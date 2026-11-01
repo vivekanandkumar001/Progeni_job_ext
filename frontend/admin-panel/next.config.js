@@ -1,0 +1,1 @@
+﻿const nextConfig = { transpilePackages: ['@progeni/ui', '@progeni/shared-types'] }; module.exports = nextConfig;

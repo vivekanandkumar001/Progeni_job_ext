@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Local uploads, logs, and candidate data
+uploads/
+**/uploads/*
+*.log
+candidate-data.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

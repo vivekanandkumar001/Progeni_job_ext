@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Progeni AutoApply",
+  "version": "0.1.0",
+  "description": "Progeni AutoApply - Manual job application assistant",
+  "action": {
+    "default_popup": "src/popup/index.html"
+  },
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
+  "permissions": ["sidePanel", "storage", "activeTab"],
+  "host_permissions": [
+    "http://127.0.0.1:5000/*",
+    "https://*.naukri.com/*",
+    "https://*.linkedin.com/*",
+    "https://*.indeed.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.naukri.com/*",
+        "https://*.linkedin.com/*",
+        "https://*.indeed.com/*"
+      ],
+      "js": ["src/content/content.ts"],
+      "css": []
+    }
+  ],
+  "web_accessible_resources": []
+}
