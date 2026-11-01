@@ -1,0 +1,1 @@
+export default function Page() { return (<div className='p-6'><h1 className='text-2xl font-semibold'>skill-gap-analyzer</h1><p className='text-sm text-on-surface-variant mt-2'>[DEMO DATA] Progeni AutoApply candidate screen</p></div>); }
