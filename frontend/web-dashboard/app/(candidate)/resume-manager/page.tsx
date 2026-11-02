@@ -131,7 +131,7 @@ export default function ResumeManagerPage() {
       setProfile((current) => ({ ...current, skills }));
       setAnalysis(null);
       setSelectedSkills([]);
-      setNotice('Reviewed details and skill evidence were added to your local profile. The uploaded file was not saved.');
+      setNotice('Reviewed details and skill evidence were added to your workspace. The uploaded file was not saved.');
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Could not save reviewed resume details.');
     } finally {
@@ -169,8 +169,8 @@ export default function ResumeManagerPage() {
       <section className="card card-padding resume-upload-card">
         <div className="resume-upload-heading">
           <div>
-            <h2 className="card-title">Analyze a resume on this device</h2>
-            <p className="card-description">PDF, DOCX, or UTF-8 text · up to 5 MB · no AI service or external upload</p>
+            <h2 className="card-title">Analyze a resume</h2>
+            <p className="card-description">PDF, DOCX, or UTF-8 text · up to 5 MB · parsed by the Progeni API, not an AI service</p>
           </div>
           <label className="button button-primary resume-file-button">
             {busy ? 'Working…' : 'Choose resume'}
@@ -183,8 +183,8 @@ export default function ResumeManagerPage() {
           </label>
         </div>
         <p className="notice">
-          The original file and full extracted text are processed by the local backend but are not retained.
-          Only details you confirm and short skill-evidence snippets are saved. The local workspace is not encrypted.
+          The selected file and extracted text are sent to the Progeni API for parsing and are not retained there.
+          Only details you confirm and short skill-evidence snippets are saved in your workspace.
         </p>
         {error && <p className="form-error" role="alert">{error}</p>}
         {notice && <p className="form-success" role="status">{notice}</p>}
@@ -240,7 +240,7 @@ export default function ResumeManagerPage() {
       <section className="card card-padding resume-list-card">
         <div className="page-heading resume-review-heading">
           <div><h2 className="card-title">Confirmed resume evidence</h2><p className="card-description">Only reviewed structured details and short skill snippets are kept.</p></div>
-          <span className="local-pill"><span className="online-dot" /> ON THIS DEVICE</span>
+          <span className="local-pill"><span className="online-dot" /> WORKSPACE DATA</span>
         </div>
         {loading ? <p className="empty-state">Loading confirmed evidence…</p> : resumes.length === 0 ? (
           <p className="empty-state">No resume evidence saved. Choose a resume to get started.</p>

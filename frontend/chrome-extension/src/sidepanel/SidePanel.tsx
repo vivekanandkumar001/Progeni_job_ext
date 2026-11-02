@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { makeRequestId, sendMessage } from '../shared/messages';
+import { ensureSupabaseHostPermission, makeRequestId, sendMessage } from '../shared/messages';
 
 interface CandidateProfile {
   fullName: string;
@@ -46,6 +46,10 @@ interface Application {
 interface ResponseData {
   ok?: boolean;
   accepted?: boolean;
+  authenticated?: boolean;
+  local?: boolean;
+  confirmationRequired?: boolean;
+  email?: string;
   profile?: CandidateProfile | null;
   applications?: Application[];
   application?: Application;
@@ -66,6 +70,11 @@ const emptyProfile: CandidateProfile = {
 };
 
 export default function SidePanel() {
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [localMode, setLocalMode] = useState(false);
+  const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [consent, setConsent] = useState<boolean | null>(null);
   const [profile, setProfile] = useState<CandidateProfile>(emptyProfile);
   const [skillsText, setSkillsText] = useState('');
@@ -82,13 +91,62 @@ export default function SidePanel() {
   async function loadConsent() {
     setBusy(true);
     try {
+      const auth = await sendMessage<ResponseData>({ type: 'GET_AUTH_STATE' });
+      if (!auth.ok) throw new Error(auth.error || 'Could not check your account sign-in.');
+      setAuthenticated(auth.authenticated === true);
+      setLocalMode(auth.local === true);
+      if (!auth.authenticated) {
+        setConsent(null);
+        setStatus('');
+        return;
+      }
       const result = await sendMessage<ResponseData>({ type: 'GET_CONSENT' });
-      if (!result.ok) throw new Error(result.error || 'Could not check the local privacy notice.');
+      if (!result.ok) throw new Error(result.error || 'Could not check the privacy notice.');
       setConsent(result.accepted === true);
       if (result.accepted) await loadWorkspace();
     } catch (error) {
       setConsent(null);
-      setStatus(error instanceof Error ? error.message : 'Local backend is unavailable.');
+      setStatus(error instanceof Error ? error.message : 'The Progeni workspace is unavailable.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitAuth(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setStatus('');
+    try {
+      await ensureSupabaseHostPermission();
+      const result = await sendMessage<ResponseData>({
+        type: authMode === 'sign-up' ? 'SIGN_UP' : 'SIGN_IN',
+        email: email.trim(),
+        password,
+      });
+      if (!result.ok) throw new Error(result.error || 'Could not authenticate your account.');
+      if (result.confirmationRequired) {
+        setStatus('Check your email to confirm your account, then sign in.');
+        return;
+      }
+      setAuthenticated(result.authenticated === true);
+      if (result.authenticated) await loadConsent();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Could not authenticate your account.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function leaveAccount() {
+    setBusy(true);
+    try {
+      const result = await sendMessage<ResponseData>({ type: 'SIGN_OUT' });
+      if (!result.ok) throw new Error(result.error || 'Could not sign out.');
+      setAuthenticated(false);
+      setConsent(null);
+      setStatus('');
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Could not sign out.');
     } finally {
       setBusy(false);
     }
@@ -117,7 +175,7 @@ export default function SidePanel() {
       if (!result.ok) throw new Error(result.error || 'Could not save your consent.');
       setConsent(true);
       await loadWorkspace();
-      setStatus('Privacy notice accepted on this device.');
+      setStatus('Privacy notice accepted.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not save your consent.');
     } finally {
@@ -139,7 +197,7 @@ export default function SidePanel() {
       });
       if (!result.ok) throw new Error(result.error || 'Could not save your profile.');
       if (result.profile) setProfile(result.profile);
-      setStatus('Profile saved on this device.');
+      setStatus('Profile saved to your workspace.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not save your profile.');
     } finally {
@@ -238,21 +296,58 @@ export default function SidePanel() {
     setProfile((current) => ({ ...current, [key]: value }));
   }
 
+  if (authenticated === null) {
+    return <main className="sidepanel"><p className="status">Connecting to your Progeni account…</p></main>;
+  }
+
+  if (!authenticated) {
+    return (
+      <main className="sidepanel">
+        <header className="brand">
+          <div className="brand-mark">P</div>
+          <div><strong>Progeni AutoApply</strong><span>Sign in to your career workspace</span></div>
+        </header>
+        <section className="card">
+          <h1>{authMode === 'sign-up' ? 'Create your account' : 'Welcome back'}</h1>
+          <p>Use the same account as your Progeni web dashboard.</p>
+          <form className="form-grid" onSubmit={(event) => void submitAuth(event)}>
+            <label className="full-width">Email
+              <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+            </label>
+            <label className="full-width">Password
+              <input type="password" autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} />
+            </label>
+            <button className="primary full-width" disabled={busy}>
+              {busy ? 'Please wait…' : authMode === 'sign-up' ? 'Create account' : 'Sign in'}
+            </button>
+          </form>
+          <button className="text-button" disabled={busy} onClick={() => {
+            setAuthMode((mode) => mode === 'sign-in' ? 'sign-up' : 'sign-in');
+            setStatus('');
+          }}>
+            {authMode === 'sign-up' ? 'Already have an account? Sign in' : 'Create a new account'}
+          </button>
+          {status && <p className="status" role="status">{status}</p>}
+        </section>
+      </main>
+    );
+  }
+
   if (consent !== true) {
     return (
       <main className="sidepanel">
         <header className="brand">
           <div className="brand-mark">P</div>
-          <div><strong>Progeni AutoApply</strong><span>Local career workspace</span></div>
+          <div><strong>Progeni AutoApply</strong><span>{localMode ? 'Local career workspace' : 'Account career workspace'}</span></div>
         </header>
         <section className="card">
           <h1>Privacy notice</h1>
           <p>
-            Your profile, detected job details, match results, and tracker are stored on
-            this device by the local backend. Job pages are read only after you click
-            Detect. No data is sent to an AI provider or job site.
+            Your profile, detected job details, match results, and tracker are stored
+            {localMode ? ' on this device by the local backend.' : ' in the Progeni workspace linked to your account.'}
+            {' '}Job pages are read only after you click Detect. No data is sent to an AI provider or job site.
           </p>
-          <p className="muted">The local data file is not encrypted by this development build; use a trusted device only. Application submission remains manual.</p>
+          <p className="muted">Resume files are processed to suggest details; the original file and full text are not saved. Application submission remains manual.</p>
           <button className="primary" disabled={busy || consent === null} onClick={() => void acceptConsent()}>
             {busy ? 'Connecting…' : 'I agree and continue'}
           </button>
@@ -271,13 +366,13 @@ export default function SidePanel() {
     <main className="sidepanel">
       <header className="brand">
         <div className="brand-mark">P</div>
-        <div><strong>Progeni AutoApply</strong><span>Candidate workspace · local-only</span></div>
+        <div><strong>Progeni AutoApply</strong><span>Candidate workspace · {localMode ? 'local' : 'account'}</span></div>
       </header>
 
       <section className="card">
         <div className="section-heading">
           <div><h1>Your career profile</h1><p>Only used to explain job fit.</p></div>
-          <span className="local-badge">LOCAL</span>
+          <span className="local-badge">{localMode ? 'LOCAL' : 'ACCOUNT'}</span>
         </div>
         <form className="form-grid" onSubmit={(event) => void saveProfile(event)}>
           <label>Full name<input value={profile.fullName} onChange={(event) => updateProfile('fullName', event.target.value)} autoComplete="name" /></label>
@@ -348,6 +443,9 @@ export default function SidePanel() {
         <p className="muted">“Submitted” is a status you set yourself; Progeni does not submit applications.</p>
       </section>
 
+      <button className="text-button" disabled={busy} onClick={() => void leaveAccount()}>
+        Sign out of Progeni
+      </button>
       <footer className="policy-note">
         Manual review and submission only. Never share passwords or one-time codes.
       </footer>

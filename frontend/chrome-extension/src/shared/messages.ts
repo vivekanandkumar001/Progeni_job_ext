@@ -3,6 +3,10 @@
   | 'PONG'
   | 'GET_CONSENT'
   | 'SAVE_CONSENT'
+  | 'GET_AUTH_STATE'
+  | 'SIGN_IN'
+  | 'SIGN_UP'
+  | 'SIGN_OUT'
   | 'DETECT_REQUEST'
   | 'DETECT_RESPONSE'
   | 'EXTRACT_JOB'
@@ -32,6 +36,8 @@ export interface Message<T = unknown> {
   status?: string;
   notes?: string;
   accepted?: boolean;
+  email?: string;
+  password?: string;
 }
 
 export function sendMessage<TResponse = unknown, TPayload = unknown>(
@@ -53,6 +59,20 @@ export function sendTabMessage<TResponse = unknown, TPayload = unknown>(
       }
     });
   });
+}
+
+export async function ensureSupabaseHostPermission(): Promise<void> {
+  const configuredUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (!configuredUrl) throw new Error('Supabase authentication is not configured for this extension.');
+  const supabaseOrigin = new URL(configuredUrl);
+  if (supabaseOrigin.protocol !== 'https:') {
+    throw new Error('Supabase authentication must use HTTPS.');
+  }
+  const origins = [`${supabaseOrigin.origin}/*`];
+  if (await chrome.permissions.contains({ origins })) return;
+  if (!(await chrome.permissions.request({ origins }))) {
+    throw new Error('Allow access to the Progeni sign-in service to continue.');
+  }
 }
 
 export function makeRequestId(): string {

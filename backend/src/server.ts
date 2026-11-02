@@ -10,7 +10,7 @@ import resumeRoutes from './routes/resume.js';
 import jobRoutes from './routes/jobs.js';
 import matchRoutes from './routes/matches.js';
 import applicationRoutes from './routes/applications.js';
-import localMvpRoutes from './routes/localMvp.js';
+import { localMvpRoutes, productionWorkspaceRoutes } from './routes/localMvp.js';
 import { authMiddleware, requireRole } from './middlewares/auth.js';
 
 dotenv.config();
@@ -44,6 +44,8 @@ app.get('/health', async (_req, res, next) => {
 
 if (isLocalDevelopment) {
   app.use('/api/v1/local', localMvpRoutes);
+} else {
+  app.use('/api/v1/workspace', productionWorkspaceRoutes);
 }
 app.use('/api/v1/profile', authMiddleware, candidateProfileRoutes);
 app.use('/api/v1/resumes', authMiddleware, resumeRoutes);

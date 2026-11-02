@@ -131,8 +131,8 @@ export default function DashboardPage() {
       </header>
 
       <div className="stats-grid">
-        <article className="card stat-card"><span className="stat-label">Tracked opportunities</span><strong className="stat-value">{applications.length}</strong><span className="stat-footnote">Across your local tracker</span></article>
-        <article className="card stat-card"><span className="stat-label">Jobs analyzed</span><strong className="stat-value">{matches.length}</strong><span className="stat-footnote">Explanations saved locally</span></article>
+        <article className="card stat-card"><span className="stat-label">Tracked opportunities</span><strong className="stat-value">{applications.length}</strong><span className="stat-footnote">Across your workspace</span></article>
+        <article className="card stat-card"><span className="stat-label">Jobs analyzed</span><strong className="stat-value">{matches.length}</strong><span className="stat-footnote">Explanations saved to your workspace</span></article>
         <article className="card stat-card"><span className="stat-label">Profile completeness</span><strong className="stat-value">{profileComplete}/4</strong><span className="stat-footnote">Name, email, role, and skills</span></article>
         <article className="card stat-card"><span className="stat-label">Submission mode</span><strong className="stat-value" style={{ fontSize: 17 }}>Manual</strong><span className="stat-footnote">You remain in control</span></article>
       </div>

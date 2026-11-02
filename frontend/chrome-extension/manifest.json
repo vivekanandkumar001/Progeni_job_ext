@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Progeni AutoApply",
-  "version": "0.1.0",
-  "description": "Progeni AutoApply - Manual job application assistant",
+  "version": "1.0.0",
+  "description": "Review job details, understand job fit, and track applications. Submissions remain manual.",
   "action": {
     "default_popup": "src/popup/index.html"
   },
@@ -12,9 +12,14 @@
   "permissions": ["sidePanel", "storage", "activeTab"],
   "host_permissions": [
     "http://127.0.0.1:5000/*",
+    "https://job.progeni.live/*",
+    "https://progeni-job-ext.vercel.app/*",
     "https://*.naukri.com/*",
     "https://*.linkedin.com/*",
     "https://*.indeed.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*.supabase.co/*"
   ],
   "background": {
     "service_worker": "src/background/service-worker.ts",

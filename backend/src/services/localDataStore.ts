@@ -66,6 +66,36 @@ export interface TrackedApplication {
   updatedAt: string;
 }
 
+export interface CandidateWorkspaceStore {
+  getProfile(userId: string): Promise<CandidateProfile | null>;
+  hasConsent(userId: string): Promise<boolean>;
+  saveConsent(userId: string): Promise<string>;
+  clearWorkspace(userId: string): Promise<void>;
+  saveProfile(userId: string, profile: Omit<CandidateProfile, 'updatedAt'>): Promise<CandidateProfile>;
+  listResumes(userId: string): Promise<LocalResume[]>;
+  saveResume(
+    userId: string,
+    resume: Omit<LocalResume, 'id' | 'createdAt'>,
+    profile: Omit<CandidateProfile, 'updatedAt'>,
+  ): Promise<LocalResume>;
+  deleteResume(userId: string, id: string): Promise<boolean>;
+  listJobs(userId: string): Promise<JobListing[]>;
+  saveMatch(
+    userId: string,
+    job: Omit<JobListing, 'id' | 'createdAt'>,
+    match: Omit<JobMatch, 'id' | 'job' | 'createdAt'>,
+  ): Promise<JobMatch>;
+  listMatches(userId: string): Promise<JobMatch[]>;
+  createApplication(userId: string, jobId: string): Promise<TrackedApplication>;
+  listApplications(userId: string): Promise<TrackedApplication[]>;
+  updateApplication(
+    userId: string,
+    id: string,
+    status: ApplicationStatus,
+    notes?: string,
+  ): Promise<TrackedApplication | null>;
+}
+
 interface LocalData {
   profile: CandidateProfile | null;
   consentAcceptedAt: string | null;
@@ -133,22 +163,22 @@ function updateData<T>(update: (data: LocalData) => T): Promise<T> {
 }
 
 export const localDataStore = {
-  async getProfile(): Promise<CandidateProfile | null> {
+  async getProfile(_userId: string): Promise<CandidateProfile | null> {
     return (await readData()).profile;
   },
 
-  async hasConsent(): Promise<boolean> {
+  async hasConsent(_userId: string): Promise<boolean> {
     return Boolean((await readData()).consentAcceptedAt);
   },
 
-  saveConsent(): Promise<string> {
+  saveConsent(_userId: string): Promise<string> {
     return updateData((data) => {
       data.consentAcceptedAt = new Date().toISOString();
       return data.consentAcceptedAt;
     });
   },
 
-  clearWorkspace(): Promise<void> {
+  clearWorkspace(_userId: string): Promise<void> {
     return updateData((data) => {
       data.profile = null;
       data.consentAcceptedAt = null;
@@ -160,6 +190,7 @@ export const localDataStore = {
   },
 
   saveProfile(
+    _userId: string,
     profile: Omit<CandidateProfile, 'updatedAt'>,
   ): Promise<CandidateProfile> {
     return updateData((data) => {
@@ -169,11 +200,12 @@ export const localDataStore = {
     });
   },
 
-  async listResumes(): Promise<LocalResume[]> {
+  async listResumes(_userId: string): Promise<LocalResume[]> {
     return (await readData()).resumes;
   },
 
   saveResume(
+    _userId: string,
     resume: Omit<LocalResume, 'id' | 'createdAt'>,
     profile: Omit<CandidateProfile, 'updatedAt'>,
   ): Promise<LocalResume> {
@@ -193,7 +225,7 @@ export const localDataStore = {
     });
   },
 
-  deleteResume(id: string): Promise<boolean> {
+  deleteResume(_userId: string, id: string): Promise<boolean> {
     return updateData((data) => {
       const resumes = data.resumes.filter((resume) => resume.id !== id);
       if (resumes.length === data.resumes.length) return false;
@@ -202,11 +234,12 @@ export const localDataStore = {
     });
   },
 
-  async listJobs(): Promise<JobListing[]> {
+  async listJobs(_userId: string): Promise<JobListing[]> {
     return (await readData()).jobs;
   },
 
   saveMatch(
+    _userId: string,
     job: Omit<JobListing, 'id' | 'createdAt'>,
     match: Omit<JobMatch, 'id' | 'job' | 'createdAt'>,
   ): Promise<JobMatch> {
@@ -230,11 +263,11 @@ export const localDataStore = {
     });
   },
 
-  async listMatches(): Promise<JobMatch[]> {
+  async listMatches(_userId: string): Promise<JobMatch[]> {
     return (await readData()).matches;
   },
 
-  createApplication(jobId: string): Promise<TrackedApplication> {
+  createApplication(_userId: string, jobId: string): Promise<TrackedApplication> {
     return updateData((data) => {
       const job = data.jobs.find((item) => item.id === jobId);
       if (!job) throw new Error('Job not found.');
@@ -252,11 +285,12 @@ export const localDataStore = {
     });
   },
 
-  async listApplications(): Promise<TrackedApplication[]> {
+  async listApplications(_userId: string): Promise<TrackedApplication[]> {
     return (await readData()).applications;
   },
 
   updateApplication(
+    _userId: string,
     id: string,
     status: ApplicationStatus,
     notes?: string,

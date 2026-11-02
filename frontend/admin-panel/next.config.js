@@ -1,1 +1,2 @@
-﻿const nextConfig = { transpilePackages: ['@progeni/ui', '@progeni/shared-types'] }; module.exports = nextConfig;
+﻿const nextConfig = { outputFileTracingRoot: process.cwd() };
+module.exports = nextConfig;

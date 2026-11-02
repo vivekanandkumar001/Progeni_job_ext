@@ -1,6 +1,6 @@
 # Progeni AutoApply Backend
 
-The Express API supports the local candidate dashboard and Chrome extension.
+The Express API serves the local candidate workspace in development and the authenticated MongoDB-backed workspace in production.
 
 ## Local development
 
@@ -20,25 +20,31 @@ npm run build
 npm start
 ```
 
-## Deployment warning
+## API modes
 
-The candidate API at `/api/v1/local` is enabled only in local development. Do not expose it or the JSON data file to the internet. Production code now supports Supabase Auth and MongoDB Atlas, but the live Vercel project is not ready until its credentials, network access, and allowed origins are configured.
+- Local development exposes `/api/v1/local`, uses a local JWT session, and stores data in `%LOCALAPPDATA%\ProgeniAutoApply\candidate-data.json`. It binds to `127.0.0.1`; never expose this route or data file publicly.
+- Production exposes `/api/v1/workspace`, verifies Supabase access tokens, and stores each candidate's workspace in MongoDB keyed by the verified Supabase user ID. All profile, resume evidence, job, match, consent, and tracker operations are user-scoped.
+- `/health` pings MongoDB in production before reporting healthy.
 
 ## Vercel + MongoDB Atlas production setup
 
-The Express app uses MongoDB Atlas for application data and Supabase Auth only to verify user access tokens. Production traffic remains disabled until both providers are configured.
+The Express app uses MongoDB Atlas for workspace data and Supabase Auth to verify user access tokens. Configure the environment variables before routing production traffic to it.
 
-1. Use a dedicated Atlas cluster before a public launch. The current M0 tier is intended for development and evaluation, not the expected hundreds of concurrent users.
+1. Use a dedicated Atlas cluster with backups and monitoring before a public launch. The M0 tier is intended for development and evaluation, not hundreds of concurrent users.
 2. Create a least-privilege MongoDB database user and allow the Vercel Function's outbound network access in Atlas. Vercel Hobby uses dynamic outbound IPs and does not include Static IPs. For this deployment, the selected Hobby-plan workaround is Atlas `0.0.0.0/0`; this allows connection attempts from any IP, so use a dedicated database user with only the required database permissions, a strong unique password, and never an Atlas project-owner credential. Replace this allowlist with static egress when available.
-3. In Vercel project `backend`, configure these environment variables for Production (and Preview if used):
+3. Import the repository into Vercel as one project using the repository root as the project root. The root `vercel.json` declares the `backend`, `web-dashboard`, `admin-panel`, and `chrome-extension` services. Vercel Services is currently Beta.
+4. Configure these environment variables for Production (and Preview if used):
    - `MONGODB_URI` (the connection string is a secret; configure it in Vercel, not source control; percent-encode special characters in the database password)
    - `MONGODB_DB` (defaults to `progeni_autoapply`)
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
-   - `CORS_ALLOWED_ORIGINS` as a comma-separated list of exact origins, such as `https://job.progeni.live,chrome-extension://<published-extension-id>`.
-4. Assign the `admin` role through Supabase `app_metadata` only. Users cannot grant themselves an admin role through editable user metadata.
-5. Deploy and verify `GET /health` returns `{"status":"ok","message":"Auto Apply Backend Running"}`. In production, this endpoint pings MongoDB before reporting success.
+   - `CORS_ALLOWED_ORIGINS` as a comma-separated list of exact origins, for example `https://job.progeni.live,chrome-extension://<published-extension-id>`. Replace the placeholder with the stable ID issued for the Chrome Web Store listing; do not use a wildcard.
+   - `NODE_PATH=backend/node_modules` when the Vercel project uses the repository root and its multi-service configuration; it lets the generated backend function resolve dependencies installed under the `backend` service root. Do not set this when deploying this backend branch as the project root.
+   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for the dashboard; the extension build uses those public values as its Supabase client configuration.
+5. Assign the `admin` role through Supabase `app_metadata` only. Users cannot grant themselves an admin role through editable user metadata.
+6. Route `/api/v1/*` and `/health` to the backend service and the remaining public routes to `web-dashboard`. Keep the admin panel and extension build service internal. No service binding is used because browser clients call the public API route; there is no server-to-server service call.
+7. Attach `job.progeni.live` to the Vercel project, then verify `GET https://job.progeni.live/health` returns `{"status":"ok","message":"Auto Apply Backend Running"}`.
 
-The API verifies Supabase access tokens and scopes candidate data by authenticated user ID. The MongoDB client is cached across warm Vercel invocations; its small per-instance pool is chosen to limit connection growth when Functions scale out. Monitor Atlas connections, query latency, and Vercel function concurrency before changing pool settings. The local JSON endpoints are only mounted in local development. The current web dashboard still uses those local endpoints and does not yet have a Supabase sign-in flow, so do not point it at this production API until that frontend integration is complete.
+The API verifies Supabase access tokens and scopes candidate data by authenticated user ID. The MongoDB client is cached across warm Vercel invocations; its small per-instance pool is chosen to limit connection growth when Functions scale out. Each cloud workspace has bounded history to avoid MongoDB's document-size limit. Monitor Atlas connections, query latency, and Vercel function concurrency before changing pool settings. The local JSON endpoints are mounted only in local development.
 
-No SQL migration is required. The API creates the indexes used by its queries the first time each warm Vercel instance connects to MongoDB.
+No SQL migration is required. The API creates the indexes used by its production data services the first time each warm Vercel instance connects to MongoDB.

@@ -1,6 +1,6 @@
 # Progeni AutoApply
 
-Progeni AutoApply is a Chrome extension with a local candidate dashboard and backend. It helps candidates maintain a career profile, analyze resumes for reviewable details and skill evidence, detect or enter jobs, review explainable matches, prepare application answers, and track their job search. It does not submit applications.
+Progeni AutoApply is a Chrome extension and candidate workspace. It helps candidates maintain a career profile, analyze resumes for reviewable details and skill evidence, detect or enter jobs, review explainable matches, prepare application answers, and track their job search. Production accounts use Supabase Auth and a MongoDB-backed API. It does not submit applications.
 
 ## Chrome extension and website are different builds
 
@@ -15,36 +15,38 @@ From the repository root in PowerShell:
 cd .\frontend\chrome-extension
 npm ci
 npm run typecheck
-npm run build
+npm run build:local
 ```
 
 In Chrome, go to `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `frontend\chrome-extension\dist`. Keep this generated `dist` folder intact: it contains the extension manifest, popup, side panel, service worker, and content scripts. For Chrome Web Store submission, ZIP the **contents** of `dist` (including `manifest.json` at the ZIP root), not the repository or a Vercel deployment.
 
-### Deploy the candidate dashboard to Vercel
+### Deploy the connected web services to Vercel
 
-Create a separate Vercel project for the website using the `vivekanandkumar001/Progeni_job_ext` Git repository:
+The root `vercel.json` defines Vercel Services (currently Beta). Import the repository as **one Vercel project** and set its **Root Directory** to the repository root, not `backend` or a frontend folder. Public routing sends `/api/v1/*` and `/health` to the Express backend and all other paths to the candidate dashboard. The admin panel and extension build services have no public routes.
 
-1. In Vercel, select **Add New → Project** and import the repository.
-2. Set **Root Directory** to `frontend/web-dashboard` (without a leading slash). Do not choose `frontend/chrome-extension`, `frontend/admin-panel`, or `backend`.
-3. Use the detected **Next.js** framework and the defaults for install command, build command (`next build` / `npm run build`), and output directory.
-4. Deploy and wait for the deployment to become **Ready**.
-5. In this dashboard project, open **Settings → Domains** and add `job.progeni.live`. If that domain is still assigned to the Chrome-extension Vercel project, remove it from that project first, then assign it here. Apply the DNS records Vercel requests and wait for domain verification and TLS.
-6. Keep the extension as a separate local/Chrome Web Store build; it does not need its own Vercel project or domain.
+Configure these production variables in the Vercel project without committing secrets:
 
-If Vercel already imported `frontend/chrome-extension`, you can leave that project undeployed or remove it. In Vercel project settings, change **Root Directory** to `frontend/web-dashboard`, or create a separate dashboard project with that root. A `vercel.json` at the repository root is not needed for this monorepo setup.
+- Backend: `MONGODB_URI`, `MONGODB_DB`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NODE_PATH=backend/node_modules`, and `CORS_ALLOWED_ORIGINS` (exact origins, for example `https://job.progeni.live,chrome-extension://<published-extension-id>` after the Chrome Web Store assigns the extension ID; do not use a wildcard).
+- Dashboard: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- The extension Vite build reads those public Supabase values from the Vercel build environment. The extension API uses `https://job.progeni.live/api/v1/workspace`.
+
+Attach `job.progeni.live` to this Vercel project and apply the DNS records Vercel requests. Verify `/health` before sharing the dashboard URL. The public API requires a Supabase bearer token; health checks do not expose candidate data.
+
+**Vercel does not install a Chrome extension.** Build a production package with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` available to Vite, then submit a ZIP of the `dist` folder contents to the Chrome Web Store. The ZIP must have `manifest.json` at its root. `npm run build:local` is only for local testing and targets the local backend. The Web Store listing needs a published privacy-policy URL and support contact. Its stable ID is also required to add the extension's exact origin to the backend CORS allowlist, without which extension API calls will be blocked.
 
 ### How the local pieces connect
 
 ```text
-Chrome extension ──┐
-                   ├── HTTP ──> Express backend at 127.0.0.1:5000
-Dashboard on       ┘            local JSON data in %LOCALAPPDATA%\ProgeniAutoApply
-http://localhost:3000
+Local development:
+Dashboard + Chrome extension ──> http://127.0.0.1:5000/api/v1/local
+                                  local JSON data
+
+Production:
+Dashboard + Chrome extension ──> https://job.progeni.live/api/v1/workspace
+                                  Supabase Auth → Express → MongoDB Atlas
 ```
 
-For local development, start the backend and dashboard using the steps below, then load the extension in Chrome. Both the extension and the local dashboard use the local API at `http://127.0.0.1:5000/api/v1/local`; the extension requests access to that loopback host in its manifest. The backend only exposes this local candidate API in development and binds to loopback.
-
-**Vercel-hosted dashboard limitation:** deployment makes the website reachable, but it does not deploy or connect the local Express backend. In a visitor’s browser, `127.0.0.1` refers to that visitor’s own computer; HTTPS browser security also restricts calls from a public site to a local HTTP service. The backend now supports Vercel Functions with MongoDB Atlas for data and Supabase Auth for token verification, but it is not live until the Atlas tier/network access and Vercel secrets/origin allowlist are configured. The dashboard and extension still use the local API and need Supabase sign-in plus a configurable production API URL before they can use that backend. See [`backend/README.md`](./backend/README.md) for the production setup. Do not expose the development local API or its JSON data file to the internet.
+In local development, the API binds to loopback and uses a JSON file under `%LOCALAPPDATA%\ProgeniAutoApply`. Production clients sign in with Supabase; the API verifies each bearer token and stores the candidate's workspace under that Supabase user ID in MongoDB. Do not expose `/api/v1/local` or the local JSON file to the internet. See [`backend/README.md`](./backend/README.md) for backend environment variables and deployment details.
 
 ## Run locally
 
@@ -68,14 +70,14 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The home page redirects to `/dashboard`. Accept the local-data notice before entering profile or job information.
+Open [http://localhost:3000](http://localhost:3000). The home page redirects to `/dashboard`. Accept the data notice before entering profile or job information.
 
 ### 3. Build and load the Chrome extension
 
 ```powershell
 cd .\frontend\chrome-extension
 npm install
-npm run build
+npm run build:local
 ```
 
 In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select:
@@ -84,22 +86,22 @@ In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load 
 .\frontend\chrome-extension\dist
 ```
 
-Open a supported Naukri, LinkedIn, or Indeed job page and use the extension. Refresh a job page if it was already open when the extension was loaded. The content script reads job details only when you choose **Detect this job**. Profile data, extracted job details, match results, and tracker entries are stored by the local backend.
+Open a supported Naukri, LinkedIn, or Indeed job page and use the extension. Refresh a job page if it was already open when the extension was loaded. The content script reads job details only when you choose **Detect this job**. In local development, the local backend stores workspace data. In production, the extension uses the signed-in account workspace.
 
 ## What this MVP does and does not do
 
 - Matching is deterministic and explainable. It compares user-entered profile skills and experience with details provided for a job; it is not an AI assessment or hiring probability.
 - Skills mentioned in a job description are not assumed to be mandatory qualifications. Missing profile or job information is reported as unknown.
 - Profile-based application details are suggestions for the candidate to review and copy manually. Subjective and sensitive screening questions are left to the candidate.
-- Resume intelligence parses PDF, DOCX, and UTF-8 text files locally (maximum 5 MB). It suggests contact details, explicit experience statements, and skills from a fixed catalog with short matching text snippets. Candidates review and confirm all details. Scanned PDFs require OCR, which is not included.
-- The original resume and full extracted text are not retained. Confirmed profile fields and short skill-evidence snippets are stored in the local workspace. Remove a resume record to remove its evidence snippets; confirmed profile fields remain until edited or the workspace is cleared.
+- Resume intelligence parses PDF, DOCX, and UTF-8 text files (maximum 5 MB). In production, the selected file is sent to the Progeni API for parsing. It suggests contact details, explicit experience statements, and skills from a fixed catalog with short matching text snippets. Candidates review and confirm all details. Scanned PDFs require OCR, which is not included.
+- The original resume and full extracted text are not retained. Confirmed profile fields and short skill-evidence snippets are stored in the workspace. Remove a resume record to remove its evidence snippets; confirmed profile fields remain until edited or the workspace is cleared.
 - Tracker statuses are self-reported. A “submitted” status does not verify that a job site received an application.
 - Application submission, CAPTCHA/OTP handling, and bypassing website controls are not implemented.
 - AI-provider integration, job recommendations, interview coaching, analytics, and the admin interface are not part of this candidate MVP.
 
 ## Privacy and release readiness
 
-The local dashboard and extension require explicit consent before using candidate data. Use **Privacy & data** in the dashboard to clear the local workspace and withdraw consent. The local JSON file is **not encrypted at the application layer**; use only for local development on a trusted device. This build is not ready for production deployment or Chrome Web Store release.
+The dashboard and extension require explicit consent before using candidate data. Use **Privacy & data** in the dashboard to clear workspace records and withdraw consent. The local JSON file is intended only for local development and is not encrypted at the application layer. The production dashboard and extension require configured Supabase, MongoDB Atlas, Vercel routing, and a published Chrome Web Store listing before public use.
 
 Chrome’s extension documentation describes content-script access and message-based communication with the extension. The Chrome Web Store policy also requires prominent disclosure and consent for user-data handling, including local processing, and secure handling/storage. Review these requirements before any public release:
 

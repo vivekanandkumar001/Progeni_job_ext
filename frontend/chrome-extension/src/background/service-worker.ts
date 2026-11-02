@@ -1,12 +1,63 @@
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
 const SUPPORTED_HOSTS = ['naukri.com', 'linkedin.com', 'indeed.com'];
-const API_BASE_URL = 'http://127.0.0.1:5000/api/v1/local';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const hasSupabaseConfiguration = Boolean(supabaseUrl || supabaseAnonKey);
+const isLocalBuild = import.meta.env.DEV || import.meta.env.PROGENI_LOCAL;
+const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/+$/, '') || '';
+const defaultApiUrl = isLocalBuild
+  ? 'http://127.0.0.1:5000/api/v1/local'
+  : 'https://job.progeni.live/api/v1/workspace';
+const API_BASE_URL = configuredApiUrl
+  ? /\/api\/v1\/(local|workspace)$/.test(configuredApiUrl)
+    ? configuredApiUrl
+    : `${configuredApiUrl}/api/v1/workspace`
+  : defaultApiUrl;
+let supabaseClient: SupabaseClient | null = null;
+const trustedStorageReady = chrome.storage.local.setAccessLevel({
+  accessLevel: 'TRUSTED_CONTEXTS',
+});
 
 interface ApiResponse {
   ok?: boolean;
   error?: string;
   token?: string;
   accepted?: boolean;
+  authenticated?: boolean;
+  local?: boolean;
+  confirmationRequired?: boolean;
+  email?: string;
   [key: string]: unknown;
+}
+
+function getSupabaseClient(): SupabaseClient {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('The production extension is missing Supabase authentication configuration.');
+  }
+  if (!supabaseClient) {
+    const storage = {
+      async getItem(key: string) {
+        const values = await chrome.storage.local.get(key);
+        return typeof values[key] === 'string' ? values[key] as string : null;
+      },
+      async setItem(key: string, value: string) {
+        await chrome.storage.local.set({ [key]: value });
+      },
+      async removeItem(key: string) {
+        await chrome.storage.local.remove(key);
+      },
+    };
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage,
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+  return supabaseClient;
 }
 
 function isSupportedUrl(url: string): boolean {
@@ -33,6 +84,16 @@ function makeRequestId(): string {
 }
 
 async function getApiToken(): Promise<string> {
+  if (hasSupabaseConfiguration) {
+    const { data, error } = await getSupabaseClient().auth.getSession();
+    if (error) throw new Error(`Could not restore your sign-in: ${error.message}`);
+    if (!data.session) throw new Error('Sign in to your Progeni account to continue.');
+    return data.session.access_token;
+  }
+  if (!isLocalBuild) {
+    throw new Error('The production extension is missing Supabase authentication configuration.');
+  }
+
   const cached = await chrome.storage.local.get(['localApiToken']);
   if (typeof cached.localApiToken === 'string') return cached.localApiToken;
 
@@ -47,20 +108,24 @@ async function getApiToken(): Promise<string> {
 
 async function localApi(path: string, init?: RequestInit): Promise<ApiResponse> {
   const token = await getApiToken();
+  const headers = new Headers(init?.headers);
+  headers.set('Content-Type', 'application/json');
+  headers.set('Authorization', `Bearer ${token}`);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...init?.headers,
-    },
+    headers,
   });
-  const body: ApiResponse = await response.json();
+  let body: ApiResponse;
+  try {
+    body = await response.json() as ApiResponse;
+  } catch {
+    throw new Error(`The Progeni API returned an invalid response (HTTP ${response.status}).`);
+  }
   if (!response.ok) {
     if (response.status === 401) {
       await chrome.storage.local.remove('localApiToken');
     }
-    const error = new Error(body.error || `Local API request failed (${response.status}).`);
+    const error = new Error(body.error || `Progeni API request failed (${response.status}).`);
     Object.assign(error, { code: body.code });
     throw error;
   }
@@ -74,24 +139,64 @@ async function handleApiMessage(message: {
   jobId?: string;
   status?: string;
   notes?: string;
+  email?: string;
+  password?: string;
 }): Promise<ApiResponse> {
+  await trustedStorageReady;
   switch (message.type) {
-    case 'GET_CONSENT': {
-      const result = await localApi('/consent');
-      if (result.accepted === true) {
-        await chrome.storage.local.set({ privacyConsentAccepted: true });
-      } else {
-        await chrome.storage.local.remove('privacyConsentAccepted');
+    case 'GET_AUTH_STATE': {
+      if (!hasSupabaseConfiguration) {
+        if (!isLocalBuild) {
+          throw new Error('The production extension is missing Supabase authentication configuration.');
+        }
+        return { ok: true, authenticated: true, local: true };
       }
-      return result;
+      const { data, error } = await getSupabaseClient().auth.getSession();
+      if (error) throw new Error(`Could not restore your sign-in: ${error.message}`);
+      return {
+        ok: true,
+        authenticated: Boolean(data.session),
+        local: false,
+        email: data.session?.user.email,
+      };
+    }
+    case 'SIGN_IN': {
+      if (!message.email || !message.password) throw new Error('Email and password are required.');
+      const { data, error } = await getSupabaseClient().auth.signInWithPassword({
+        email: message.email.trim(),
+        password: message.password,
+      });
+      if (error) throw new Error(error.message);
+      return { ok: true, authenticated: Boolean(data.session), email: data.user?.email };
+    }
+    case 'SIGN_UP': {
+      if (!message.email || !message.password) throw new Error('Email and password are required.');
+      if (message.password.length < 8) throw new Error('Passwords must contain at least 8 characters.');
+      const { data, error } = await getSupabaseClient().auth.signUp({
+        email: message.email.trim(),
+        password: message.password,
+      });
+      if (error) throw new Error(error.message);
+      return {
+        ok: true,
+        authenticated: Boolean(data.session),
+        confirmationRequired: !data.session,
+        email: data.user?.email,
+      };
+    }
+    case 'SIGN_OUT': {
+      const { error } = await getSupabaseClient().auth.signOut();
+      if (error) throw new Error(error.message);
+      return { ok: true, authenticated: false };
+    }
+    case 'GET_CONSENT': {
+      return localApi('/consent');
     }
     case 'SAVE_CONSENT': {
-      const result = await localApi('/consent', {
+      return localApi('/consent', {
         method: 'POST',
         body: JSON.stringify({ accepted: true }),
       });
-      await chrome.storage.local.set({ privacyConsentAccepted: true });
-      return result;
     }
     case 'GET_CANDIDATE_PROFILE':
       return localApi('/profile');
@@ -121,7 +226,7 @@ async function handleApiMessage(message: {
     case 'GET_MATCHES':
       return localApi('/matches');
     default:
-      throw new Error(`Unknown local API request: ${message.type}`);
+      throw new Error(`Unknown Progeni API request: ${message.type}`);
   }
 }
 
@@ -185,11 +290,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return {
           ok: false,
           code: 'CONSENT_REQUIRED',
-          error: 'Review and accept the local data notice before detecting a job.',
+          error: 'Review and accept the Progeni data notice before detecting a job.',
           requestId,
         };
       }
-      await chrome.storage.local.set({ privacyConsentAccepted: true });
       if (tabId === undefined) {
         throw new Error('Could not identify the active tab. Reopen the extension and try again.');
       }
@@ -237,17 +341,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   const apiMessages = [
+    'GET_AUTH_STATE', 'SIGN_IN', 'SIGN_UP', 'SIGN_OUT',
     'GET_CONSENT', 'SAVE_CONSENT', 'GET_CANDIDATE_PROFILE', 'SAVE_PROFILE',
     'GET_APPLICATIONS', 'CREATE_APPLICATION', 'UPDATE_APPLICATION',
     'GET_MATCHES', 'ANALYZE_JOB',
   ];
   if (apiMessages.includes(message.type)) {
+    if (
+      sender.id !== chrome.runtime.id ||
+      !sender.url?.startsWith(`chrome-extension://${chrome.runtime.id}/`)
+    ) {
+      safeRespond(sendResponse, { ok: false, error: 'Workspace messages are accepted only from Progeni extension pages.' });
+      return false;
+    }
     void handleApiMessage(message).then(
       (response) => safeRespond(sendResponse, response),
       (error: unknown) => safeRespond(sendResponse, {
         ok: false,
         ...(error instanceof Error && 'code' in error ? { code: error.code } : {}),
-        error: error instanceof Error ? error.message : 'The local backend request failed.',
+        error: error instanceof Error ? error.message : 'The Progeni API request failed.',
       }),
     );
     return true;

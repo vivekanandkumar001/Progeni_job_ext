@@ -134,7 +134,7 @@ export default function ApplicationAssistantPage() {
               <button className="button button-primary" disabled={busy || selectedApplication.status === 'prepared'} onClick={() => void markPrepared()}>
                 {busy ? 'Saving…' : selectedApplication.status === 'prepared' ? 'Marked prepared' : 'Mark prepared for review'}
               </button>
-              <span className="card-description">This only updates your local tracker.</span>
+              <span className="card-description">This only updates your workspace tracker.</span>
             </div>
           </>
         )}
