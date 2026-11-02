@@ -4,7 +4,7 @@
     "backend": {
       "root": "backend",
       "framework": "express",
-      "entrypoint": "dist/server.js",
+      "entrypoint": "src/server.ts",
       "buildCommand": "npm run build"
     },
     "admin-panel": {
