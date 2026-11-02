@@ -1,5 +1,4 @@
 import mammoth from 'mammoth';
-import { PDFParse } from 'pdf-parse';
 
 export type ResumeFileType = 'pdf' | 'docx' | 'txt';
 
@@ -93,6 +92,7 @@ export async function analyzeResume(
       if (buffer.subarray(0, 5).toString('ascii') !== '%PDF-') {
         throw new ResumeParseError('The file does not appear to be a valid PDF.');
       }
+      const { PDFParse } = await import('pdf-parse');
       const parser = new PDFParse({ data: buffer, verbosity: 0, isEvalSupported: false });
       try {
         const parsed = await parser.getText({ first: 50 });
