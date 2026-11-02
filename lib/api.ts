@@ -1,5 +1,29 @@
-const API_BASE_URL = 'http://127.0.0.1:5000/api/v1/local';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const hasSupabaseConfiguration = Boolean(supabaseUrl || supabaseAnonKey);
+export const usesCloudAuthentication = hasSupabaseConfiguration;
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || '';
+const apiRoute = hasSupabaseConfiguration ? 'workspace' : 'local';
+const API_BASE_URL = configuredApiUrl
+  ? /\/api\/v1\/(local|workspace)$/.test(configuredApiUrl)
+    ? configuredApiUrl
+    : configuredApiUrl.endsWith('/api/v1')
+      ? `${configuredApiUrl}/${apiRoute}`
+      : `${configuredApiUrl}/api/v1/${apiRoute}`
+  : hasSupabaseConfiguration ? '/api/v1/workspace' : 'http://127.0.0.1:5000/api/v1/local';
 const TOKEN_KEY = 'progeni.localApiToken';
+let supabaseClient: SupabaseClient | null = null;
+
+export function getSupabaseClient(): SupabaseClient | null {
+  if (!hasSupabaseConfiguration) return null;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Configure both NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+  }
+  supabaseClient ??= createClient(supabaseUrl, supabaseAnonKey);
+  return supabaseClient;
+}
 
 export interface CandidateProfile {
   fullName: string;
@@ -92,6 +116,15 @@ interface ApiEnvelope<T> {
 }
 
 async function getToken(): Promise<string> {
+  if (usesCloudAuthentication) {
+    const client = getSupabaseClient();
+    if (!client) throw new Error('Supabase authentication is not configured.');
+    const { data, error } = await client.auth.getSession();
+    if (error) throw new Error(`Could not restore your sign-in: ${error.message}`);
+    if (!data.session) throw new Error('Sign in to your Progeni account to continue.');
+    return data.session.access_token;
+  }
+
   const cached = window.localStorage.getItem(TOKEN_KEY);
   if (cached) return cached;
 
@@ -109,15 +142,19 @@ async function request<T>(
   init?: RequestInit,
 ): Promise<ApiEnvelope<T>> {
   const token = await getToken();
+  const headers = new Headers(init?.headers);
+  headers.set('Content-Type', 'application/json');
+  headers.set('Authorization', `Bearer ${token}`);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...init?.headers,
-    },
+    headers,
   });
-  const result = await response.json() as ApiEnvelope<T>;
+  let result: ApiEnvelope<T>;
+  try {
+    result = await response.json() as ApiEnvelope<T>;
+  } catch {
+    throw new Error(`The Progeni API returned an invalid response (HTTP ${response.status}).`);
+  }
   if (!response.ok) {
     if (response.status === 401) window.localStorage.removeItem(TOKEN_KEY);
     throw new Error(result.error || `Local API request failed (${response.status}).`);
@@ -227,4 +264,30 @@ export async function saveResume(
 
 export async function deleteResume(id: string): Promise<void> {
   await request<never>(`/resumes/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export async function signIn(email: string, password: string): Promise<void> {
+  const client = getSupabaseClient();
+  if (!client) throw new Error('Cloud sign-in is unavailable in local development.');
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+}
+
+export async function signUp(email: string, password: string): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) throw new Error('Cloud sign-up is unavailable in local development.');
+  const { data, error } = await client.auth.signUp({ email, password });
+  if (error) throw new Error(error.message);
+  return Boolean(data.session);
+}
+
+export async function signOut(): Promise<void> {
+  if (!usesCloudAuthentication) {
+    window.localStorage.removeItem(TOKEN_KEY);
+    return;
+  }
+  const client = getSupabaseClient();
+  if (!client) throw new Error('Supabase authentication is not configured.');
+  const { error } = await client.auth.signOut();
+  if (error) throw new Error(error.message);
 }

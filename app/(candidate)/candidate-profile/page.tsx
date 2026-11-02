@@ -49,7 +49,7 @@ export default function CandidateProfilePage() {
       });
       setProfile(saved);
       setSkillsText(saved.skills.join(', '));
-      setNotice('Your profile was saved to this device.');
+      setNotice('Your profile was saved to your workspace.');
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Could not save your profile.');
     } finally {
@@ -66,8 +66,8 @@ export default function CandidateProfilePage() {
 
       <section className="card card-padding" style={{ maxWidth: 850 }}>
         <div className="page-heading" style={{ marginBottom: 8 }}>
-          <div><h2 className="card-title">Candidate details</h2><p className="card-description">Your profile is stored locally and used to explain job matches.</p></div>
-          <span className="local-pill"><span className="online-dot" /> ON THIS DEVICE</span>
+          <div><h2 className="card-title">Candidate details</h2><p className="card-description">Your profile is stored in your workspace and used to explain job matches.</p></div>
+          <span className="local-pill"><span className="online-dot" /> WORKSPACE DATA</span>
         </div>
         {loading ? <p className="empty-state">Loading your profile…</p> : (
           <form onSubmit={(event) => void handleSave(event)}>
