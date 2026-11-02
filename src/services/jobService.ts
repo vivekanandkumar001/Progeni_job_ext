@@ -1,4 +1,5 @@
-import { supabase } from '../config/supabase/client.js';
+import { randomUUID } from 'node:crypto';
+import { getDatabase } from '../config/mongodb.js';
 
 const TABLE = 'jobs';
 
@@ -19,40 +20,48 @@ export interface JobRow {
   created_at: string;
 }
 
+type JobDocument = Omit<JobRow, 'id'> & { _id: string };
+
 export class JobService {
   async list(): Promise<JobRow[]> {
-    const { data, error } = await supabase.from(TABLE).select('*').order('created_at', { ascending: false }).limit(100);
-    if (error) throw new Error('Failed to list jobs: ' + error.message);
-    return data || [];
+    const jobs = await (await getDatabase())
+      .collection<JobDocument>(TABLE)
+      .find({})
+      .sort({ created_at: -1 })
+      .limit(100)
+      .toArray();
+    return jobs.map((job) => this.toRow(job));
   }
 
   async get(id: string): Promise<JobRow | null> {
-    const { data, error } = await supabase.from(TABLE).select('*').eq('id', id).maybeSingle();
-    if (error) throw new Error('Failed to fetch job: ' + error.message);
-    return data || null;
+    const job = await (await getDatabase()).collection<JobDocument>(TABLE).findOne({ _id: id });
+    return job ? this.toRow(job) : null;
   }
 
   async create(body: Partial<JobRow>): Promise<JobRow> {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .insert({
-        title: body.title || 'Untitled',
-        company: body.company || 'Unknown',
-        location: body.location || null,
-        salary_min: typeof body.salary_min === 'number' ? body.salary_min : null,
-        salary_max: typeof body.salary_max === 'number' ? body.salary_max : null,
-        experience_min: typeof body.experience_min === 'number' ? body.experience_min : null,
-        experience_max: typeof body.experience_max === 'number' ? body.experience_max : null,
-        skills: Array.isArray(body.skills) ? body.skills : null,
-        mandatory_skills: Array.isArray(body.mandatory_skills) ? body.mandatory_skills : null,
-        source: body.source || null,
-        url: body.url || null,
-        platform: body.platform || null,
-      })
-      .select()
-      .single();
-    if (error) throw new Error('Failed to create job: ' + error.message);
-    return data;
+    const job: JobDocument = {
+      _id: randomUUID(),
+      title: body.title || 'Untitled',
+      company: body.company || 'Unknown',
+      location: body.location || null,
+      salary_min: typeof body.salary_min === 'number' ? body.salary_min : null,
+      salary_max: typeof body.salary_max === 'number' ? body.salary_max : null,
+      experience_min: typeof body.experience_min === 'number' ? body.experience_min : null,
+      experience_max: typeof body.experience_max === 'number' ? body.experience_max : null,
+      skills: Array.isArray(body.skills) ? body.skills : null,
+      mandatory_skills: Array.isArray(body.mandatory_skills) ? body.mandatory_skills : null,
+      source: body.source || null,
+      url: body.url || null,
+      platform: body.platform || null,
+      created_at: new Date().toISOString(),
+    };
+    await (await getDatabase()).collection<JobDocument>(TABLE).insertOne(job);
+    return this.toRow(job);
+  }
+
+  private toRow(job: JobDocument): JobRow {
+    const { _id, ...data } = job;
+    return { ...data, id: _id };
   }
 }
 
