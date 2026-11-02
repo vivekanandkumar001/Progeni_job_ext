@@ -13,14 +13,14 @@ export interface ApplicationRecord {
 }
 
 export interface ApplicationStorage {
-  get(id: string, candidateId?: string): Promise<ApplicationRecord | null>;
+  get(id: string, candidateId: string): Promise<ApplicationRecord | null>;
   list(candidateId: string): Promise<ApplicationRecord[]>;
   save(record: ApplicationRecord): Promise<ApplicationRecord>;
   updateStatus(
     id: string,
     status: string,
+    candidateId: string,
     metadata?: Record<string, unknown>,
-    candidateId?: string,
   ): Promise<ApplicationRecord | null>;
 }
 
@@ -36,8 +36,8 @@ export function transitionStatus(
   storage: ApplicationStorage,
   id: string,
   to: string,
+  candidateId: string,
   metadata?: Record<string, unknown>,
-  candidateId?: string,
 ): Promise<
   | { ok: true; record: ApplicationRecord }
   | { ok: false; error: string }
@@ -53,7 +53,7 @@ export function transitionStatus(
       };
     }
 
-    const updated = await storage.updateStatus(id, to, metadata, candidateId);
+    const updated = await storage.updateStatus(id, to, candidateId, metadata);
     if (!updated) return { ok: false, error: 'Application not found' };
     return { ok: true, record: updated };
   })();

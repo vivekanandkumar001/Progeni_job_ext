@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { supabase } from './config/supabase/client.js';
+import { getDatabase } from './config/mongodb.js';
 import { ApplicationStorage, ApplicationRecord } from './services/applicationEngine.js';
 
 const TABLE = 'applications';
@@ -18,46 +18,49 @@ export interface ApplicationRow {
   metadata: Record<string, unknown> | null;
 }
 
+type ApplicationDocument = Omit<ApplicationRow, 'id'> & { _id: string };
+
 export class ApplicationService implements ApplicationStorage {
   get storage(): ApplicationStorage { return this; }
 
-  async get(id: string, candidateId?: string): Promise<ApplicationRecord | null> {
-    let query = supabase.from(TABLE).select('*').eq('id', id);
-    if (candidateId) query = query.eq('user_id', candidateId);
-    const { data, error } = await query.maybeSingle();
-    if (error) throw new Error('Failed to fetch application: ' + error.message);
+  async get(id: string, candidateId: string): Promise<ApplicationRecord | null> {
+    const data = await (await getDatabase())
+      .collection<ApplicationDocument>(TABLE)
+      .findOne({ _id: id, user_id: candidateId });
     return data ? this.toRecord(data) : null;
   }
 
   async list(candidateId: string): Promise<ApplicationRecord[]> {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('user_id', candidateId)
-      .order('updated_at', { ascending: false });
-    if (error) throw new Error('Failed to list applications: ' + error.message);
-    return (data || []).map((r) => this.toRecord(r));
+    const applications = await (await getDatabase())
+      .collection<ApplicationDocument>(TABLE)
+      .find({ user_id: candidateId })
+      .sort({ updated_at: -1 })
+      .toArray();
+    return applications.map((application) => this.toRecord(application));
   }
 
   async save(record: ApplicationRecord): Promise<ApplicationRecord> {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .upsert({
-        id: record.id,
-        user_id: record.candidateId,
-        job_id: record.jobId || null,
-        status: record.status,
-        idempotency_key: record.idempotencyKey,
-        updated_at: record.updatedAt,
-        submitted_at: record.submittedAt || null,
-        verified_at: record.verifiedAt || null,
-        failure_reason: record.failureReason || null,
-        metadata: record.metadata || null,
-      })
-      .select()
-      .single();
-    if (error) throw new Error('Failed to save application: ' + error.message);
-    return this.toRecord(data);
+    const document: ApplicationDocument = {
+      _id: record.id,
+      user_id: record.candidateId,
+      job_id: record.jobId || null,
+      status: record.status,
+      idempotency_key: record.idempotencyKey,
+      created_at: record.createdAt,
+      updated_at: record.updatedAt,
+      submitted_at: record.submittedAt || null,
+      verified_at: record.verifiedAt || null,
+      failure_reason: record.failureReason || null,
+      metadata: record.metadata || null,
+    };
+    await (await getDatabase())
+      .collection<ApplicationDocument>(TABLE)
+      .replaceOne(
+        { _id: record.id, user_id: record.candidateId },
+        document,
+        { upsert: true },
+      );
+    return this.toRecord(document);
   }
 
   async create(
@@ -85,8 +88,8 @@ export class ApplicationService implements ApplicationStorage {
   async updateStatus(
     id: string,
     status: string,
+    candidateId: string,
     metadata?: Record<string, unknown>,
-    candidateId?: string,
   ): Promise<ApplicationRecord | null> {
     const existing = await this.get(id, candidateId);
     if (!existing) return null;
@@ -107,29 +110,27 @@ export class ApplicationService implements ApplicationStorage {
   }
 
   async existsByIdempotencyKey(key: string, candidateId: string): Promise<boolean> {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('id')
-      .eq('idempotency_key', key)
-      .eq('user_id', candidateId)
-      .maybeSingle();
-    if (error) throw new Error('Failed to check idempotency: ' + error.message);
-    return !!data;
+    const application = await (await getDatabase())
+      .collection<ApplicationDocument>(TABLE)
+      .findOne(
+        { idempotency_key: key, user_id: candidateId },
+        { projection: { _id: 1 } },
+      );
+    return !!application;
   }
 
   async findDuplicate(candidateId: string, jobId: string, excludeStatuses: string[] = []): Promise<ApplicationRecord | null> {
-    let query = supabase.from(TABLE).select('*').eq('user_id', candidateId).eq('job_id', jobId);
-    if (excludeStatuses.length > 0) {
-      query = query.not('status', 'in', `(${excludeStatuses.join(',')})`);
-    }
-    const { data, error } = await query.maybeSingle();
-    if (error) throw new Error('Failed to find duplicate: ' + error.message);
-    return data ? this.toRecord(data) : null;
+    const filter: Record<string, unknown> = { user_id: candidateId, job_id: jobId };
+    if (excludeStatuses.length > 0) filter.status = { $nin: excludeStatuses };
+    const application = await (await getDatabase())
+      .collection<ApplicationDocument>(TABLE)
+      .findOne(filter);
+    return application ? this.toRecord(application) : null;
   }
 
-  private toRecord(row: ApplicationRow): ApplicationRecord {
+  private toRecord(row: ApplicationDocument): ApplicationRecord {
     return {
-      id: row.id,
+      id: row._id,
       jobId: row.job_id || '',
       candidateId: row.user_id,
       status: row.status,

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase/client.js';
+import { getDatabase } from '../config/mongodb.js';
 
 const TABLE = 'candidate_profiles';
 
@@ -19,34 +19,34 @@ export interface CandidateProfileRow {
 
 export class CandidateProfileService {
   async get(userId: string): Promise<CandidateProfileRow | null> {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (error) throw new Error('Failed to fetch profile: ' + error.message);
-    return data || null;
+    const collection = (await getDatabase()).collection<CandidateProfileRow & { _id: string }>(TABLE);
+    const profile = await collection.findOne({ _id: userId, user_id: userId });
+    return profile ? { ...profile, id: profile._id } : null;
   }
 
   async upsert(userId: string, body: Partial<CandidateProfileRow>): Promise<CandidateProfileRow> {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .upsert({
-        user_id: userId,
-        full_name: body.full_name || null,
-        email: body.email || null,
-        target_role: body.target_role || null,
-        experience_level: body.experience_level || null,
-        location: body.location || null,
-        resume_completeness: typeof body.resume_completeness === 'number' ? body.resume_completeness : 0,
-        skills: Array.isArray(body.skills) ? body.skills : null,
-        experience_years: typeof body.experience_years === 'number' ? body.experience_years : null,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-    if (error) throw new Error('Failed to upsert profile: ' + error.message);
-    return data;
+    const collection = (await getDatabase()).collection<CandidateProfileRow & { _id: string }>(TABLE);
+    const existing = await collection.findOne(
+      { _id: userId, user_id: userId },
+      { projection: { created_at: 1 } },
+    );
+    const profile = {
+      _id: userId,
+      id: userId,
+      user_id: userId,
+      full_name: body.full_name || null,
+      email: body.email || null,
+      target_role: body.target_role || null,
+      experience_level: body.experience_level || null,
+      location: body.location || null,
+      resume_completeness: typeof body.resume_completeness === 'number' ? body.resume_completeness : 0,
+      skills: Array.isArray(body.skills) ? body.skills : null,
+      experience_years: typeof body.experience_years === 'number' ? body.experience_years : null,
+      created_at: existing?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    await collection.replaceOne({ _id: userId }, profile, { upsert: true });
+    return profile;
   }
 }
 
