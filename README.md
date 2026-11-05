@@ -22,7 +22,7 @@ In Chrome, go to `chrome://extensions`, enable **Developer mode**, choose **Load
 
 ### Deploy the connected web services to Vercel
 
-The root `vercel.json` defines Vercel Services (currently Beta). Import the repository as **one Vercel project** and set its **Root Directory** to the repository root, not `backend` or a frontend folder. Public routing sends `/api/v1/*` and `/health` to the Express backend and all other paths to the candidate dashboard. The admin panel and extension build services have no public routes.
+The root `vercel.json` defines Vercel Services (currently Beta). Import the repository as **one Vercel project** and set its **Root Directory** to the repository root, not `backend` or a frontend folder. Requests to `api.job.progeni.live` and the `/api/v1/*` and `/health` paths on the main domain go to the Express backend; other main-domain paths go to the candidate dashboard. The admin panel and extension build services have no public routes.
 
 Configure these production variables in the Vercel project without committing secrets:
 
@@ -30,7 +30,7 @@ Configure these production variables in the Vercel project without committing se
 - Dashboard: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - The extension Vite build reads those public Supabase values from the Vercel build environment. The extension API uses `https://job.progeni.live/api/v1/workspace`.
 
-Attach `job.progeni.live` to this Vercel project and apply the DNS records Vercel requests. Verify `/health` before sharing the dashboard URL. The public API requires a Supabase bearer token; health checks do not expose candidate data.
+Attach `job.progeni.live` and `api.job.progeni.live` to this Vercel project and apply the DNS records Vercel requests. Verify `/health` before sharing the dashboard URL. The public API requires a Supabase bearer token; health checks do not expose candidate data.
 
 **Vercel does not install a Chrome extension.** Build a production package with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` available to Vite, then submit a ZIP of the `dist` folder contents to the Chrome Web Store. The ZIP must have `manifest.json` at its root. `npm run build:local` is only for local testing and targets the local backend. The Web Store listing needs a published privacy-policy URL and support contact. Its stable ID is also required to add the extension's exact origin to the backend CORS allowlist, without which extension API calls will be blocked.
 

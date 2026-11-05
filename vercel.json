@@ -24,6 +24,18 @@
   },
   "rewrites": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "api.job.progeni.live"
+        }
+      ],
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
       "source": "/api/v1/(.*)",
       "destination": {
         "service": "backend"
