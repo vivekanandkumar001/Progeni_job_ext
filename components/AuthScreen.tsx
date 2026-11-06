@@ -314,6 +314,19 @@ export default function AuthScreen({
             </div>
           )}
 
+          {/* Prominent Error / Notice Banner */}
+          {message && (
+            <div
+              className={`mt-4 rounded-xl border p-3.5 text-xs leading-relaxed ${
+                isSuccessMessage
+                  ? 'border-success/30 bg-success/10 text-success'
+                  : 'border-danger/30 bg-danger/10 text-danger'
+              }`}
+            >
+              {message}
+            </div>
+          )}
+
           {/* GOOGLE SIGN IN (Sign-in and Sign-up modes only) */}
           {mode !== 'forgot-password' && mode !== 'verify-otp' && usesCloudAuthentication && (
             <div className="mt-6">
@@ -540,18 +553,6 @@ export default function AuthScreen({
                         : 'Sign in to Progeni'}
                 </button>
               </>
-            )}
-
-            {message && (
-              <div
-                className={`rounded-xl border p-3 text-xs leading-relaxed ${
-                  isSuccessMessage
-                    ? 'border-success/30 bg-success/10 text-success'
-                    : 'border-danger/30 bg-danger/10 text-danger'
-                }`}
-              >
-                {message}
-              </div>
             )}
           </form>
 

@@ -189,7 +189,7 @@ export default function JobRecommendationsPage() {
             onClick={handleTriggerDiscovery}
             className="px-4 py-2 text-sm font-medium rounded-lg bg-surface-subtle hover:bg-surface-variant text-on-surface border border-surface-subtle transition-colors shadow-sm disabled:opacity-50"
           >
-            {discovering ? 'Crawling sourcesâ€¦' : 'â†» Crawl Live Sources'}
+            {discovering ? 'Crawling sources…' : '↻ Crawl Live Sources'}
           </button>
           <button
             type="button"
@@ -221,21 +221,21 @@ export default function JobRecommendationsPage() {
           onClick={() => handleTabChange('personalized')}
           className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'personalized' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
         >
-          âœ¦ Recommended For You
+          ✦ Recommended For You
         </button>
         <button
           type="button"
           onClick={() => handleTabChange('all')}
           className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'all' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
         >
-          ðŸ” Explore All Postings
+          🔍  Explore All Postings
         </button>
         <button
           type="button"
           onClick={() => handleTabChange('saved')}
           className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'saved' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
         >
-          â˜… Saved Jobs
+          ★ Saved Jobs
         </button>
       </div>
 
@@ -327,7 +327,7 @@ export default function JobRecommendationsPage() {
         // Saved Jobs View
         savedJobs.length === 0 ? (
           <div className="py-20 text-center border-2 border-dashed border-surface-subtle rounded-2xl">
-            <div className="text-3xl mb-2">â˜…</div>
+            <div className="text-3xl mb-2">★</div>
             <h3 className="text-lg font-semibold text-on-surface">No Saved Jobs Yet</h3>
             <p className="text-sm text-on-surface-variant mt-1 max-w-sm mx-auto">
               Bookmark jobs from the recommendations or explore tab to keep track of target opportunities.
@@ -365,18 +365,18 @@ export default function JobRecommendationsPage() {
                         className="text-warning hover:text-warning p-1 rounded hover:bg-surface-subtle"
                         title="Remove bookmark"
                       >
-                        â˜…
+                        ★
                       </button>
                     </div>
 
                     <div className="text-xs text-on-surface-variant space-y-1">
                       <div className="flex items-center gap-2">
-                        <span>ðŸ“ {job.location || 'Location unlisted'}</span>
-                        <span>â€¢</span>
+                        <span>📍  {job.location || 'Location unlisted'}</span>
+                        <span>•</span>
                         <span className="capitalize">{job.workplace_mode}</span>
                       </div>
                       <div className="font-medium text-on-surface">
-                        ðŸ’° {job.salary_min ? `${job.salary_currency || '$'}${job.salary_min.toLocaleString()} - ${job.salary_max?.toLocaleString() || 'DOE'}` : 'Salary not disclosed'}
+                        💰 {job.salary_min ? `${job.salary_currency || '$'}${job.salary_min.toLocaleString()} - ${job.salary_max?.toLocaleString() || 'DOE'}` : 'Salary not disclosed'}
                       </div>
                     </div>
 
@@ -402,7 +402,7 @@ export default function JobRecommendationsPage() {
                         rel="noreferrer"
                         className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                       >
-                        Apply on Board â†—
+                        Apply on Board ↗
                       </a>
                     )}
                   </div>
@@ -414,7 +414,7 @@ export default function JobRecommendationsPage() {
       ) : jobs.length === 0 ? (
         // Empty State for Personalized or Explore
         <div className="py-20 text-center border-2 border-dashed border-surface-subtle rounded-2xl">
-          <div className="text-3xl mb-2">ðŸ”</div>
+          <div className="text-3xl mb-2">🔍 </div>
           <h3 className="text-lg font-semibold text-on-surface">No Jobs Found</h3>
           <p className="text-sm text-on-surface-variant mt-1 max-w-sm mx-auto">
             {tab === 'personalized'
@@ -484,7 +484,7 @@ export default function JobRecommendationsPage() {
                       className={`p-1.5 rounded-lg border transition-colors ${ job.is_saved ? 'border-warning/30 text-warning bg-warning-container ' : 'border-surface-subtle text-on-surface-variant hover:text-on-surface hover:bg-surface-subtle' }`}
                       title={job.is_saved ? 'Unsave job' : 'Save job'}
                     >
-                      {job.is_saved ? 'â˜…' : 'â˜†'}
+                      {job.is_saved ? '★' : '☆'}
                     </button>
                   </div>
 
@@ -496,7 +496,7 @@ export default function JobRecommendationsPage() {
                           key={idx}
                           className="px-1.5 py-0.5 text-[10px] rounded bg-success-container text-success border border-success/40"
                         >
-                          âœ“ {reason}
+                          ✓ {reason}
                         </span>
                       ))}
                     </div>
@@ -504,12 +504,12 @@ export default function JobRecommendationsPage() {
 
                   <div className="text-xs text-on-surface-variant space-y-1">
                     <div className="flex items-center gap-1.5">
-                      <span>ðŸ“ {job.location || 'Location unlisted'}</span>
-                      <span>â€¢</span>
+                      <span>📍  {job.location || 'Location unlisted'}</span>
+                      <span>•</span>
                       <span className="capitalize font-medium">{job.workplace_mode}</span>
                     </div>
                     <div className="font-medium text-on-surface">
-                      ðŸ’°{' '}
+                      💰{' '}
                       {job.salary_min
                         ? `${job.salary_currency || '$'}${job.salary_min.toLocaleString()} - ${
                             job.salary_max ? `${job.salary_max.toLocaleString()}` : 'DOE'
@@ -553,7 +553,7 @@ export default function JobRecommendationsPage() {
                       rel="noreferrer"
                       className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      Apply on Board â†—
+                      Apply on Board ↗
                     </a>
                   )}
                 </div>
@@ -605,7 +605,7 @@ export default function JobRecommendationsPage() {
                 onClick={() => setSelectedJob(null)}
                 className="text-on-surface-variant hover:text-on-surface text-xl font-bold p-1"
               >
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -681,7 +681,7 @@ export default function JobRecommendationsPage() {
                 onClick={() => handleToggleSave(selectedJob)}
                 className="px-4 py-2 text-xs font-medium rounded-lg bg-surface-subtle hover:bg-surface-variant text-on-surface"
               >
-                {selectedJob.is_saved ? 'â˜… Bookmarked' : 'â˜† Bookmark Job'}
+                {selectedJob.is_saved ? '★ Bookmarked' : '☆ Bookmark Job'}
               </button>
               {selectedJob.application_url && (
                 <a
@@ -690,7 +690,7 @@ export default function JobRecommendationsPage() {
                   rel="noreferrer"
                   className="px-5 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Apply on Original Career Page â†—
+                  Apply on Original Career Page ↗
                 </a>
               )}
             </div>
@@ -712,7 +712,7 @@ export default function JobRecommendationsPage() {
                 onClick={() => setShowImportModal(false)}
                 className="text-on-surface-variant hover:text-on-surface text-lg font-bold"
               >
-                âœ•
+                ✕
               </button>
             </div>
 
