@@ -230,11 +230,7 @@ export default function AuthScreen({
                     setMessage('');
                     setIsSuccessMessage(false);
                   }}
-                  className={`rounded-lg py-2 text-xs font-semibold transition-colors ${
-                    mode === tab
-                      ? 'bg-surface text-on-surface shadow-sm'
-                      : 'text-on-surface-variant hover:text-on-surface'
-                  }`}
+                  className={`rounded-lg py-2 text-xs font-semibold transition-colors ${ mode === tab ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}}
                 >
                   {tab === 'sign-in' ? 'Sign in' : 'Create account'}
                 </button>
@@ -332,7 +328,7 @@ export default function AuthScreen({
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="••••••••"
-                    className={`${inputClass} pr-10`}
+                    className={`${inputClass} pr-10`}}
                   />
                   <button
                     type="button"
@@ -376,11 +372,7 @@ export default function AuthScreen({
 
             {message && (
               <div
-                className={`flex items-start gap-2 rounded-xl border p-3 text-[11px] ${
-                  isSuccessMessage
-                    ? 'border-success/30 bg-success-container text-on-success-container'
-                    : 'border-danger/30 bg-danger-container text-on-danger-container'
-                }`}
+                className={`flex items-start gap-2 rounded-xl border p-3 text-[11px] ${ isSuccessMessage ? 'border-success/30 bg-success-container text-on-success-container' : 'border-danger/30 bg-danger-container text-on-danger-container' }`}}
                 role="alert"
               >
                 <span className="shrink-0">{isSuccessMessage ? '✓' : '⚠'}</span>

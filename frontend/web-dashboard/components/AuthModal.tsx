@@ -172,11 +172,7 @@ export default function AuthModal({
                   setMessage('');
                   setIsSuccess(false);
                 }}
-                className={`rounded-lg py-2 text-xs font-semibold transition-colors ${
-                  mode === tab
-                    ? 'bg-surface text-on-surface shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                }`}
+                className={`rounded-lg py-2 text-xs font-semibold transition-colors ${ mode === tab ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}}
               >
                 {tab === 'sign-in' ? 'Sign in' : 'Create account'}
               </button>
@@ -259,7 +255,7 @@ export default function AuthModal({
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="At least 8 characters"
-                  className={`${inputClass} pr-10`}
+                  className={`${inputClass} pr-10`}}
                 />
                 <button
                   type="button"
@@ -303,11 +299,7 @@ export default function AuthModal({
 
           {message && (
             <div
-              className={`flex items-start gap-2 rounded-xl border p-3 text-[11px] ${
-                isSuccess
-                  ? 'border-success/30 bg-success-container text-on-success-container'
-                  : 'border-danger/30 bg-danger-container text-on-danger-container'
-              }`}
+              className={`flex items-start gap-2 rounded-xl border p-3 text-[11px] ${ isSuccess ? 'border-success/30 bg-success-container text-on-success-container' : 'border-danger/30 bg-danger-container text-on-danger-container' }`}}
               role="alert"
             >
               <span className="shrink-0">{isSuccess ? '✓' : '⚠'}</span>

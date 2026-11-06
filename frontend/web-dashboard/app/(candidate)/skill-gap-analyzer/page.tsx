@@ -59,7 +59,7 @@ export default function SkillGapAnalyzerPage() {
           <p className="text-sm">Analyzing posting requirements across target roles...</p>
         </div>
       ) : error ? (
-        <div className="p-6 text-center text-red-600 bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200">
+        <div className="p-6 text-center text-danger bg-danger-container rounded-xl border border-danger/30">
           <p className="font-medium">{error}</p>
           <button
             type="button"
@@ -104,10 +104,10 @@ export default function SkillGapAnalyzerPage() {
             </div>
 
             <div className="p-4 rounded-xl border border-surface-subtle bg-surface">
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
+              <span className="text-xs font-semibold text-success uppercase tracking-wider block">
                 Verified Candidate Skills
               </span>
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+              <div className="text-2xl font-bold text-success mt-1">
                 {data.verified_candidate_skills.length}
               </div>
               <p className="text-xs text-on-surface-variant mt-0.5">Backed by verified claims</p>
@@ -139,11 +139,7 @@ export default function SkillGapAnalyzerPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span
-                          className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider mb-1 ${
-                            gap.importance === 'required'
-                              ? 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
-                          }`}
+                          className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider mb-1 ${ gap.importance === 'required' ? 'bg-danger-container text-danger ' : 'bg-info-container text-info ' }`}}
                         >
                           {gap.importance === 'required' ? 'High Priority (Required)' : 'Bonus (Preferred)'}
                         </span>
@@ -177,11 +173,7 @@ export default function SkillGapAnalyzerPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-on-surface font-mono">{item.skill}</span>
                         <span
-                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${
-                            item.importance === 'high'
-                              ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300'
-                              : 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
-                          }`}
+                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${ item.importance === 'high' ? 'bg-danger-container text-danger ' : 'bg-info-container text-info ' }`}}
                         >
                           {item.importance} priority
                         </span>

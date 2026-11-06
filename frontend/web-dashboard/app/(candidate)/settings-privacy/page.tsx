@@ -167,12 +167,12 @@ export default function PrivacySettingsPage() {
           Pair your browser extension securely with your account using a one-time code without entering your password in the extension.
         </p>
         {pairingCode ? (
-          <div style={{ marginTop: 14, padding: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
-            <p style={{ fontSize: '0.875rem', color: '#166534', fontWeight: 600 }}>Your 5-Minute Pairing Code:</p>
-            <p style={{ fontSize: '1.75rem', fontFamily: 'monospace', fontWeight: 700, color: '#15803d', letterSpacing: '2px', marginTop: 4 }}>
+          <div style={{ marginTop: 14, padding: '16px', background: 'rgb(var(--success-container))', border: '1px solid rgb(var(--success) / 0.3)', borderRadius: 8 }}>
+            <p style={{ fontSize: '0.875rem', color: 'rgb(var(--success))', fontWeight: 600 }}>Your 5-Minute Pairing Code:</p>
+            <p style={{ fontSize: '1.75rem', fontFamily: 'monospace', fontWeight: 700, color: 'rgb(var(--success))', letterSpacing: '2px', marginTop: 4 }}>
               {pairingCode}
             </p>
-            <p style={{ fontSize: '0.8rem', color: '#166534', marginTop: 4 }}>
+            <p style={{ fontSize: '0.8rem', color: 'rgb(var(--success))', marginTop: 4 }}>
               Open the Progeni Chrome Extension Side Panel, click &ldquo;Pair with Code&rdquo;, and paste this code.
             </p>
           </div>
@@ -193,7 +193,7 @@ export default function PrivacySettingsPage() {
           <div style={{ marginTop: 14 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #e5e7eb', textAlign: 'left', color: '#6b7280' }}>
+                <tr style={{ borderBottom: '1px solid rgb(var(--outline-variant))', textAlign: 'left', color: 'rgb(var(--on-surface-variant))' }}>
                   <th style={{ padding: '8px 0' }}>Device / Browser</th>
                   <th style={{ padding: '8px 0' }}>Last active</th>
                   <th style={{ padding: '8px 0' }}>Status</th>
@@ -202,11 +202,11 @@ export default function PrivacySettingsPage() {
               </thead>
               <tbody>
                 {sessions.map((sess) => (
-                  <tr key={sess.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <tr key={sess.id} style={{ borderBottom: '1px solid rgb(var(--surface-variant))' }}>
                     <td style={{ padding: '10px 0', fontWeight: 500 }}>{sess.browser || 'Web Browser'} ({sess.os || 'Desktop'})</td>
-                    <td style={{ padding: '10px 0', color: '#6b7280' }}>{new Date(sess.lastActiveAt).toLocaleString()}</td>
+                    <td style={{ padding: '10px 0', color: 'rgb(var(--on-surface-variant))' }}>{new Date(sess.lastActiveAt).toLocaleString()}</td>
                     <td style={{ padding: '10px 0' }}>
-                      <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 99, fontSize: '0.75rem', background: sess.revokedAt ? '#fef2f2' : '#f0fdf4', color: sess.revokedAt ? '#991b1b' : '#166534' }}>
+                      <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 99, fontSize: '0.75rem', background: sess.revokedAt ? 'rgb(var(--danger-container))' : 'rgb(var(--success-container))', color: sess.revokedAt ? 'rgb(var(--danger))' : 'rgb(var(--success))' }}>
                         {sess.revokedAt ? 'Revoked' : 'Active'}
                       </span>
                     </td>
@@ -223,7 +223,7 @@ export default function PrivacySettingsPage() {
             </table>
           </div>
         ) : (
-          <p style={{ marginTop: 12, fontSize: '0.875rem', color: '#6b7280' }}>No active remote sessions recorded.</p>
+          <p style={{ marginTop: 12, fontSize: '0.875rem', color: 'rgb(var(--on-surface-variant))' }}>No active remote sessions recorded.</p>
         )}
         <button className="button button-secondary" style={{ marginTop: 16 }} disabled={busy} onClick={() => void handleLogoutAll()}>
           Log out of all devices
@@ -245,8 +245,8 @@ export default function PrivacySettingsPage() {
               borderRadius: 99,
               fontSize: '0.75rem',
               fontWeight: 600,
-              background: mfaStatus ? '#f0fdf4' : '#f3f4f6',
-              color: mfaStatus ? '#166534' : '#6b7280',
+              background: mfaStatus ? 'rgb(var(--success-container))' : 'rgb(var(--surface-variant))',
+              color: mfaStatus ? 'rgb(var(--success))' : 'rgb(var(--on-surface-variant))',
             }}>
               {mfaStatus ? 'Enabled (AAL2 Protected)' : 'Disabled'}
             </span>
@@ -268,10 +268,10 @@ export default function PrivacySettingsPage() {
           Clear your candidate workspace data or permanently delete your account.
         </p>
         <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
-          <button className="button" style={{ color: '#a23f4c', borderColor: '#f0d7db', background: '#fff8f8' }} disabled={busy} onClick={() => void handleClearWorkspace()}>
+          <button className="button" style={{ color: 'rgb(var(--danger))', borderColor: 'rgb(var(--danger) / 0.25)', background: 'rgb(var(--danger-container))' }} disabled={busy} onClick={() => void handleClearWorkspace()}>
             Clear workspace data only
           </button>
-          <button className="button" style={{ color: '#ffffff', borderColor: '#b91c1c', background: '#dc2626' }} disabled={busy} onClick={() => void handleDeleteAccount()}>
+          <button className="button" style={{ color: 'rgb(var(--surface))', borderColor: 'rgb(var(--danger))', background: 'rgb(var(--danger))' }} disabled={busy} onClick={() => void handleDeleteAccount()}>
             Permanently delete account
           </button>
         </div>

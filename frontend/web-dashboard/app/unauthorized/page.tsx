@@ -8,9 +8,9 @@ export default function UnauthorizedPage() {
           <span className="brand-mark">P</span>
           <span>PROGENI <b>AUTOAPPLY</b></span>
         </div>
-        <p className="eyebrow" style={{ color: '#b91c1c' }}>ACCESS RESTRICTED (HTTP 403)</p>
+        <p className="eyebrow" style={{ color: 'rgb(var(--danger))' }}>ACCESS RESTRICTED (HTTP 403)</p>
         <h1>Unauthorized Access</h1>
-        <p style={{ color: '#4b5563', lineHeight: 1.6 }}>
+        <p style={{ color: 'rgb(var(--on-surface-variant))', lineHeight: 1.6 }}>
           You do not have the required role or permissions to view this resource. If you believe this is an error, please contact your workspace administrator.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
@@ -25,4 +25,3 @@ export default function UnauthorizedPage() {
     </main>
   );
 }
-

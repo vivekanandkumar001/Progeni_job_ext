@@ -72,10 +72,10 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-2xl font-bold tracking-tight text-on-surface">
             Notification Center
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-on-surface-variant">
             Timely interview alerts, overdue reminders, and lifecycle status updates.
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function NotificationsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleMarkAllRead}
-            className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-zinc-800 text-zinc-200 border border-zinc-700 hover:bg-zinc-700 transition"
+            className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-surface-subtle text-on-surface border border-outline hover:bg-surface-variant transition"
           >
             ✓ Mark All Read
           </button>
@@ -97,7 +97,7 @@ export default function NotificationsPage() {
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+        <div className="p-3.5 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs">
           {error}
         </div>
       )}
@@ -106,52 +106,42 @@ export default function NotificationsPage() {
       <div className="flex gap-2">
         <button
           onClick={() => setUnreadOnly(false)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
-            !unreadOnly
-              ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ !unreadOnly ? 'bg-surface-subtle text-on-surface border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
         >
           All Notifications
         </button>
         <button
           onClick={() => setUnreadOnly(true)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
-            unreadOnly
-              ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ unreadOnly ? 'bg-surface-subtle text-on-surface border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
         >
           Unread Only
         </button>
       </div>
 
       {/* Notification List */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-surface border border-outline-variant rounded-xl overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-sm text-zinc-400">Loading notifications...</div>
+          <div className="p-12 text-center text-sm text-on-surface-variant">Loading notifications...</div>
         ) : notifications.length === 0 ? (
-          <div className="p-12 text-center text-sm text-zinc-500">No notifications to display.</div>
+          <div className="p-12 text-center text-sm text-on-surface-variant">No notifications to display.</div>
         ) : (
-          <div className="divide-y divide-zinc-800/60">
+          <div className="divide-y divide-outline-variant">
             {notifications.map((item) => (
               <div
                 key={item.id}
-                className={`p-4 flex items-start justify-between gap-4 transition ${
-                  item.read ? 'bg-transparent' : 'bg-indigo-950/10'
-                }`}
+                className={`p-4 flex items-start justify-between gap-4 transition ${ item.read ? 'bg-transparent' : 'bg-primary/10' }`}}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-xl pt-0.5">{getTypeIcon(item.type)}</span>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-zinc-200">{item.title}</span>
+                      <span className="text-sm font-semibold text-on-surface">{item.title}</span>
                       {!item.read && (
                         <span className="h-2 w-2 rounded-full bg-indigo-500 inline-block" />
                       )}
                     </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{item.message}</p>
-                    <span className="text-[10px] text-zinc-500 block">
+                    <p className="text-xs text-on-surface-variant leading-relaxed">{item.message}</p>
+                    <span className="text-[10px] text-on-surface-variant block">
                       {new Date(item.createdAt).toLocaleString()}
                     </span>
                   </div>
@@ -161,7 +151,7 @@ export default function NotificationsPage() {
                   {item.applicationId && (
                     <Link
                       href={`/application-details?id=${encodeURIComponent(item.applicationId)}`}
-                      className="px-2.5 py-1 text-xs text-indigo-400 hover:underline"
+                      className="px-2.5 py-1 text-xs text-primary hover:underline"
                     >
                       Dossier →
                     </Link>
@@ -169,7 +159,7 @@ export default function NotificationsPage() {
                   {!item.read && (
                     <button
                       onClick={() => handleMarkRead(item.id)}
-                      className="px-2.5 py-1 text-xs font-medium rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition"
+                      className="px-2.5 py-1 text-xs font-medium rounded bg-surface-subtle text-on-surface-variant hover:bg-surface-variant transition"
                     >
                       Mark Read
                     </button>

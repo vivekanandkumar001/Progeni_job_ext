@@ -479,7 +479,7 @@ export default function CandidateOnboardingPage() {
                 style={{
                   textAlign: 'left',
                   background: isActive ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
-                  border: isActive ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+                  border: isActive ? '2px solid rgb(var(--info))' : '1px solid rgb(var(--outline-variant))',
                   borderRadius: '8px',
                   padding: '10px 12px',
                   cursor: isDone || s.step <= currentStep ? 'pointer' : 'not-allowed',
@@ -487,17 +487,17 @@ export default function CandidateOnboardingPage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: isActive ? '#2563eb' : '#64748b' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: isActive ? 'rgb(var(--info))' : 'rgb(var(--on-surface-variant))' }}>
                     STAGE {s.step}
                   </span>
                   {isDone ? (
-                    <span style={{ color: '#16a34a', fontWeight: 'bold', fontSize: '12px' }}>✓ Done</span>
+                    <span style={{ color: 'rgb(var(--success))', fontWeight: 'bold', fontSize: '12px' }}>✓ Done</span>
                   ) : isActive ? (
                     <span className="online-dot" />
                   ) : null}
                 </div>
-                <strong style={{ fontSize: '13px', display: 'block', color: '#1e293b' }}>{s.title}</strong>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>{s.description}</span>
+                <strong style={{ fontSize: '13px', display: 'block', color: 'rgb(var(--on-surface))' }}>{s.title}</strong>
+                <span style={{ fontSize: '11px', color: 'rgb(var(--on-surface-variant))' }}>{s.description}</span>
               </button>
             );
           })}
@@ -704,7 +704,7 @@ export default function CandidateOnboardingPage() {
                 <select
                   value={preferences.workplace_type}
                   onChange={(e) => updatePreferenceField('workplace_type', e.target.value as any)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgb(var(--outline))' }}
                 >
                   <option value="remote">Remote Only</option>
                   <option value="hybrid">Hybrid (Office + Remote)</option>
@@ -718,7 +718,7 @@ export default function CandidateOnboardingPage() {
                 <select
                   value={preferences.experience_level}
                   onChange={(e) => updatePreferenceField('experience_level', e.target.value as any)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgb(var(--outline))' }}
                 >
                   <option value="entry">Entry-Level (0-2 years)</option>
                   <option value="mid">Mid-Level (3-5 years)</option>
@@ -733,7 +733,7 @@ export default function CandidateOnboardingPage() {
                 <select
                   value={preferences.joining_availability}
                   onChange={(e) => updatePreferenceField('joining_availability', e.target.value as any)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgb(var(--outline))' }}
                 >
                   <option value="immediate">Immediate / Serving Notice</option>
                   <option value="15_days">Within 15 Days</option>
@@ -748,7 +748,7 @@ export default function CandidateOnboardingPage() {
                 <select
                   value={preferences.employment_type}
                   onChange={(e) => updatePreferenceField('employment_type', e.target.value as any)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgb(var(--outline))' }}
                 >
                   <option value="full-time">Full-Time Permanent</option>
                   <option value="contract">Contract / Consulting</option>
@@ -767,7 +767,7 @@ export default function CandidateOnboardingPage() {
                       expected_salary: { ...prev.expected_salary, currency: e.target.value },
                     }))
                   }
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgb(var(--outline))' }}
                 >
                   <option value="INR">INR (₹)</option>
                   <option value="USD">USD ($)</option>
@@ -845,19 +845,19 @@ export default function CandidateOnboardingPage() {
 
           <div
             style={{
-              border: '2px dashed #94a3b8',
+              border: '2px dashed rgb(var(--outline))',
               borderRadius: '8px',
               padding: '2rem',
               textAlign: 'center',
-              backgroundColor: '#f8fafc',
+              backgroundColor: 'rgb(var(--surface-subtle))',
               marginBottom: '1.5rem',
             }}
           >
             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📄</div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'rgb(var(--on-surface))', marginBottom: '4px' }}>
               Upload Your Resume Document
             </h3>
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>
+            <p style={{ fontSize: '13px', color: 'rgb(var(--on-surface-variant))', marginBottom: '12px' }}>
               Supports text-based PDF, DOCX, or TXT (up to 5 MB). File is stored privately in your workspace.
             </p>
 
@@ -875,24 +875,24 @@ export default function CandidateOnboardingPage() {
 
           {/* Uploaded / Analyzed Result Preview */}
           {analysis && (
-            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem' }}>
+            <div style={{ backgroundColor: 'rgb(var(--surface))', border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <strong>Extracted from: {analysis.fileName} ({analysis.fileType.toUpperCase()})</strong>
-                <span className="score-chip" style={{ background: '#ecfdf5', color: '#047857' }}>
+                <span className="score-chip" style={{ background: 'rgb(var(--success-container))', color: 'rgb(var(--success))' }}>
                   {analysis.status === 'ready' ? 'High Confidence' : 'Review Recommended'}
                 </span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
-                <div><span style={{ fontSize: '11px', color: '#64748b' }}>Detected Name:</span> <strong>{analysis.detected.fullName || 'Not detected'}</strong></div>
-                <div><span style={{ fontSize: '11px', color: '#64748b' }}>Detected Email:</span> <strong>{analysis.detected.email || 'Not detected'}</strong></div>
-                <div><span style={{ fontSize: '11px', color: '#64748b' }}>Detected Phone:</span> <strong>{analysis.detected.phone || 'Not detected'}</strong></div>
-                <div><span style={{ fontSize: '11px', color: '#64748b' }}>Experience:</span> <strong>{analysis.detected.experienceYears !== null ? `${analysis.detected.experienceYears} Years` : 'Not specified'}</strong></div>
+                <div><span style={{ fontSize: '11px', color: 'rgb(var(--on-surface-variant))' }}>Detected Name:</span> <strong>{analysis.detected.fullName || 'Not detected'}</strong></div>
+                <div><span style={{ fontSize: '11px', color: 'rgb(var(--on-surface-variant))' }}>Detected Email:</span> <strong>{analysis.detected.email || 'Not detected'}</strong></div>
+                <div><span style={{ fontSize: '11px', color: 'rgb(var(--on-surface-variant))' }}>Detected Phone:</span> <strong>{analysis.detected.phone || 'Not detected'}</strong></div>
+                <div><span style={{ fontSize: '11px', color: 'rgb(var(--on-surface-variant))' }}>Experience:</span> <strong>{analysis.detected.experienceYears !== null ? `${analysis.detected.experienceYears} Years` : 'Not specified'}</strong></div>
               </div>
 
               {analysis.skills.length > 0 && (
                 <div style={{ marginTop: '12px' }}>
-                  <p style={{ fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgb(var(--on-surface-variant))', marginBottom: '6px' }}>
                     Verified Skills with Document Evidence ({analysis.skills.length}):
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -901,11 +901,11 @@ export default function CandidateOnboardingPage() {
                         key={s.skill}
                         style={{
                           fontSize: '12px',
-                          background: '#f1f5f9',
-                          border: '1px solid #cbd5e1',
+                          background: 'rgb(var(--surface-variant))',
+                          border: '1px solid rgb(var(--outline))',
                           padding: '3px 8px',
                           borderRadius: '4px',
-                          color: '#0f172a',
+                          color: 'rgb(var(--on-surface))',
                         }}
                         title={s.evidence}
                       >
@@ -961,21 +961,21 @@ export default function CandidateOnboardingPage() {
           </div>
 
           {/* Extension Pairing Card */}
-          <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem', background: '#f8fafc' }}>
+          <div style={{ border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem', background: 'rgb(var(--surface-subtle))' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>Auto Apply AI Browser Extension</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'rgb(var(--on-surface))' }}>Auto Apply AI Browser Extension</h3>
               {extensionConnected ? (
-                <span className="score-chip" style={{ background: '#dcfce7', color: '#15803d' }}>
+                <span className="score-chip" style={{ background: 'rgb(var(--success-container))', color: 'rgb(var(--success))' }}>
                   ● Extension Connected
                 </span>
               ) : (
-                <span className="score-chip" style={{ background: '#fef3c7', color: '#b45309' }}>
+                <span className="score-chip" style={{ background: 'rgb(var(--warning-container))', color: 'rgb(var(--warning))' }}>
                   ○ Not Connected
                 </span>
               )}
             </div>
 
-            <p style={{ fontSize: '13px', color: '#475569', marginBottom: '12px' }}>
+            <p style={{ fontSize: '13px', color: 'rgb(var(--on-surface-variant))', marginBottom: '12px' }}>
               The Chrome Extension reads job postings on supported career portals (Greenhouse, Lever, Workday) and assists with pre-filling application fields. Final submissions always require your explicit approval.
             </p>
 
@@ -1003,19 +1003,19 @@ export default function CandidateOnboardingPage() {
                 style={{
                   marginTop: '16px',
                   padding: '16px',
-                  backgroundColor: '#ffffff',
-                  border: '2px solid #3b82f6',
+                  backgroundColor: 'rgb(var(--surface))',
+                  border: '2px solid rgb(var(--info))',
                   borderRadius: '8px',
                   textAlign: 'center',
                 }}
               >
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#2563eb', letterSpacing: '1px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgb(var(--info))', letterSpacing: '1px' }}>
                   YOUR SINGLE-USE PAIRING CODE (EXPIRES IN {Math.floor(pairingExpiresIn / 60)}:{(pairingExpiresIn % 60).toString().padStart(2, '0')})
                 </span>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '4px', margin: '8px 0' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'rgb(var(--on-surface))', letterSpacing: '4px', margin: '8px 0' }}>
                   {pairingCode}
                 </div>
-                <p style={{ fontSize: '12px', color: '#64748b' }}>
+                <p style={{ fontSize: '12px', color: 'rgb(var(--on-surface-variant))' }}>
                   Open the Progeni Chrome Extension Side Panel, click <strong>Pair with Code</strong>, enter this code, and click <strong>Link Extension</strong>.
                 </p>
               </div>
@@ -1023,8 +1023,8 @@ export default function CandidateOnboardingPage() {
           </div>
 
           {/* Privacy & Consents Box */}
-          <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', marginBottom: '12px' }}>
+          <div style={{ border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'rgb(var(--on-surface))', marginBottom: '12px' }}>
               Privacy &amp; Data Processing Controls
             </h3>
 
@@ -1037,10 +1037,10 @@ export default function CandidateOnboardingPage() {
                   onChange={(e) => setDataProcessingConsent(e.target.checked)}
                   style={{ marginTop: '3px' }}
                 />
-                <span style={{ fontSize: '13px', color: '#1e293b' }}>
+                <span style={{ fontSize: '13px', color: 'rgb(var(--on-surface))' }}>
                   <strong>Data Processing Consent (Policy v1.0) *</strong>
                   <br />
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>
+                  <span style={{ color: 'rgb(var(--on-surface-variant))', fontSize: '12px' }}>
                     I authorize Auto Apply AI to store my candidate profile, parsed resume metadata, and career preferences in my workspace to evaluate eligibility against job postings.
                   </span>
                 </span>
@@ -1056,17 +1056,17 @@ export default function CandidateOnboardingPage() {
                   onChange={(e) => setJobAssistanceConsent(e.target.checked)}
                   style={{ marginTop: '3px' }}
                 />
-                <span style={{ fontSize: '13px', color: '#1e293b' }}>
+                <span style={{ fontSize: '13px', color: 'rgb(var(--on-surface))' }}>
                   <strong>Job Application Assistance Consent (Controlled Automation)</strong>
                   <br />
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>
+                  <span style={{ color: 'rgb(var(--on-surface-variant))', fontSize: '12px' }}>
                     I authorize the extension to assist with pre-filling application form fields based on my verified profile. I acknowledge that Auto Apply AI never submits applications automatically; I will review every form before submitting.
                   </span>
                 </span>
               </label>
             </div>
 
-            <div style={{ marginTop: '12px', fontSize: '12px', color: '#64748b' }}>
+            <div style={{ marginTop: '12px', fontSize: '12px', color: 'rgb(var(--on-surface-variant))' }}>
               You may withdraw either consent at any time from <Link href="/settings-privacy">Privacy &amp; data</Link>.
             </div>
           </div>
@@ -1104,19 +1104,19 @@ export default function CandidateOnboardingPage() {
           </div>
 
           {/* Completeness Gauge */}
-          <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem' }}>
+          <div style={{ backgroundColor: 'rgb(var(--surface-subtle))', border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '16px', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontWeight: 600, fontSize: '14px', color: '#1e293b' }}>Profile Completeness</span>
-              <strong style={{ fontSize: '16px', color: completenessScore >= 80 ? '#16a34a' : '#d97706' }}>
+              <span style={{ fontWeight: 600, fontSize: '14px', color: 'rgb(var(--on-surface))' }}>Profile Completeness</span>
+              <strong style={{ fontSize: '16px', color: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
                 {completenessScore}%
               </strong>
             </div>
-            <div style={{ height: '8px', width: '100%', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
+            <div style={{ height: '8px', width: '100%', background: 'rgb(var(--outline-variant))', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
               <div
                 style={{
                   height: '100%',
                   width: `${completenessScore}%`,
-                  background: completenessScore >= 80 ? '#16a34a' : '#3b82f6',
+                  background: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--info))',
                   transition: 'width 0.3s ease',
                 }}
               />
@@ -1124,16 +1124,16 @@ export default function CandidateOnboardingPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '12px' }}>
               <div>
-                <strong style={{ color: '#16a34a' }}>Completed Criteria ({completedFields.length}):</strong>
-                <ul style={{ margin: '4px 0 0 16px', color: '#334155' }}>
+                <strong style={{ color: 'rgb(var(--success))' }}>Completed Criteria ({completedFields.length}):</strong>
+                <ul style={{ margin: '4px 0 0 16px', color: 'rgb(var(--on-surface-variant))' }}>
                   {completedFields.map((f) => (
                     <li key={f}>{f}</li>
                   ))}
                 </ul>
               </div>
               <div>
-                <strong style={{ color: '#d97706' }}>Optional Missing Criteria ({missingFields.length}):</strong>
-                <ul style={{ margin: '4px 0 0 16px', color: '#64748b' }}>
+                <strong style={{ color: 'rgb(var(--warning))' }}>Optional Missing Criteria ({missingFields.length}):</strong>
+                <ul style={{ margin: '4px 0 0 16px', color: 'rgb(var(--on-surface-variant))' }}>
                   {missingFields.length === 0 ? <li>All key criteria completed!</li> : missingFields.map((f) => <li key={f}>{f}</li>)}
                 </ul>
               </div>
@@ -1143,10 +1143,10 @@ export default function CandidateOnboardingPage() {
           {/* Profile Overview Summaries */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '1.5rem' }}>
             {/* Identity Card */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <strong>Personal Identity</strong>
-                <button type="button" onClick={() => setCurrentStep(1)} style={{ color: '#2563eb', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setCurrentStep(1)} style={{ color: 'rgb(var(--info))', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
                   Edit
                 </button>
               </div>
@@ -1157,10 +1157,10 @@ export default function CandidateOnboardingPage() {
             </div>
 
             {/* Preferences Card */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <strong>Preferences</strong>
-                <button type="button" onClick={() => setCurrentStep(2)} style={{ color: '#2563eb', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setCurrentStep(2)} style={{ color: 'rgb(var(--info))', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
                   Edit
                 </button>
               </div>
@@ -1171,10 +1171,10 @@ export default function CandidateOnboardingPage() {
             </div>
 
             {/* Resume & Skills Card */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <strong>Resume &amp; Skills</strong>
-                <button type="button" onClick={() => setCurrentStep(3)} style={{ color: '#2563eb', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setCurrentStep(3)} style={{ color: 'rgb(var(--info))', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
                   Edit
                 </button>
               </div>
@@ -1184,10 +1184,10 @@ export default function CandidateOnboardingPage() {
             </div>
 
             {/* Extension & Consent Card */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ border: '1px solid rgb(var(--outline-variant))', borderRadius: '8px', padding: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <strong>Extension &amp; Privacy</strong>
-                <button type="button" onClick={() => setCurrentStep(4)} style={{ color: '#2563eb', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setCurrentStep(4)} style={{ color: 'rgb(var(--info))', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
                   Edit
                 </button>
               </div>
