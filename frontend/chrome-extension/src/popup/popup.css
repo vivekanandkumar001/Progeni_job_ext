@@ -32,9 +32,11 @@ button { cursor: pointer; }
 .form-grid input:focus { border-color: #796ce4; box-shadow: 0 0 0 3px #796ce41c; }
 .full-width { grid-column: 1 / -1; }
 .match-card { margin-top: 12px; padding: 12px; border-radius: 12px; background: #f8f7ff; }
-.score { color: #5242cb; font-size: 31px; font-weight: 800; }
-.score span { font-size: 17px; }
-.match-card ul { padding-left: 18px; color: #555d73; font-size: 11px; line-height: 1.6; }
+.match-score-card { margin-top: 12px; padding: 16px; border-radius: 12px; background: #f0f4ff; border: 1px solid #c9d0f0; }
+.match-score-card strong { color: #2c3e50; font-size: 20px; display: block; margin-bottom: 8px; }
+.match-score-card p { margin: 4px 0; font-size: 12px; color: #34495e; line-height: 1.5; }
+.match-score-card p:last-child { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e4f0; }
+.match-score-card ul { padding-left: 18px; color: #555d73; font-size: 11px; line-height: 1.6; }
 .warning { padding: 8px; border-radius: 8px; color: #83550b !important; background: #fff5dc; }
 .application-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid #eef0f5; }
 .application-row div { display: grid; gap: 4px; min-width: 0; }

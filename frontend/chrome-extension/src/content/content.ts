@@ -1,4 +1,4 @@
-import { extractJob } from './jobAdapter';
+import { extractJob, computeMatchScore } from './jobAdapter';
 import {
   detectFormInputs,
   buildAutofillPlan,
@@ -34,6 +34,68 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       ...result,
       requestId: msg.requestId,
     });
+    return false;
+  }
+
+  if (msg.type === 'GET_PROFILE_SKILLS') {
+    if (sender.id !== chrome.runtime.id) {
+      safeSend(sendResponse, { ok: false, error: 'Only Progeni can request profile data.' });
+      return false;
+    }
+    // Fetch candidate profile from backend
+    fetch('/api/v1/workspace', {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.skills) {
+          safeSend(sendResponse, { ok: true, skills: data.skills, experience_years: data.experience_years });
+        } else {
+          safeSend(sendResponse, { ok: true, skills: [], experience_years: 0 });
+        }
+      })
+      .catch(() => {
+        safeSend(sendResponse, { ok: true, skills: [], experience_years: 0 });
+      });
+    return true;
+  }
+
+  if (msg.type === 'GET_PROFILE_EXPERIENCE') {
+    if (sender.id !== chrome.runtime.id) {
+      safeSend(sendResponse, { ok: false, error: 'Only Progeni can request profile data.' });
+      return false;
+    }
+    fetch('/api/v1/workspace', {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.experience_years !== undefined) {
+          safeSend(sendResponse, { ok: true, experience_years: data.experience_years });
+        } else {
+          safeSend(sendResponse, { ok: true, experience_years: 0 });
+        }
+      })
+      .catch(() => {
+        safeSend(sendResponse, { ok: true, experience_years: 0 });
+      });
+    return true;
+  }
+
+  if (msg.type === 'COMPUTE_MATCH_SCORE') {
+    if (sender.id !== chrome.runtime.id) {
+      safeSend(sendResponse, { ok: false, error: 'Only Progeni can compute match scores.' });
+      return false;
+    }
+    const { job, candidateSkills, candidateExperience } = msg.payload || {};
+    if (!job) {
+      safeSend(sendResponse, { ok: false, error: 'No job data provided.' });
+      return false;
+    }
+    const result = computeMatchScore(job, candidateSkills || [], candidateExperience ?? null);
+    safeSend(sendResponse, { ok: true, type: 'MATCH_SCORE_COMPUTED', ...result });
     return false;
   }
 

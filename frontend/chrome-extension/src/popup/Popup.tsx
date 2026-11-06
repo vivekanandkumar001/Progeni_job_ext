@@ -24,6 +24,7 @@ export default function Popup() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
   const [job, setJob] = useState<ResponseData['job'] | null>(null);
+  const [matchScore, setMatchScore] = useState<{ score: number; matchedSkills: string[]; missingSkills: string[]; explanation: string[] } | null>(null);
 
   useEffect(() => {
     void refreshAuth();
@@ -104,6 +105,7 @@ export default function Popup() {
     setBusy(true);
     setStatus('Checking the active tab…');
     setJob(null);
+    setMatchScore(null);
     try {
       const activeTab = await sendMessage<ResponseData & { url?: string; tabId?: number }>({
         type: 'GET_ACTIVE_TAB',
@@ -124,7 +126,39 @@ export default function Popup() {
         return;
       }
       setJob(result.job || null);
-      setStatus('Job details detected. Review them in the side panel before saving.');
+
+      // Compute match score against candidate profile
+      if (result.job && authenticated) {
+        try {
+          const profileResult = await sendMessage<ResponseData>({ type: 'GET_PROFILE_SKILLS' });
+          if (profileResult.ok && profileResult.skills) {
+            const expResult = await sendMessage<ResponseData>({ type: 'GET_PROFILE_EXPERIENCE' });
+            const candExp = Number(profileResult.experience_years) || Number(expResult.experience_years) || null;
+            const matchResult = await sendMessage<any>({
+              type: 'COMPUTE_MATCH_SCORE',
+              payload: {
+                job: result.job,
+                candidateSkills: profileResult.skills,
+                candidateExperience: candExp,
+              },
+            });
+            if (matchResult && matchResult.score !== undefined) {
+              setMatchScore(matchResult);
+              setStatus(`Job detected. Match score: ${matchResult.score}% - ${matchResult.explanation?.join('; ') || ''}`);
+            }
+          } else {
+            setStatus('Job detected. Profile skills not available for match scoring.');
+          }
+        } catch (matchError) {
+          // Match scoring failure is non-critical
+          setStatus('Job detected. Match scoring unavailable.');
+          console.error('Match scoring error:', matchError);
+        }
+      } else if (!authenticated) {
+        setStatus('Job detected. Sign in to enable match scoring.');
+      } else {
+        setStatus('Job detected. Review them in the side panel before saving.');
+      }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Job detection failed.');
     } finally {
@@ -240,6 +274,18 @@ export default function Popup() {
               <div className="job-preview">
                 <strong>{job.title || 'Untitled job'}</strong>
                 <span>{job.company || 'Company not detected'}</span>
+              </div>
+            )}
+            {matchScore && (
+              <div className="match-score-card">
+                <strong>Match Score: {matchScore.score}%</strong>
+                <p>{matchScore.explanation?.join('. ') || 'No details available.'}</p>
+                {matchScore.matchedSkills.length > 0 && (
+                  <p>Matched skills: {matchScore.matchedSkills.join(', ')}</p>
+                )}
+                {matchScore.missingSkills.length > 0 && (
+                  <p>Suggested skills to add: {matchScore.missingSkills.join(', ')}</p>
+                )}
               </div>
             )}
             <button className="primary" disabled={busy} onClick={() => void detectJob()}>

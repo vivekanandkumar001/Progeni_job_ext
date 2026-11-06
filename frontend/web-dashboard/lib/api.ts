@@ -299,20 +299,31 @@ export async function signInWithGoogle(): Promise<void> {
     throw new Error('Google authentication is not configured yet on this Supabase project. Please sign in with email and password.');
   }
 
-  // Pre-flight check the OAuth authorization URL to verify the provider is enabled
+  // Pre-flight check the OAuth authorization URL via our server-side route to verify the provider is enabled
   try {
-    const probe = await fetch(data.url, { method: 'GET', mode: 'cors' });
-    if (!probe.ok) {
-      const errorJson = await probe.json().catch(() => null);
-      if (errorJson?.error_code === 'validation_failed' || errorJson?.msg?.includes('provider is not enabled')) {
-        throw new Error('Google Sign-in is not enabled in your Supabase project (Authentication → Providers → Google). Please use Email & Password below.');
+    const probeRes = await fetch('/api/auth/oauth-validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: data.url }),
+    });
+    if (probeRes.ok) {
+      const probeJson = await probeRes.json().catch(() => null);
+      if (probeJson && probeJson.ok === false) {
+        throw new Error(
+          probeJson.error ||
+            'Google Sign-in is not enabled in this Supabase project (Authentication → Providers → Google). Please use Email & Password below.'
+        );
       }
     }
   } catch (probeError) {
-    if (probeError instanceof Error && probeError.message.includes('Google Sign-in is not enabled')) {
+    if (
+      probeError instanceof Error &&
+      (probeError.message.includes('Google Sign-in is not enabled') ||
+        probeError.message.includes('Authentication → Providers → Google') ||
+        probeError.message.includes('Social authentication'))
+    ) {
       throw probeError;
     }
-    // Network or CORS probe restriction — proceed to URL
   }
 
   window.location.href = data.url;

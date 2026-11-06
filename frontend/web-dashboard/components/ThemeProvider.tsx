@@ -37,16 +37,16 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
+  const [theme, setThemeState] = useState<Theme>('light');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    let stored: Theme = 'system';
+    let stored: Theme = 'light';
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved === 'light' || saved === 'dark' || saved === 'system') stored = saved;
     } catch {
-      // Storage can be unavailable in private mode; fall back to system.
+      // Storage can be unavailable in private mode; fall back to light.
     }
     setThemeState(stored);
     applyTheme(stored);
@@ -97,4 +97,4 @@ export function useTheme() {
   return context;
 }
 
-export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}')||'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;if(d){r.classList.add('dark');}r.style.colorScheme=d?'dark':'light';}catch(e){}})();`;
+export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}')||'light';var d=t==='dark';var r=document.documentElement;if(d){r.classList.add('dark');}else{r.classList.remove('dark');}r.style.colorScheme=d?'dark':'light';}catch(e){}})();`;

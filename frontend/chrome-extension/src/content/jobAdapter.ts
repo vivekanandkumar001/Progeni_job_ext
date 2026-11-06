@@ -10,18 +10,9 @@ export interface ExtractedJob {
   platform: string;
   requiredSkills: string[];
   experienceMin: number | null;
-}
-
-export interface JobExtractionResult {
-  supported: boolean;
-  platform: string | null;
-  policy: 'manual_only';
-  job: ExtractedJob | null;
-  confidence: number;
-  missingFields: string[];
-  reason?: string;
-  detectedFields?: FormField[];
-  canAutoFill?: boolean;
+  matchedSkills: string[];
+  missingSkills: string[];
+  matchScore: number;
 }
 
 const knownSkills = [
@@ -30,19 +21,39 @@ const knownSkills = [
   'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'AWS', 'Azure', 'GCP', 'Docker',
   'Kubernetes', 'Machine Learning', 'Deep Learning', 'Data Analysis',
   'HTML', 'CSS', 'Git', 'REST API', 'GraphQL', 'Excel', 'Communication',
+  'Project Management', 'Leadership', 'Problem Solving', 'Teamwork',
+  'Analytical', 'Creative', 'Detail-oriented', 'Organized',
 ];
 
 function extractSkillsAndExperience(text: string): {
   requiredSkills: string[];
   experienceMin: number | null;
+  matchedSkills: string[];
+  missingSkills: string[];
 } {
   const searchableText = text.toLocaleLowerCase();
-  const requiredSkills = knownSkills.filter((skill) => {
+  const foundSkills: string[] = [];
+
+  // Check known skills
+  const matchedKnownSkills = knownSkills.filter((skill) => {
     const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`(^|[^a-z0-9])${escaped.toLocaleLowerCase()}([^a-z0-9]|$)`, 'i').test(
-      searchableText,
-    );
+    const regex = new RegExp(`(^|[^a-z0-9])${escaped.toLocaleLowerCase()}([^a-z0-9]|$)`, 'i');
+    if (regex.test(searchableText)) {
+      foundSkills.push(skill);
+      return true;
+    }
+    return false;
   });
+
+  return {
+    requiredSkills: matchedKnownSkills,
+    experienceMin: extractExperienceMin(searchableText),
+    matchedSkills: foundSkills,
+    missingSkills: [], // Will be calculated comparing against candidate profile
+  };
+}
+
+function extractExperienceMin(searchableText: string): number | null {
   const experienceMatch = searchableText.match(
     /(?:minimum|min\.?|at least)\s*(\d{1,2})\s*(?:\+)?\s*(?:years?|yrs?)(?:\s+of)?\s+experience|(\d{1,2})\s*(?:\+)?\s*(?:years?|yrs?)\s+(?:of\s+)?experience/i,
   );
@@ -50,9 +61,60 @@ function extractSkillsAndExperience(text: string): {
     ? Number(experienceMatch[1] || experienceMatch[2])
     : null;
 
+  return Number.isFinite(experienceMin) ? experienceMin : null;
+}
+
+/** Compute a match score between a job and a candidate profile. */
+export function computeMatchScore(
+  job: ExtractedJob,
+  candidateSkills: string[],
+  candidateExperience: number | null,
+): { score: number; matchedSkills: string[]; missingSkills: string[]; explanation: string[] } {
+  const candidateSkillSet = new Set(
+    candidateSkills.map((s) => s.toLowerCase()),
+  );
+  const matched: string[] = job.requiredSkills.filter((s) => candidateSkillSet.has(s.toLowerCase()));
+  const missing: string[] = job.requiredSkills.filter((s) => !candidateSkillSet.has(s.toLowerCase()));
+
+  // Base score from skill match (0-80 range)
+  const skillScore = candidateSkills.length > 0
+    ? Math.round((matched.length / Math.max(1, candidateSkills.length)) * 80)
+    : 0;
+
+  // Experience bonus (0-20 range)
+  let experienceScore = 0;
+  if (candidateExperience !== null && job.experienceMin !== null) {
+    if (candidateExperience >= job.experienceMin) {
+      experienceScore = 20;
+    } else if (candidateExperience >= job.experienceMin * 0.7) {
+      experienceScore = 10;
+    }
+  }
+
+  // Skill count bonus (0-10 range) - candidates with more relevant skills get a small boost
+  const countBonus = Math.min(10, Math.round(candidateSkills.length / 5));
+
+  const totalScore = Math.min(100, skillScore + experienceScore + countBonus);
+
+  const explanation: string[] = [];
+  if (matched.length > 0) {
+    explanation.push(`Matched ${matched.length} skill(s): ${matched.join(', ')}`);
+  }
+  if (missing.length > 0) {
+    explanation.push(`Missing ${missing.length} skill(s): ${missing.join(', ')}`);
+  }
+  if (experienceScore > 0) {
+    explanation.push(`Experience: ${candidateExperience || 0}+ years vs required ${job.experienceMin || 'not specified'}`);
+  }
+  if (matched.length === 0) {
+    explanation.push('No overlapping skills found - consider tailoring your resume.');
+  }
+
   return {
-    requiredSkills,
-    experienceMin: Number.isFinite(experienceMin) ? experienceMin : null,
+    score: totalScore,
+    matchedSkills: matched,
+    missingSkills: missing,
+    explanation,
   };
 }
 
@@ -92,7 +154,7 @@ export function extractJob(url: string, document: Document): JobExtractionResult
   const location = extracted?.location || '';
   const description = extracted?.description || '';
 
-  const { requiredSkills, experienceMin } = extractSkillsAndExperience(
+  const { requiredSkills, experienceMin, matchedSkills } = extractSkillsAndExperience(
     `${title} ${description}`,
   );
 
@@ -105,6 +167,8 @@ export function extractJob(url: string, document: Document): JobExtractionResult
     platform: adapter.platform,
     requiredSkills,
     experienceMin,
+    matchedSkills,
+    missingSkills: [], // Will be filled in when comparing with candidate profile
   };
 
   const missingFields = [
