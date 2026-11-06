@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { requestCorrelationMiddleware } from './middlewares/requestCorrelation.js';
 import { env, isLocalDevelopment } from './config/env.js';
 import { getDatabase } from './config/mongodb.js';
 import candidateProfileRoutes from './routes/candidateProfile.js';
@@ -45,6 +46,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json({ limit: isLocalDevelopment ? '10mb' : '4mb' }));
+app.use(requestCorrelationMiddleware);
 
 app.get('/health', async (_req, res, next) => {
   try {
@@ -55,6 +57,57 @@ app.get('/health', async (_req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+app.get('/api/v1/health/deep', async (_req, res) => {
+  const startTime = Date.now();
+  let dbStatus = 'disconnected';
+  let dbLatencyMs = 0;
+
+  try {
+    if (!isLocalDevelopment) {
+      const dbStart = Date.now();
+      await (await getDatabase()).command({ ping: 1 });
+      dbLatencyMs = Date.now() - dbStart;
+      dbStatus = 'connected';
+    } else {
+      dbStatus = 'local_file_store';
+    }
+  } catch (err) {
+    dbStatus = 'error: ' + (err instanceof Error ? err.message : String(err));
+  }
+
+  const memory = process.memoryUsage();
+  const uptime = process.uptime();
+  const isHealthy = dbStatus === 'connected' || dbStatus === 'local_file_store';
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'healthy' : 'degraded',
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.floor(uptime),
+    durationMs: Date.now() - startTime,
+    version: '1.0.0',
+    environment: env.NODE_ENV,
+    checks: {
+      database: {
+        status: dbStatus,
+        latencyMs: dbLatencyMs,
+      },
+      memory: {
+        rssMb: Math.round(memory.rss / 1024 / 1024),
+        heapUsedMb: Math.round(memory.heapUsed / 1024 / 1024),
+        heapTotalMb: Math.round(memory.heapTotal / 1024 / 1024),
+      },
+      progeniAtlas: {
+        enabled: Boolean(env.PROGENI_ATLAS_BASE_URL || env.PROGENI_API_URL),
+        mode: isLocalDevelopment ? 'mock_ready' : 'production_ready',
+      },
+      billingGateway: {
+        provider: 'Razorpay',
+        sandbox: env.NODE_ENV !== 'production',
+      },
+    },
+  });
 });
 
 app.use('/api/v1/auth', authRoutes);
@@ -125,7 +178,24 @@ const isTestEnvironment =
 if (process.env.VERCEL !== '1' && !isTestEnvironment) {
   const PORT = env.PORT;
   const HOST = '127.0.0.1';
-  app.listen(Number(PORT), HOST, () => {
+  const server = app.listen(Number(PORT), HOST, () => {
     console.log(`Server running on http://${HOST}:${PORT}`);
   });
+
+  const gracefulShutdown = (signal: string) => {
+    console.log(`[Lifecycle] Received ${signal}. Draining HTTP connections gracefully...`);
+    server.close(() => {
+      console.log('[Lifecycle] HTTP server closed cleanly. Exiting process.');
+      process.exit(0);
+    });
+
+    // Force terminate if graceful shutdown hangs
+    setTimeout(() => {
+      console.error('[Lifecycle] Shutdown timeout exceeded (10s). Forcing termination.');
+      process.exit(1);
+    }, 10000).unref();
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 }
