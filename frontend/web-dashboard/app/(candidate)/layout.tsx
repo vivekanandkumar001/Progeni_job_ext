@@ -13,6 +13,8 @@ import {
   usesCloudAuthentication,
 } from '../../lib/api';
 
+import AuthScreen from '../../components/AuthScreen';
+
 const navigation = [
   { href: '/dashboard', label: 'Overview', symbol: '⌂' },
   { href: '/onboarding', label: 'Onboarding wizard', symbol: '✦' },
@@ -151,124 +153,126 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
 
   if (auth === 'loading') {
     return (
-      <main className="consent-screen">
-        <section className="consent-card">
-          <div className="brand-lockup"><span className="brand-mark">P</span><span>PROGENI <b>AUTOAPPLY</b></span></div>
-          <h1>Connecting to your {usesCloudAuthentication ? 'secure workspace' : 'local workspace'}</h1>
-          <p>{usesCloudAuthentication ? 'Restoring your account and workspace.' : 'Your profile and job data stay on this device.'}</p>
-        </section>
+      <main className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100">
+        <div className="flex flex-col items-center max-w-sm text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/25 mb-6 animate-pulse">
+            <span className="text-white font-black text-2xl">P</span>
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-indigo-400 font-semibold mb-3">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
+            Connecting to Workspace
+          </div>
+          <h1 className="text-xl font-bold text-white mb-2">Restoring Your Session</h1>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            {usesCloudAuthentication
+              ? 'Authenticating with cloud workspace and syncing candidate data…'
+              : 'Connecting to your local Progeni backend…'}
+          </p>
+        </div>
       </main>
     );
   }
 
   if (auth === 'required' || auth === 'unavailable') {
     return (
-      <main className="consent-screen">
-        <section className="consent-card">
-          <div className="brand-lockup"><span className="brand-mark">P</span><span>PROGENI <b>AUTOAPPLY</b></span></div>
-          <p className="eyebrow">YOUR ACCOUNT, YOUR WORKSPACE</p>
-          <h1>{auth === 'unavailable' ? 'Account service unavailable' : authMode === 'sign-up' ? 'Create your account' : 'Sign in to Progeni'}</h1>
-          <p>
-            Your workspace is stored under your account. Job-page detection is started
-            only when you choose Detect; applications are never submitted automatically.
-          </p>
-          {auth === 'required' && (
-            <form className="form-grid" onSubmit={(event) => void submitAuth(event)}>
-              <label className="field field-full">
-                Email
-                <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-              </label>
-              <label className="field field-full">
-                Password
-                <input
-                  type="password"
-                  autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'}
-                  minLength={8}
-                  required
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </label>
-              <button className="button button-primary field-full" disabled={busy}>
-                {busy ? 'Please wait…' : authMode === 'sign-up' ? 'Create account' : 'Sign in'}
-              </button>
-            </form>
-          )}
-          {auth === 'required' && (
-            <button
-              className="button button-secondary"
-              disabled={busy}
-              onClick={() => {
-                setAuthMode((mode) => mode === 'sign-in' ? 'sign-up' : 'sign-in');
-                setMessage('');
-              }}
-            >
-              {authMode === 'sign-up' ? 'Already have an account? Sign in' : 'New to Progeni? Create an account'}
-            </button>
-          )}
-          {message && <p className="form-error" role="alert">{message}</p>}
-          <p><Link href="/login">Open sign-in page</Link> · <Link href="/privacy">Privacy policy</Link></p>
-        </section>
-      </main>
+      <AuthScreen
+        initialMode="sign-in"
+        nextPath={pathname}
+        onSuccess={() => {
+          setAuth('authenticated');
+          void checkConsent();
+        }}
+      />
     );
   }
 
   if (consent === 'loading') {
     return (
-      <main className="consent-screen">
-        <section className="consent-card">
-          <div className="brand-lockup"><span className="brand-mark">P</span><span>PROGENI <b>AUTOAPPLY</b></span></div>
-          <h1>Connecting to your workspace</h1>
-          <p>Loading your saved privacy choice and candidate data.</p>
-        </section>
+      <main className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100">
+        <div className="flex flex-col items-center max-w-sm text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/25 mb-6 animate-pulse">
+            <span className="text-white font-black text-2xl">P</span>
+          </div>
+          <h1 className="text-xl font-bold text-white mb-2">Loading Career Intelligence</h1>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Retrieving candidate preferences and verification state…
+          </p>
+        </div>
       </main>
     );
   }
 
   if (consent !== 'accepted' && pathname !== '/onboarding') {
     return (
-      <main className="consent-screen">
-        <section className="consent-card">
-          <div className="brand-lockup"><span className="brand-mark">P</span><span>PROGENI <b>AUTOAPPLY</b></span></div>
+      <main className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-6 text-slate-100 relative overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative z-10 w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-indigo-950/40 backdrop-blur-xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <span className="text-white font-black text-xl">P</span>
+            </div>
+            <div>
+              <span className="text-base font-bold text-white block">
+                PROGENI <span className="text-indigo-400">AUTOAPPLY</span>
+              </span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">
+                Privacy & Security Guardrails
+              </span>
+            </div>
+          </div>
           {consent === 'unavailable' ? (
-            <>
-              <h1>{usesCloudAuthentication ? 'Workspace unavailable' : 'Local backend unavailable'}</h1>
-              <p>{message || 'Start the backend from the backend folder, then retry.'}</p>
-              <button className="button button-primary" disabled={busy} onClick={() => void checkConsent()}>
-                Retry connection
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-3">
+                {usesCloudAuthentication ? 'Workspace Unavailable' : 'Local Backend Unavailable'}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
+                {message || 'Start the backend from the backend folder, then retry.'}
+              </p>
+              <button
+                className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors"
+                disabled={busy}
+                onClick={() => void checkConsent()}
+              >
+                Retry Connection
               </button>
-            </>
+            </div>
           ) : (
-            <>
-              <p className="eyebrow">YOUR DATA, YOUR CONTROL</p>
-              <h1>Before you build your career workspace</h1>
-              <p>
-                Your career profile, job details, match results, and application tracker
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-xs font-semibold mb-4">
+                <span>🛡️</span> Zero Data Misuse Guarantee
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-3">Before you build your workspace</h1>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                Your career profile, job targets, match scores, and application tracker
                 {usesCloudAuthentication
-                  ? ' are stored in the Progeni workspace linked to your account on our MongoDB database.'
-                  : ' are saved by the local Progeni backend on this device.'}
-                {' '}The extension reads a job page only when you choose Detect. Your
-                information is not sent to AI providers or job sites.
+                  ? ' are securely persisted in your Progeni cloud workspace on MongoDB Atlas.'
+                  : ' stay securely on this device.'}
+                {' '}The extension reads a job page only when you explicitly click Detect.
               </p>
-              <p>
-                If you choose Resume intelligence, the backend reads your selected
-                PDF, DOCX, or text file to suggest profile details and skill evidence.
-                The original file and full extracted text are not saved. Only details you
-                review and confirm are added to your workspace.
-              </p>
-              <p>
-                Review every application yourself. Progeni does not submit applications,
-                bypass platform controls, or claim that a job was submitted automatically.
-              </p>
-              <p>
-                You can remove your workspace data from Privacy &amp; data. Read the
-                <Link href="/privacy"> privacy policy</Link> for data handling details.
-              </p>
-              <button className="button button-primary" disabled={busy} onClick={() => void giveConsent()}>
-                {busy ? 'Saving…' : 'I agree and continue'}
+              <div className="space-y-3 mb-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+                <div className="flex items-start gap-2.5 text-xs text-slate-300">
+                  <span className="text-emerald-400 font-bold mt-0.5">✓</span>
+                  <span><strong>Zero Hallucinations:</strong> Resumes and answers are grounded strictly in your confirmed master records.</span>
+                </div>
+                <div className="flex items-start gap-2.5 text-xs text-slate-300">
+                  <span className="text-emerald-400 font-bold mt-0.5">✓</span>
+                  <span><strong>Human In The Loop:</strong> Applications are never auto-submitted without your explicit digital approval.</span>
+                </div>
+                <div className="flex items-start gap-2.5 text-xs text-slate-300">
+                  <span className="text-emerald-400 font-bold mt-0.5">✓</span>
+                  <span><strong>Data Sovereignty:</strong> You can export or permanently wipe your workspace records anytime.</span>
+                </div>
+              </div>
+              <button
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 active:scale-[0.99] disabled:opacity-50"
+                disabled={busy}
+                onClick={() => void giveConsent()}
+              >
+                {busy ? 'Saving choice…' : 'I Understand & Agree — Continue to Dashboard'}
               </button>
-              {message && <p className="form-error" role="alert">{message}</p>}
-            </>
+              {message && <p className="mt-3 text-xs text-rose-400" role="alert">{message}</p>}
+            </div>
           )}
         </section>
       </main>
