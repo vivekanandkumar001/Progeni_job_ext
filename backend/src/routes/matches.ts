@@ -1,10 +1,25 @@
 import { Router } from 'express';
-import { calculateMatch, getMatch, listMatches } from '../controllers/matches.js';
-import { authMiddleware } from '../middlewares/auth.js';
+import {
+  calculateMatch,
+  getMatch,
+  getMatchSummary,
+  getSkillGaps,
+  listMatches,
+  recalculateMatches,
+} from '../controllers/matches.js';
 
 const router = Router();
-router.get('/', authMiddleware, listMatches);
-router.get('/:id', authMiddleware, getMatch);
-router.post('/', authMiddleware, calculateMatch);
+
+// Sub-resources must precede /:id
+router.get('/summary', getMatchSummary);
+router.get('/skill-gaps', getSkillGaps);
+router.post('/recalculate', recalculateMatches);
+
+// Base match listing & calculation
+router.get('/', listMatches);
+router.post('/', calculateMatch);
+
+// Entity-specific operations
+router.get('/:id', getMatch);
 
 export default router;

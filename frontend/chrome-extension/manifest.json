@@ -16,7 +16,12 @@
     "https://progeni-job-ext.vercel.app/*",
     "https://*.naukri.com/*",
     "https://*.linkedin.com/*",
-    "https://*.indeed.com/*"
+    "https://*.indeed.com/*",
+    "https://boards.greenhouse.io/*",
+    "https://jobs.lever.co/*",
+    "https://jobs.ashbyhq.com/*",
+    "https://*.myworkdayjobs.com/*",
+    "https://jobs.smartrecruiters.com/*"
   ],
   "optional_host_permissions": [
     "https://*.supabase.co/*"
@@ -30,7 +35,12 @@
       "matches": [
         "https://*.naukri.com/*",
         "https://*.linkedin.com/*",
-        "https://*.indeed.com/*"
+        "https://*.indeed.com/*",
+        "https://boards.greenhouse.io/*",
+        "https://jobs.lever.co/*",
+        "https://jobs.ashbyhq.com/*",
+        "https://*.myworkdayjobs.com/*",
+        "https://jobs.smartrecruiters.com/*"
       ],
       "js": ["src/content/content.ts"],
       "css": []

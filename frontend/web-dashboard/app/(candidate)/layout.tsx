@@ -15,10 +15,23 @@ import {
 
 const navigation = [
   { href: '/dashboard', label: 'Overview', symbol: '⌂' },
+  { href: '/onboarding', label: 'Onboarding wizard', symbol: '✦' },
   { href: '/candidate-profile', label: 'Career profile', symbol: '◉' },
-  { href: '/resume-manager', label: 'Resume intelligence', symbol: '▧' },
-  { href: '/application-assistant', label: 'Prepare & review', symbol: '✓' },
+  { href: '/job-recommendations', label: 'Jobs & discovery', symbol: '🔍' },
+  { href: '/job-match-intelligence', label: 'Match intelligence', symbol: '⚡' },
+  { href: '/skill-gap-analyzer', label: 'Skill gap analyzer', symbol: '📊' },
+  { href: '/resume-manager', label: 'Resume upload', symbol: '▧' },
+  { href: '/resume-studio', label: 'Resume studio', symbol: '✎' },
+  { href: '/resume-analyzer', label: 'ATS diagnostics', symbol: '◎' },
+  { href: '/targeted-resume', label: 'Targeted generator', symbol: '🎯' },
+  { href: '/truth-engine', label: 'Truth engine', symbol: '🛡' },
+  { href: '/application-assistant', label: 'Application assistant', symbol: '🤖' },
   { href: '/application-tracker', label: 'Application tracker', symbol: '▤' },
+  { href: '/interview-center', label: 'Interview center', symbol: '🗓' },
+  { href: '/follow-up-manager', label: 'Follow-up manager', symbol: '⏰' },
+  { href: '/performance-analytics', label: 'Analytics & rates', symbol: '📈' },
+  { href: '/notifications', label: 'Notifications', symbol: '🔔' },
+  { href: '/billing', label: 'Plans & billing', symbol: '💳' },
   { href: '/settings-privacy', label: 'Privacy & data', symbol: '◇' },
 ];
 
@@ -194,7 +207,7 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
             </button>
           )}
           {message && <p className="form-error" role="alert">{message}</p>}
-          <p><Link href="/privacy">Privacy policy</Link></p>
+          <p><Link href="/login">Open sign-in page</Link> · <Link href="/privacy">Privacy policy</Link></p>
         </section>
       </main>
     );
@@ -212,7 +225,7 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (consent !== 'accepted') {
+  if (consent !== 'accepted' && pathname !== '/onboarding') {
     return (
       <main className="consent-screen">
         <section className="consent-card">

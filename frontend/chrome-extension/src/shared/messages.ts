@@ -1,4 +1,4 @@
-﻿export type MsgType =
+export type MsgType =
   | 'PING'
   | 'PONG'
   | 'GET_CONSENT'
@@ -7,8 +7,10 @@
   | 'SIGN_IN'
   | 'SIGN_UP'
   | 'SIGN_OUT'
+  | 'PAIR_WITH_CODE'
   | 'DETECT_REQUEST'
   | 'DETECT_RESPONSE'
+  | 'GET_DETECTED_JOB'
   | 'EXTRACT_JOB'
   | 'JOB_DETECTED'
   | 'GET_ACTIVE_TAB'
@@ -21,9 +23,18 @@
   | 'UPDATE_APPLICATION'
   | 'GET_MATCHES'
   | 'ANALYZE_JOB'
+  | 'IMPORT_JOB'
+  | 'SAVE_JOB'
+  | 'UNSAVE_JOB'
+  | 'LIST_SAVED_JOBS'
   | 'MARK_DEMO_DATA'
+  | 'DETECT_FORM_FIELDS'
+  | 'PREVIEW_AUTOFILL'
+  | 'APPLY_AUTOFILL'
   | 'PAGE_READY'
   | 'ERROR';
+
+export const DETECTED_JOB_STORAGE_KEY = 'pendingDetectedJob';
 
 export interface Message<T = unknown> {
   type: MsgType;
@@ -35,6 +46,7 @@ export interface Message<T = unknown> {
   jobId?: string;
   status?: string;
   notes?: string;
+  code?: string;
   accepted?: boolean;
   email?: string;
   password?: string;

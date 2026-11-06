@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ensureSupabaseHostPermission, makeRequestId, sendMessage } from '../shared/messages';
+import {
+  DETECTED_JOB_STORAGE_KEY,
+  ensureSupabaseHostPermission,
+  makeRequestId,
+  sendMessage,
+  sendTabMessage,
+} from '../shared/messages';
 
 interface CandidateProfile {
   fullName: string;
@@ -69,10 +75,29 @@ const emptyProfile: CandidateProfile = {
   experienceYears: null,
 };
 
+function isJob(value: unknown): value is Job {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    (candidate.id === undefined || typeof candidate.id === 'string') &&
+    typeof candidate.title === 'string' &&
+    typeof candidate.company === 'string' &&
+    typeof candidate.location === 'string' &&
+    typeof candidate.description === 'string' &&
+    typeof candidate.url === 'string' &&
+    typeof candidate.platform === 'string' &&
+    Array.isArray(candidate.requiredSkills) &&
+    candidate.requiredSkills.every((skill) => typeof skill === 'string') &&
+    (candidate.experienceMin === null || typeof candidate.experienceMin === 'number')
+  );
+}
+
 export default function SidePanel() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [localMode, setLocalMode] = useState(false);
   const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [authMethod, setAuthMethod] = useState<'password' | 'pairing'>('password');
+  const [pairingCodeInput, setPairingCodeInput] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [consent, setConsent] = useState<boolean | null>(null);
@@ -83,9 +108,27 @@ export default function SidePanel() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
+  const [autofillFields, setAutofillFields] = useState<
+    Array<{ id: string; name: string; label: string; selector: string; value: string; approved: boolean; required: boolean }>
+  >([]);
+  const [humanApproved, setHumanApproved] = useState(false);
+  const [autofillNotice, setAutofillNotice] = useState('');
+  const [activeTabId, setActiveTabId] = useState<number | null>(null);
 
   useEffect(() => {
     void loadConsent();
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string,
+    ) => {
+      const detectedJob = changes[DETECTED_JOB_STORAGE_KEY]?.newValue;
+      if (areaName === 'session' && isJob(detectedJob)) {
+        setJob(detectedJob);
+        setStatus('Detected details. Review them before calculating your match.');
+      }
+    };
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
   }, []);
 
   async function loadConsent() {
@@ -166,6 +209,11 @@ export default function SidePanel() {
       setSkillsText(profileResult.profile.skills.join(', '));
     }
     setApplications(applicationResult.applications || []);
+    const detectedJobResult = await sendMessage<ResponseData>({ type: 'GET_DETECTED_JOB' });
+    if (!detectedJobResult.ok) {
+      throw new Error(detectedJobResult.error || 'Could not load the detected job.');
+    }
+    if (isJob(detectedJobResult.job)) setJob(detectedJobResult.job);
   }
 
   async function acceptConsent() {
@@ -200,6 +248,31 @@ export default function SidePanel() {
       setStatus('Profile saved to your workspace.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not save your profile.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function importDetectedJob() {
+    if (!job) return;
+    setBusy(true);
+    setStatus('');
+    try {
+      const result = await sendMessage<ResponseData>({
+        type: 'IMPORT_JOB',
+        payload: {
+          title: job.title,
+          companyName: job.company,
+          location: job.location,
+          url: job.url,
+          provider: 'extension',
+          skills: job.requiredSkills,
+        },
+      });
+      if (!result.ok) throw new Error(result.error || 'Failed to import job');
+      setStatus('Job imported and synced with your candidate dashboard.');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not import job');
     } finally {
       setBusy(false);
     }
@@ -292,6 +365,114 @@ export default function SidePanel() {
     }
   }
 
+  async function submitPairing(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setStatus('');
+    try {
+      const result = await sendMessage<ResponseData>({
+        type: 'PAIR_WITH_CODE',
+        code: pairingCodeInput.trim().toUpperCase(),
+      });
+      if (!result.ok) throw new Error(result.error || 'Failed to redeem pairing code.');
+      setAuthenticated(true);
+      setStatus('Extension linked successfully to your dashboard workspace.');
+      await loadWorkspace();
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Invalid or expired pairing code.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function detectFormFields() {
+    setBusy(true);
+    setAutofillNotice('');
+    try {
+      const activeTab = await sendMessage<ResponseData & { url?: string; tabId?: number }>({
+        type: 'GET_ACTIVE_TAB',
+      });
+      if (!activeTab.ok || activeTab.tabId === undefined) {
+        throw new Error('Please open an application page in the active tab.');
+      }
+      setActiveTabId(activeTab.tabId);
+      const res = await sendTabMessage<{ ok?: boolean; error?: string; plan?: { fields: any[] } }>(
+        activeTab.tabId,
+        {
+          type: 'PREVIEW_AUTOFILL',
+          payload: {
+            candidateData: {
+              fullName: profile.fullName,
+              email: profile.email,
+              phone: profile.phone,
+              location: profile.location,
+            },
+            isApplicationApproved: humanApproved,
+          },
+        },
+      );
+      if (!res.ok || !res.plan) {
+        throw new Error(res.error || 'Could not detect form fields on this page.');
+      }
+      setAutofillFields(res.plan.fields || []);
+      setAutofillNotice(`Detected ${res.plan.fields.length} form fields. Review each field before injecting.`);
+    } catch (err: any) {
+      setAutofillNotice(err.message || 'Form detection failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function toggleFieldApproval(id: string) {
+    setAutofillFields((current) =>
+      current.map((f) => (f.id === id ? { ...f, approved: !f.approved } : f)),
+    );
+  }
+
+  function approveAllFields() {
+    setAutofillFields((current) => current.map((f) => ({ ...f, approved: true })));
+  }
+
+  async function executeAutofill() {
+    if (!humanApproved) {
+      setAutofillNotice('Safety invariant: Explicit candidate approval is required before autofill can inject values.');
+      return;
+    }
+    const approvedCount = autofillFields.filter((f) => f.approved).length;
+    if (approvedCount === 0) {
+      setAutofillNotice('Select at least one approved field to inject.');
+      return;
+    }
+    if (activeTabId === null) {
+      setAutofillNotice('Active tab is disconnected. Rescan the form.');
+      return;
+    }
+    setBusy(true);
+    setAutofillNotice('');
+    try {
+      const res = await sendTabMessage<{ ok?: boolean; injectedCount?: number; skippedCount?: number; message?: string }>(
+        activeTabId,
+        {
+          type: 'APPLY_AUTOFILL',
+          payload: {
+            plan: {
+              fields: autofillFields,
+              isApplicationApproved: true,
+            },
+          },
+        },
+      );
+      if (!res.ok) {
+        throw new Error(res.message || 'Autofill execution failed.');
+      }
+      setAutofillNotice(`Successfully injected ${res.injectedCount || 0} approved fields into the form. Review the inputs and submit manually.`);
+    } catch (err: any) {
+      setAutofillNotice(err.message || 'Autofill injection failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function updateProfile<K extends keyof CandidateProfile>(key: K, value: CandidateProfile[K]) {
     setProfile((current) => ({ ...current, [key]: value }));
   }
@@ -308,25 +489,69 @@ export default function SidePanel() {
           <div><strong>Progeni AutoApply</strong><span>Sign in to your career workspace</span></div>
         </header>
         <section className="card">
-          <h1>{authMode === 'sign-up' ? 'Create your account' : 'Welcome back'}</h1>
-          <p>Use the same account as your Progeni web dashboard.</p>
-          <form className="form-grid" onSubmit={(event) => void submitAuth(event)}>
-            <label className="full-width">Email
-              <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-            </label>
-            <label className="full-width">Password
-              <input type="password" autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} />
-            </label>
-            <button className="primary full-width" disabled={busy}>
-              {busy ? 'Please wait…' : authMode === 'sign-up' ? 'Create account' : 'Sign in'}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+            <button
+              type="button"
+              className={authMethod === 'password' ? 'primary' : 'secondary'}
+              style={{ flex: 1, padding: '6px 8px', fontSize: '0.8rem' }}
+              onClick={() => { setAuthMethod('password'); setStatus(''); }}
+            >
+              Email Sign In
             </button>
-          </form>
-          <button className="text-button" disabled={busy} onClick={() => {
-            setAuthMode((mode) => mode === 'sign-in' ? 'sign-up' : 'sign-in');
-            setStatus('');
-          }}>
-            {authMode === 'sign-up' ? 'Already have an account? Sign in' : 'Create a new account'}
-          </button>
+            <button
+              type="button"
+              className={authMethod === 'pairing' ? 'primary' : 'secondary'}
+              style={{ flex: 1, padding: '6px 8px', fontSize: '0.8rem' }}
+              onClick={() => { setAuthMethod('pairing'); setStatus(''); }}
+            >
+              Pair with Code
+            </button>
+          </div>
+
+          {authMethod === 'pairing' ? (
+            <div>
+              <p style={{ fontSize: '0.825rem', color: '#4b5563', marginBottom: '10px' }}>
+                Open your Progeni Web Dashboard &rarr; <b>Settings &rarr; Chrome Extension Pairing</b> and paste the 6-digit code below:
+              </p>
+              <form className="form-grid" onSubmit={(event) => void submitPairing(event)}>
+                <label className="full-width">Pairing code
+                  <input
+                    type="text"
+                    required
+                    placeholder="PAIR-123456"
+                    value={pairingCodeInput}
+                    onChange={(e) => setPairingCodeInput(e.target.value)}
+                    style={{ textTransform: 'uppercase', letterSpacing: '1px', fontFamily: 'monospace', fontWeight: 600 }}
+                  />
+                </label>
+                <button className="primary full-width" disabled={busy || !pairingCodeInput}>
+                  {busy ? 'Linking…' : 'Link Extension'}
+                </button>
+              </form>
+            </div>
+          ) : (
+            <>
+              <h1>{authMode === 'sign-up' ? 'Create your account' : 'Welcome back'}</h1>
+              <p>Use the same account as your Progeni web dashboard.</p>
+              <form className="form-grid" onSubmit={(event) => void submitAuth(event)}>
+                <label className="full-width">Email
+                  <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+                </label>
+                <label className="full-width">Password
+                  <input type="password" autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} />
+                </label>
+                <button className="primary full-width" disabled={busy}>
+                  {busy ? 'Please wait…' : authMode === 'sign-up' ? 'Create account' : 'Sign in'}
+                </button>
+              </form>
+              <button className="text-button" disabled={busy} onClick={() => {
+                setAuthMode((mode) => mode === 'sign-in' ? 'sign-up' : 'sign-in');
+                setStatus('');
+              }}>
+                {authMode === 'sign-up' ? 'Already have an account? Sign in' : 'Create a new account'}
+              </button>
+            </>
+          )}
           {status && <p className="status" role="status">{status}</p>}
         </section>
       </main>
@@ -398,9 +623,14 @@ export default function SidePanel() {
             <strong>{job.title || 'Untitled job'}</strong>
             <span>{[job.company, job.location, job.platform].filter(Boolean).join(' · ')}</span>
             <span>{job.requiredSkills.length ? `Detected skills: ${job.requiredSkills.join(', ')}` : 'No recognizable skills found; verify requirements manually.'}</span>
-            <button className="secondary" disabled={busy} onClick={() => void analyzeJob()}>
-              Calculate explainable match
-            </button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+              <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void analyzeJob()}>
+                Calculate match
+              </button>
+              <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void importDetectedJob()}>
+                Import to Discovery
+              </button>
+            </div>
           </div>
         )}
         {match && (
@@ -419,6 +649,73 @@ export default function SidePanel() {
             )}
           </div>
         )}
+      </section>
+
+      <section className="card">
+        <div className="section-heading">
+          <div><h2>Application Assistant & Smart Autofill</h2><p>Safe form population with explicit candidate approval.</p></div>
+        </div>
+        <button className="primary" disabled={busy} onClick={() => void detectFormFields()}>
+          Scan Application Form
+        </button>
+
+        {autofillFields.length > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Detected Fields ({autofillFields.length})</span>
+              <button
+                type="button"
+                className="secondary"
+                style={{ padding: '2px 8px', fontSize: '0.75rem' }}
+                onClick={() => approveAllFields()}
+              >
+                Approve all
+              </button>
+            </div>
+            <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 6, padding: 8 }}>
+              {autofillFields.map((f) => (
+                <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #f1f5f9' }}>
+                  <input
+                    type="checkbox"
+                    checked={f.approved}
+                    onChange={() => toggleFieldApproval(f.id)}
+                    id={`field_${f.id}`}
+                  />
+                  <label htmlFor={`field_${f.id}`} style={{ flex: 1, fontSize: '0.8rem', cursor: 'pointer', margin: 0 }}>
+                    <strong>{f.label}</strong> {f.required ? '*' : ''}
+                    <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem' }}>
+                      {f.value ? `→ "${f.value.slice(0, 30)}${f.value.length > 30 ? '...' : ''}"` : '*(No mapped value)*'}
+                    </span>
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 12, padding: 10, background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.8rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={humanApproved}
+                  onChange={(e) => setHumanApproved(e.target.checked)}
+                  style={{ marginTop: 2 }}
+                />
+                <span>
+                  <strong>Explicit Human Approval Gate:</strong> I have reviewed the detected fields and explicitly approve populating them. Progeni will never automatically submit or bypass security checks.
+                </span>
+              </label>
+            </div>
+
+            <button
+              className="primary full-width"
+              style={{ marginTop: 10 }}
+              disabled={busy || !humanApproved || autofillFields.filter((f) => f.approved).length === 0}
+              onClick={() => void executeAutofill()}
+            >
+              Safely Fill Approved Fields
+            </button>
+          </div>
+        )}
+        {autofillNotice && <p className="status" style={{ marginTop: 8 }} role="status">{autofillNotice}</p>}
       </section>
 
       <section className="card">

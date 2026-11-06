@@ -23,7 +23,7 @@ npm start
 ## API modes
 
 - Local development exposes `/api/v1/local`, uses a local JWT session, and stores data in `%LOCALAPPDATA%\ProgeniAutoApply\candidate-data.json`. It binds to `127.0.0.1`; never expose this route or data file publicly.
-- Production exposes `/api/v1/workspace`, verifies Supabase access tokens, and stores each candidate's workspace in MongoDB keyed by the verified Supabase user ID. All profile, resume evidence, job, match, consent, and tracker operations are user-scoped.
+- Production exposes `/api/v1/workspace`, verifies Supabase access tokens, requires the candidate role on candidate endpoints, and stores each candidate's workspace in MongoDB keyed by the verified Supabase user ID. All profile, resume evidence, job, match, consent, and tracker operations are user-scoped.
 - `/health` pings MongoDB in production before reporting healthy.
 
 ## Vercel + MongoDB Atlas production setup

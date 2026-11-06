@@ -28,6 +28,7 @@ Configure these production variables in the Vercel project without committing se
 
 - Backend: `MONGODB_URI`, `MONGODB_DB`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NODE_PATH=backend/node_modules`, and `CORS_ALLOWED_ORIGINS` (exact origins, for example `https://job.progeni.live,chrome-extension://<published-extension-id>` after the Chrome Web Store assigns the extension ID; do not use a wildcard).
 - Dashboard: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Supabase Auth: set the production Site URL to `https://job.progeni.live` and allow the exact callback URLs `https://job.progeni.live/auth/callback/signup` and `https://job.progeni.live/auth/callback/recovery` in the Auth redirect URL list. Add the corresponding exact localhost callback URLs for local auth testing if needed.
 - The extension Vite build reads those public Supabase values from the Vercel build environment. The extension API uses `https://job.progeni.live/api/v1/workspace`.
 
 Attach `job.progeni.live` and `api.job.progeni.live` to this Vercel project and apply the DNS records Vercel requests. Verify `/health` before sharing the dashboard URL. The public API requires a Supabase bearer token; health checks do not expose candidate data.
@@ -46,7 +47,7 @@ Dashboard + Chrome extension ──> https://job.progeni.live/api/v1/workspace
                                   Supabase Auth → Express → MongoDB Atlas
 ```
 
-In local development, the API binds to loopback and uses a JSON file under `%LOCALAPPDATA%\ProgeniAutoApply`. Production clients sign in with Supabase; the API verifies each bearer token and stores the candidate's workspace under that Supabase user ID in MongoDB. Do not expose `/api/v1/local` or the local JSON file to the internet. See [`backend/README.md`](./backend/README.md) for backend environment variables and deployment details.
+In local development, the API binds to loopback and uses a JSON file under `%LOCALAPPDATA%\ProgeniAutoApply`. Production dashboard sessions use Supabase cookies refreshed and verified by Next.js middleware; email confirmation and password recovery return through `/auth/callback/signup` and `/auth/callback/recovery`. The dashboard redirects signed-out visitors to `/login` and fails closed if production Supabase variables are missing. Existing browser sessions stored only in local storage may need to sign in again after the cookie-session update. The API separately verifies each bearer token, permits the candidate role on candidate endpoints, and stores the candidate's workspace under that verified Supabase user ID in MongoDB. Do not expose `/api/v1/local` or the local JSON file to the internet. See [`backend/README.md`](./backend/README.md) for backend environment variables and deployment details.
 
 ## Run locally
 

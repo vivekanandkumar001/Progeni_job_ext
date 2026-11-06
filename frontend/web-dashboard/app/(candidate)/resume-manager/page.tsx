@@ -163,7 +163,12 @@ export default function ResumeManagerPage() {
           <h1>Resume intelligence</h1>
           <p>Extract profile suggestions and short skill evidence. You review every detail before it is saved.</p>
         </div>
-        <Link className="button button-secondary" href="/candidate-profile">Open career profile</Link>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <Link className="button button-primary" href="/resume-studio">Open Resume Studio</Link>
+          <Link className="button button-secondary" href="/resume-analyzer">ATS Diagnostics</Link>
+          <Link className="button button-secondary" href="/targeted-resume">Targeted Generator</Link>
+          <Link className="button button-secondary" href="/truth-engine">Truth Claims</Link>
+        </div>
       </header>
 
       <section className="card card-padding resume-upload-card">

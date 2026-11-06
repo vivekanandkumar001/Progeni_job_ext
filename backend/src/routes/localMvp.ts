@@ -1,7 +1,7 @@
 import { Router, type Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { authMiddleware, type AuthRequest } from '../middlewares/auth.js';
+import { authMiddleware, requireRole, type AuthRequest } from '../middlewares/auth.js';
 import { env } from '../config/env.js';
 import { checkHardEligibility, calculateMatchScore } from '../services/matchingEngine.js';
 import { localDataStore, type CandidateWorkspaceStore } from '../services/localDataStore.js';
@@ -78,7 +78,7 @@ function requireUserId(req: AuthRequest): string {
 function createWorkspaceRoutes(store: CandidateWorkspaceStore) {
     const router = Router();
 
-    router.use(authMiddleware);
+    router.use(authMiddleware, requireRole('candidate', 'premium_candidate'));
 
     router.get('/consent', async (req: AuthRequest, res, next) => {
       try {
