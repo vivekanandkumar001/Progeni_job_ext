@@ -99,6 +99,78 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return false;
   }
 
+  if (msg.type === 'ANALYZE_JOB') {
+    if (sender.id !== chrome.runtime.id) {
+      safeSend(sendResponse, { ok: false, error: 'Only Progeni can analyze jobs.' });
+      return false;
+    }
+    const { job, candidateSkills, candidateExperience } = msg.payload || {};
+    if (!job) {
+      safeSend(sendResponse, { ok: false, error: 'No job data provided.' });
+      return false;
+    }
+    // Use the new computeMatchScore from jobAdapter
+    const result = computeMatchScore(job, candidateSkills || [], candidateExperience ?? null);
+    safeSend(sendResponse, { ok: true, match: result });
+    return false;
+  }
+
+  if (msg.type === 'GENERATE_COVER_LETTER') {
+    if (sender.id !== chrome.runtime.id) {
+      safeSend(sendResponse, { ok: false, error: 'Only Progeni can generate cover letters.' });
+      return false;
+    }
+    const { job } = msg.payload || {};
+    if (!job) {
+      safeSend(sendResponse, { ok: false, error: 'No job data provided.' });
+      return false;
+    }
+    // Fetch candidate profile from backend
+    fetch('/api/v1/workspace', {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data || !data.skills) {
+          safeSend(sendResponse, { ok: false, error: 'Candidate profile not found. Please set up your profile first.' });
+          return;
+        }
+        const request = {
+          jobTitle: job.title || 'Job Position',
+          company: job.company || 'Company',
+          jobDescription: job.description || '',
+          candidateSkills: data.skills,
+          candidateExperience: data.experience_years ?? null,
+          candidateTargetRole: data.target_role || null,
+        };
+        // Call the backend cover letter service
+        fetch('/api/v1/cover-letter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(request),
+        })
+          .then((res) => res.json())
+          .then((coverLetterResult) => {
+            if (coverLetterResult.success && coverLetterResult.coverLetter) {
+              safeSend(sendResponse, { ok: true, coverLetter: coverLetterResult.coverLetter });
+            } else {
+              safeSend(sendResponse, { ok: false, error: coverLetterResult.error || 'Failed to generate cover letter.' });
+            }
+          })
+          .catch(() => {
+            safeSend(sendResponse, { ok: false, error: 'Error communicating with cover letter service.' });
+          });
+      })
+      .catch(() => {
+        safeSend(sendResponse, { ok: false, error: 'Could not load candidate profile.' });
+      });
+    return true;
+  }
+
   if (msg.type === 'DETECT_FORM_FIELDS') {
     const fields = detectFormInputs(document).map((f) => ({
       name: f.name,

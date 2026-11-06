@@ -114,6 +114,8 @@ export default function SidePanel() {
   const [humanApproved, setHumanApproved] = useState(false);
   const [autofillNotice, setAutofillNotice] = useState('');
   const [activeTabId, setActiveTabId] = useState<number | null>(null);
+  const [showCoverLetter, setShowCoverLetter] = useState(false);
+  const [coverLetter, setCoverLetter] = useState<string | null>(null);
 
   useEffect(() => {
     void loadConsent();
@@ -323,6 +325,33 @@ export default function SidePanel() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function generateCoverLetter() {
+    if (!job) return;
+    setBusy(true);
+    setStatus('Generating cover letter…');
+    try {
+      const result = await sendMessage<any>({
+        type: 'GENERATE_COVER_LETTER',
+        payload: { job },
+      });
+      if (result.ok && result.coverLetter) {
+        setCoverLetter(result.coverLetter);
+        setStatus('Cover letter generated successfully!');
+      } else {
+        setStatus(result.error || 'Failed to generate cover letter.');
+      }
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Cover letter generation failed.');
+      console.error('Cover letter generation error:', error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function toggleCoverLetterVisibility() {
+    setShowCoverLetter(!showCoverLetter);
   }
 
   async function trackJob() {
@@ -627,6 +656,9 @@ export default function SidePanel() {
               <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void analyzeJob()}>
                 Calculate match
               </button>
+              <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void generateCoverLetter()}>
+                Generate Cover Letter
+              </button>
               <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void importDetectedJob()}>
                 Import to Discovery
               </button>
@@ -647,6 +679,27 @@ export default function SidePanel() {
                 Add job to tracker
               </button>
             )}
+          </div>
+        )}
+        {coverLetter && (
+          <div className="cover-letter-card">
+            <h3>Generated Cover Letter</h3>
+            <p>{coverLetter}</p>
+            <button
+              className="secondary full-width"
+              style={{ marginTop: '10px', marginBottom: '10px' }}
+              onClick={() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = coverLetter;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Cover letter copied to clipboard!');
+              }}
+            >
+              Copy to Clipboard
+            </button>
           </div>
         )}
       </section>

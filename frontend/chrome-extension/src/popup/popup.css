@@ -38,6 +38,21 @@ button { cursor: pointer; }
 .match-score-card p:last-child { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e4f0; }
 .match-score-card ul { padding-left: 18px; color: #555d73; font-size: 11px; line-height: 1.6; }
 .warning { padding: 8px; border-radius: 8px; color: #83550b !important; background: #fff5dc; }
+.smart-apply-result { 
+  background: #f0f7ff; 
+  border: 1px solid #b3d8ff; 
+  border-radius: 8px; 
+  padding: 16px; 
+  margin-top: 16px; 
+  font-size: 13px;
+}
+.smart-apply-result strong { color: #2c3e50; display: block; margin-bottom: 8px; }
+.smart-apply-result div { margin-top: 8px; color: #64748b; }
+.smart-apply-result p { margin-top: 8px; font-size: 12px; color: #2c3e50; }
+.cover-letter-card { margin-top: 20px; padding: 20px; border-radius: 12px; background: #f8f9fa; border: 1px solid #dee2e6; min-height: 300px; }
+.cover-letter-card h3 { margin: 0 0 16px 0; color: #2c3e50; font-size: 16px; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; }
+.cover-letter-card p { margin: 0; font-size: 13px; line-height: 1.6; color: #495057; white-space: pre-wrap; }
+.cover-letter-card button { width: 100%; padding: 10px; margin-top: 12px; font-size: 12px; }
 .application-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid #eef0f5; }
 .application-row div { display: grid; gap: 4px; min-width: 0; }
 .application-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }

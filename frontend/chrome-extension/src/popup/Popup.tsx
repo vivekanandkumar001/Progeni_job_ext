@@ -25,6 +25,13 @@ export default function Popup() {
   const [status, setStatus] = useState('');
   const [job, setJob] = useState<ResponseData['job'] | null>(null);
   const [matchScore, setMatchScore] = useState<{ score: number; matchedSkills: string[]; missingSkills: string[]; explanation: string[] } | null>(null);
+  const [coverLetter, setCoverLetter] = useState<string | null>(null);
+  const [smartApplyResult, setSmartApplyResult] = useState<{
+    ok: boolean;
+    injectedCount: number;
+    skippedCount: number;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     void refreshAuth();
@@ -166,6 +173,105 @@ export default function Popup() {
     }
   }
 
+  async function generateCoverLetter() {
+    if (!job || !authenticated) return;
+    setBusy(true);
+    setStatus('Generating cover letter…');
+    setCoverLetter(null);
+    try {
+      const result = await sendMessage<any>({
+        type: 'GENERATE_COVER_LETTER',
+        payload: { job },
+      });
+      if (result.ok && result.coverLetter) {
+        setCoverLetter(result.coverLetter);
+        setStatus('Cover letter generated successfully!');
+      } else {
+        setStatus(result.error || 'Failed to generate cover letter.');
+      }
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Cover letter generation failed.');
+      console.error('Cover letter generation error:', error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function smartApplyJob() {
+    if (!job || !authenticated) return;
+    setBusy(true);
+    setStatus('Smart Auto-Apply running…');
+    setSmartApplyResult(null);
+    try {
+      // Step 1: Get active tab and detect form fields
+      const activeTab = await sendMessage<ResponseData & { url?: string; tabId?: number }>({
+        type: 'GET_ACTIVE_TAB',
+      });
+      if (!activeTab.ok || !activeTab.url || activeTab.tabId === undefined) {
+        throw new Error('Please open a job application page in the active tab.');
+      }
+
+      // Step 2: Detect form fields on the job site
+      const formResult = await sendTabMessage<any>(activeTab.tabId, {
+        type: 'PREVIEW_AUTOFILL',
+        payload: {
+          candidateData: {
+            fullName: job.title ? job.title.replace(/[0-9]/g, '') : '',
+            email: '',
+            phone: '',
+            location: '',
+          },
+          isApplicationApproved: true, // Smart mode: allow auto-approval
+        },
+      });
+
+      if (!formResult.ok || !formResult.plan) {
+        throw new Error(formResult.error || 'Could not detect form fields.');
+      }
+
+      // Step 3: Auto-approve all fields for smart mode, then execute autofill
+      const autoApprovePlan = {
+        ...formResult.plan,
+        fields: formResult.plan.fields.map((f: any) => ({
+          ...f,
+          approved: true, // Auto-approve all fields in smart mode
+        })),
+        isApplicationApproved: true,
+      };
+
+      const autoResult = await sendTabMessage<any>(activeTab.tabId, {
+        type: 'APPLY_AUTOFILL',
+        payload: {
+          plan: autoApprovePlan,
+        },
+      });
+
+      // Step 4: Show results
+      const injectedCount = autoResult?.injectedCount || 0;
+      const skippedCount = autoResult?.skippedCount || 0;
+
+      setSmartApplyResult({
+        ok: injectedCount > 0,
+        injectedCount,
+        skippedCount,
+        message: `Safely filled ${injectedCount} fields. ${skippedCount > 0 ? `(${skippedCount} fields skipped for safety - resume, captcha, or file inputs)` : ''} Review form and click job's "Apply" button to submit.`,
+      });
+
+      setStatus(`${injectedCount} fields auto-filled. Please review and submit manually.`);
+    } catch (error) {
+      setSmartApplyResult({
+        ok: false,
+        injectedCount: 0,
+        skippedCount: 0,
+        message: error instanceof Error ? error.message : 'Smart Auto-Apply failed.',
+      });
+      setStatus('Smart Auto-Apply failed. Please try again.');
+      console.error('Smart Auto-Apply error:', error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function openDashboard() {
     await chrome.tabs.create({
       url: import.meta.env.DEV || import.meta.env.PROGENI_LOCAL
@@ -270,12 +376,6 @@ export default function Popup() {
               </div>
               <span className="local-badge">{localMode ? 'LOCAL' : 'ACCOUNT'}</span>
             </div>
-            {job && (
-              <div className="job-preview">
-                <strong>{job.title || 'Untitled job'}</strong>
-                <span>{job.company || 'Company not detected'}</span>
-              </div>
-            )}
             {matchScore && (
               <div className="match-score-card">
                 <strong>Match Score: {matchScore.score}%</strong>
@@ -286,6 +386,52 @@ export default function Popup() {
                 {matchScore.missingSkills.length > 0 && (
                   <p>Suggested skills to add: {matchScore.missingSkills.join(', ')}</p>
                 )}
+              </div>
+            )}
+            {coverLetter && (
+              <div className="cover-letter-card">
+                <h3>Generated Cover Letter</h3>
+                <p>{coverLetter}</p>
+                <button className="primary full-width" style={{ marginTop: '10px' }} onClick={() => {
+                  // Copy to clipboard or open in new window
+                  const textArea = document.createElement('textarea');
+                  textArea.value = coverLetter;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  alert('Cover letter copied to clipboard!');
+                }}>
+                  Copy to Clipboard
+                </button>
+              </div>
+            )}
+            {smartApplyResult && (
+              <div className="smart-apply-result">
+                <div style={{ background: '#f0f7ff', border: '1px solid #b3d8ff', borderRadius: 8, padding: 12, marginTop: 12 }}>
+                  <strong>{smartApplyResult.message}</strong>
+                  <div style={{ marginTop: 8, fontSize: '12px', color: '#64748b' }}>
+                    <strong>Auto-filled:</strong> {smartApplyResult.injectedCount} fields
+                    <strong style={{ marginLeft: '16px' }}>|</strong>
+                    <strong>Skipped/Safety:</strong> {smartApplyResult.skippedCount} fields
+                  </div>
+                  <p style={{ marginTop: 8, fontSize: '12px', color: '#2c3e50' }}>
+                    ⚡ 4-5 seconds automation | 👁️ Review form & click job's "Apply" button to submit
+                  </p>
+                </div>
+              </div>
+            )}
+            {job && (
+              <div className="job-actions">
+                <button className="secondary" onClick={() => void generateCoverLetter()}>
+                  Generate Cover Letter
+                </button>
+                <button className="secondary" onClick={() => void smartApplyJob()}>
+                  Smart Auto-Apply (4s)
+                </button>
+                <button className="primary" onClick={() => void openDashboard()}>
+                  Open Dashboard
+                </button>
               </div>
             )}
             <button className="primary" disabled={busy} onClick={() => void detectJob()}>
