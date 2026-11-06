@@ -285,13 +285,37 @@ export async function signIn(email: string, password: string): Promise<void> {
 export async function signInWithGoogle(): Promise<void> {
   const client = getSupabaseClient();
   if (!client) throw new Error('Google sign-in is unavailable in local development.');
-  const { error } = await client.auth.signInWithOAuth({
+  
+  const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${window.location.origin}/auth/callback/signup`,
+      skipBrowserRedirect: true,
     },
   });
+  
   if (error) throw new Error(error.message);
+  if (!data?.url) {
+    throw new Error('Google authentication is not configured yet on this Supabase project. Please sign in with email and password.');
+  }
+
+  // Pre-flight check the OAuth authorization URL to verify the provider is enabled
+  try {
+    const probe = await fetch(data.url, { method: 'GET', mode: 'cors' });
+    if (!probe.ok) {
+      const errorJson = await probe.json().catch(() => null);
+      if (errorJson?.error_code === 'validation_failed' || errorJson?.msg?.includes('provider is not enabled')) {
+        throw new Error('Google Sign-in is not enabled in your Supabase project (Authentication → Providers → Google). Please use Email & Password below.');
+      }
+    }
+  } catch (probeError) {
+    if (probeError instanceof Error && probeError.message.includes('Google Sign-in is not enabled')) {
+      throw probeError;
+    }
+    // Network or CORS probe restriction — proceed to URL
+  }
+
+  window.location.href = data.url;
 }
 
 export async function signUp(email: string, password: string): Promise<boolean> {
