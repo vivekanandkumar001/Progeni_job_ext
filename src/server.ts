@@ -12,6 +12,8 @@ import resumeStudioRoutes from './routes/resumeStudio.js';
 import jobRoutes from './routes/jobs.js';
 import matchRoutes from './routes/matches.js';
 import applicationRoutes from './routes/applications.js';
+import adminRoutes from './routes/admin.js';
+import coverLetterRoutes from './routes/coverLetter.js';
 import authRoutes from './routes/auth.js';
 import candidateRoutes from './routes/candidate.js';
 import trackerRoutes from './routes/tracker.js';
@@ -144,6 +146,8 @@ app.use('/api/v1/jobs', authMiddleware, (req, res, next) => {
   });
 }, jobRoutes);
 
+app.use('/api/v1/cover-letter', coverLetterRoutes);
+app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/matches', ...candidateAccess, matchRoutes);
 app.use('/api/v1/applications', ...candidateAccess, applicationRoutes);
 app.use('/api/v1/tracker', ...candidateAccess, trackerRoutes);
