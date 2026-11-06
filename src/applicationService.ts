@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { MongoServerError } from 'mongodb';
 import { getDatabase } from './config/mongodb.js';
 import { ApplicationStorage, ApplicationRecord } from './services/applicationEngine.js';
 
@@ -54,10 +55,10 @@ export class ApplicationService implements ApplicationStorage {
       metadata: record.metadata || null,
     };
     await (await getDatabase())
-      .collection<ApplicationDocument>(TABLE)
-      .replaceOne(
+      .collection<any>(TABLE)
+      .updateOne(
         { _id: record.id, user_id: record.candidateId },
-        document,
+        { $set: document },
         { upsert: true },
       );
     return this.toRecord(document);
@@ -73,16 +74,28 @@ export class ApplicationService implements ApplicationStorage {
     },
   ): Promise<ApplicationRecord> {
     const now = new Date().toISOString();
-    return this.save({
+    const idempotencyKey = input.idempotencyKey || randomUUID();
+    const existing = await this.findByIdempotencyKey(idempotencyKey, candidateId);
+    if (existing) return existing;
+
+    const record: ApplicationRecord = {
       id: randomUUID(),
       jobId: input.jobId || '',
       candidateId,
       status: input.status,
-      idempotencyKey: input.idempotencyKey || randomUUID(),
+      idempotencyKey,
       createdAt: now,
       updatedAt: now,
       metadata: input.metadata,
-    });
+    };
+    try {
+      return await this.save(record);
+    } catch (error) {
+      if (!(error instanceof MongoServerError && error.code === 11000)) throw error;
+      const duplicate = await this.findByIdempotencyKey(idempotencyKey, candidateId);
+      if (!duplicate) throw error;
+      return duplicate;
+    }
   }
 
   async updateStatus(
@@ -110,13 +123,17 @@ export class ApplicationService implements ApplicationStorage {
   }
 
   async existsByIdempotencyKey(key: string, candidateId: string): Promise<boolean> {
+    return Boolean(await this.findByIdempotencyKey(key, candidateId));
+  }
+
+  private async findByIdempotencyKey(
+    key: string,
+    candidateId: string,
+  ): Promise<ApplicationRecord | null> {
     const application = await (await getDatabase())
       .collection<ApplicationDocument>(TABLE)
-      .findOne(
-        { idempotency_key: key, user_id: candidateId },
-        { projection: { _id: 1 } },
-      );
-    return !!application;
+      .findOne({ idempotency_key: key, user_id: candidateId });
+    return application ? this.toRecord(application) : null;
   }
 
   async findDuplicate(candidateId: string, jobId: string, excludeStatuses: string[] = []): Promise<ApplicationRecord | null> {

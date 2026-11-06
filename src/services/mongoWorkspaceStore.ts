@@ -93,10 +93,15 @@ export const mongoWorkspaceStore: CandidateWorkspaceStore = {
     });
   },
 
-  clearWorkspace(userId) {
-    return updateWorkspace(userId, (data) => {
-      Object.assign(data, emptyWorkspace());
-    });
+  async clearWorkspace(userId) {
+    const database = await getDatabase();
+    await Promise.all([
+      database.collection<WorkspaceDocument>('candidate_workspaces').deleteOne({ _id: userId }),
+      database.collection('candidate_profiles').deleteMany({ user_id: userId }),
+      database.collection('resumes').deleteMany({ user_id: userId }),
+      database.collection('job_matches').deleteMany({ user_id: userId }),
+      database.collection('applications').deleteMany({ user_id: userId }),
+    ]);
   },
 
   async saveProfile(userId, profile) {

@@ -1,10 +1,33 @@
 import { Router } from 'express';
-import { listJobs, getJob, createJob } from '../controllers/jobs.js';
-import { authMiddleware, requireRole } from '../middlewares/auth.js';
+import {
+  createJob,
+  discoverJobs,
+  getDiscoverySources,
+  getDiscoveryStatus,
+  getJob,
+  importJob,
+  listJobs,
+  listSavedJobs,
+  saveJob,
+  unsaveJob,
+} from '../controllers/jobs.js';
 
 const router = Router();
-router.get('/', authMiddleware, listJobs);
-router.get('/:id', authMiddleware, getJob);
-router.post('/', authMiddleware, requireRole('admin'), createJob);
+
+// Sub-resource and specific routes MUST precede /:id
+router.get('/saved', listSavedJobs);
+router.get('/sources', getDiscoverySources);
+router.get('/discovery/status', getDiscoveryStatus);
+router.post('/discover', discoverJobs);
+router.post('/import', importJob);
+
+// Main listing & root creation
+router.get('/', listJobs);
+router.post('/', createJob);
+
+// Entity-specific operations
+router.get('/:id', getJob);
+router.post('/:id/save', saveJob);
+router.delete('/:id/save', unsaveJob);
 
 export default router;
