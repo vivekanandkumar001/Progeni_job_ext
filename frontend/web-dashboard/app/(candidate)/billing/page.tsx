@@ -243,7 +243,7 @@ export default function CandidateBillingPage() {
           {/* Progress Bar */}
           <div className="w-full bg-surface-subtle h-2.5 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-500 ${ percentageRemaining > 50 ? 'bg-purple-500' : percentageRemaining > 20 ? 'bg-amber-500' : 'bg-rose-500' }`}
+              className={`h-full transition-all duration-500 ${ percentageRemaining > 50 ? 'bg-primary' : percentageRemaining > 20 ? 'bg-warning' : 'bg-danger' }`}
               style={{ width: `${percentageRemaining}%` }}
             />
           </div>
@@ -274,7 +274,7 @@ export default function CandidateBillingPage() {
               className="relative w-12 h-6 rounded-full bg-surface-subtle border border-outline p-0.5 transition"
             >
               <div
-                className={`w-5 h-5 rounded-full bg-purple-500 transition-transform ${ billingInterval === 'year' ? 'translate-x-6' : 'translate-x-0' }`}
+                className={`w-5 h-5 rounded-full bg-primary transition-transform ${ billingInterval === 'year' ? 'translate-x-6' : 'translate-x-0' }`}
               />
             </button>
             <span className={`text-xs flex items-center gap-1.5 ${billingInterval === 'year' ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>

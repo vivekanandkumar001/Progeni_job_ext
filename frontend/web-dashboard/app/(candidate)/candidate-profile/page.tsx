@@ -90,7 +90,7 @@ export default function CandidateProfilePage() {
           <h1>Career profile</h1>
           <p>Use information you can support with real experience. Progeni never invents qualifications.</p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex flex-wrap gap-2">
           <Link className="button button-secondary" href="/onboarding">
             ✦ Onboarding wizard
           </Link>
@@ -101,14 +101,14 @@ export default function CandidateProfilePage() {
       </header>
 
       {/* Profile Completeness Summary */}
-      <section className="card card-padding" style={{ maxWidth: 850, marginBottom: '1.5rem', background: 'rgb(var(--surface-subtle))' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <section className="card card-padding mb-6 max-w-[850px] bg-surface-subtle">
+        <div className="mb-2 flex items-center justify-between gap-2">
           <span style={{ fontWeight: 600, fontSize: '14px', color: 'rgb(var(--on-surface))' }}>Career Profile Completeness</span>
           <strong style={{ fontSize: '16px', color: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
             {completenessScore}%
           </strong>
         </div>
-        <div style={{ height: '8px', width: '100%', background: 'rgb(var(--outline-variant))', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+        <div className="mb-2 h-2 w-full overflow-hidden rounded bg-outline-variant">
           <div
             style={{
               height: '100%',
@@ -125,8 +125,8 @@ export default function CandidateProfilePage() {
         )}
       </section>
 
-      <section className="card card-padding" style={{ maxWidth: 850 }}>
-        <div className="page-heading" style={{ marginBottom: 8 }}>
+      <section className="card card-padding max-w-[850px]">
+        <div className="page-heading mb-2">
           <div>
             <h2 className="card-title">Candidate details</h2>
             <p className="card-description">Your profile is stored in your workspace and used to explain job matches.</p>
@@ -261,7 +261,7 @@ export default function CandidateProfilePage() {
               </label>
             </div>
 
-            <div className="form-actions" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className="form-actions mt-6 flex-wrap justify-between">
               <button className="button button-primary" disabled={busy || loading}>
                 {busy ? 'Saving…' : 'Save profile changes'}
               </button>

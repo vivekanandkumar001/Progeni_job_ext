@@ -212,7 +212,7 @@ export default function JobMatchIntelligencePage() {
           <button
             type="button"
             onClick={loadData}
-            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-danger text-white hover:bg-red-700"
+            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-danger text-white hover:bg-danger/90"
           >
             Retry
           </button>
