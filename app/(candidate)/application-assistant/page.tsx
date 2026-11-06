@@ -411,11 +411,7 @@ export default function ApplicationAssistantPage() {
                   <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">
                     {current.jobSnapshot.platform || 'Direct ATS'}
                   </span>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    current.status === 'prepared' ? 'bg-emerald-100 text-emerald-800' :
-                    current.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
-                    'bg-amber-100 text-amber-800'
-                  }`}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ current.status === 'prepared' ? 'bg-success-container text-success' : current.status === 'submitted' ? 'bg-info-container text-info' : 'bg-warning-container text-warning' }`}}>
                     Status: {current.status.toUpperCase()}
                   </span>
                 </div>
@@ -432,9 +428,7 @@ export default function ApplicationAssistantPage() {
                   <div className="text-2xl font-black text-primary">
                     {current.matchSnapshot.score}%
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                    current.matchSnapshot.eligible ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                  }`}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ current.matchSnapshot.eligible ? 'bg-success-container text-success' : 'bg-warning-container text-warning' }`}}>
                     {current.matchSnapshot.status.replace(/_/g, ' ').toUpperCase()}
                   </span>
                 </div>
@@ -478,9 +472,7 @@ export default function ApplicationAssistantPage() {
                   <span className="text-base font-black text-primary">{current.readiness.score}/100</span>
                   <span className="text-xs text-on-surface-variant">({current.readiness.summary})</span>
                 </div>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                  current.readiness.isReadyForSubmission ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                }`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ current.readiness.isReadyForSubmission ? 'bg-success-container text-success' : 'bg-warning-container text-warning' }`}}>
                   {current.readiness.isReadyForSubmission ? 'READY FOR SUBMISSION' : 'PREPARATION IN PROGRESS'}
                 </span>
               </div>
@@ -488,10 +480,7 @@ export default function ApplicationAssistantPage() {
               {/* Progress Bar */}
               <div className="w-full bg-outline-variant/30 rounded-full h-2.5 overflow-hidden flex">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    current.readiness.score >= 90 ? 'bg-emerald-500' :
-                    current.readiness.score >= 60 ? 'bg-primary' : 'bg-amber-500'
-                  }`}
+                  className={`h-full transition-all duration-300 ${ current.readiness.score >= 90 ? 'bg-emerald-500' : current.readiness.score >= 60 ? 'bg-primary' : 'bg-amber-500' }`}}
                   style={{ width: `${current.readiness.score}%` }}
                 />
               </div>
@@ -500,37 +489,37 @@ export default function ApplicationAssistantPage() {
               <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-3 pt-3 border-t border-outline-variant/20 text-xs">
                 <div>
                   <span className="text-on-surface-variant block">Resume</span>
-                  <strong className={current.readiness.breakdown.resume.ready ? 'text-emerald-700' : 'text-amber-700'}>
+                  <strong className={current.readiness.breakdown.resume.ready ? 'text-success' : 'text-warning'}>
                     {current.readiness.breakdown.resume.score}/20 pts
                   </strong>
                 </div>
                 <div>
                   <span className="text-on-surface-variant block">Cover Letter</span>
-                  <strong className={current.readiness.breakdown.coverLetter.ready ? 'text-emerald-700' : 'text-amber-700'}>
+                  <strong className={current.readiness.breakdown.coverLetter.ready ? 'text-success' : 'text-warning'}>
                     {current.readiness.breakdown.coverLetter.score}/15 pts
                   </strong>
                 </div>
                 <div>
                   <span className="text-on-surface-variant block">Screening Q&A</span>
-                  <strong className={current.readiness.breakdown.screeningQuestions.ready ? 'text-emerald-700' : 'text-amber-700'}>
+                  <strong className={current.readiness.breakdown.screeningQuestions.ready ? 'text-success' : 'text-warning'}>
                     {current.readiness.breakdown.screeningQuestions.score}/25 pts
                   </strong>
                 </div>
                 <div>
                   <span className="text-on-surface-variant block">Form Mappings</span>
-                  <strong className={current.readiness.breakdown.formFields.ready ? 'text-emerald-700' : 'text-amber-700'}>
+                  <strong className={current.readiness.breakdown.formFields.ready ? 'text-success' : 'text-warning'}>
                     {current.readiness.breakdown.formFields.score}/20 pts
                   </strong>
                 </div>
                 <div>
                   <span className="text-on-surface-variant block">Integrity</span>
-                  <strong className={current.readiness.breakdown.missingInfo.ready ? 'text-emerald-700' : 'text-amber-700'}>
+                  <strong className={current.readiness.breakdown.missingInfo.ready ? 'text-success' : 'text-warning'}>
                     {current.readiness.breakdown.missingInfo.score}/10 pts
                   </strong>
                 </div>
                 <div>
                   <span className="text-on-surface-variant block">Human Gate</span>
-                  <strong className={current.readiness.breakdown.humanApproval.ready ? 'text-emerald-700' : 'text-amber-700'}>
+                  <strong className={current.readiness.breakdown.humanApproval.ready ? 'text-success' : 'text-warning'}>
                     {current.readiness.breakdown.humanApproval.score}/10 pts
                   </strong>
                 </div>
@@ -538,11 +527,7 @@ export default function ApplicationAssistantPage() {
             </div>
 
             {/* Human Approval Gate Bar */}
-            <div className={`p-4 rounded-lg border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-              current.approval.isApproved
-                ? 'bg-emerald-50/60 border-emerald-300 text-emerald-900'
-                : 'bg-amber-50/60 border-amber-300 text-amber-900'
-            }`}>
+            <div className={`p-4 rounded-lg border flex flex-col md:flex-row md:items-center justify-between gap-3 ${ current.approval.isApproved ? 'bg-success-container/60 border-success/30 text-success' : 'bg-warning-container/60 border-warning/30 text-warning' }`}}>
               <div className="flex items-start gap-3">
                 <span className="text-xl">{current.approval.isApproved ? '🛡️' : '⚠️'}</span>
                 <div>
@@ -593,11 +578,7 @@ export default function ApplicationAssistantPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}
-                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'border-primary text-primary font-bold'
-                    : 'border-transparent text-on-surface-variant hover:text-on-surface'
-                }`}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${ activeTab === tab.id ? 'border-primary text-primary font-bold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -615,19 +596,17 @@ export default function ApplicationAssistantPage() {
                   {current.readiness.checklist.map((item, index) => (
                     <div
                       key={index}
-                      className={`p-3 rounded-lg border text-sm flex items-center justify-between ${
-                        item.ready ? 'bg-surface border-emerald-200' : 'bg-surface-variant/20 border-outline-variant/40'
-                      }`}
+                      className={`p-3 rounded-lg border text-sm flex items-center justify-between ${ item.ready ? 'bg-surface border-success/30' : 'bg-surface-variant/20 border-outline-variant/40' }`}}
                     >
                       <div className="flex items-center gap-3">
-                        <span className={item.ready ? 'text-emerald-600 font-bold' : 'text-amber-600'}>
+                        <span className={item.ready ? 'text-success font-bold' : 'text-warning'}>
                           {item.ready ? '✓' : '○'}
                         </span>
                         <div>
                           <strong className="text-on-surface">{item.item}</strong>
                           <span className="text-xs text-on-surface-variant block">Category: {item.category}</span>
                           {item.actionRequired && (
-                            <span className="text-xs text-amber-800 font-medium block mt-0.5">
+                            <span className="text-xs text-warning font-medium block mt-0.5">
                               Action: {item.actionRequired}
                             </span>
                           )}
@@ -642,7 +621,7 @@ export default function ApplicationAssistantPage() {
 
                 {/* Missing Information Alerts */}
                 {current.missingInformation.length > 0 && (
-                  <div className="p-4 bg-amber-50 rounded-lg border border-amber-200 text-amber-900 text-sm mt-4">
+                  <div className="p-4 bg-warning-container rounded-lg border border-warning/30 text-warning text-sm mt-4">
                     <strong className="block font-semibold mb-1">Missing Information Warnings:</strong>
                     <ul className="list-disc list-inside space-y-0.5 text-xs">
                       {current.missingInformation.map((warn, i) => (
@@ -723,7 +702,7 @@ export default function ApplicationAssistantPage() {
                   <div className="p-4 rounded-xl border border-outline-variant/40 bg-surface-variant/10 space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold uppercase tracking-wider text-primary">Tailored Summary</span>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-success-container text-success">
                         {current.targetedResumeSnapshot.alignmentScore}% Job Alignment
                       </span>
                     </div>
@@ -878,9 +857,7 @@ export default function ApplicationAssistantPage() {
                 {current.screeningAnswers.map((item) => (
                   <div
                     key={item.id}
-                    className={`p-4 rounded-xl border transition-colors ${
-                      item.userApproved ? 'bg-surface border-emerald-300' : 'bg-surface-variant/10 border-outline-variant/40'
-                    }`}
+                    className={`p-4 rounded-xl border transition-colors ${ item.userApproved ? 'bg-surface border-success/30' : 'bg-surface-variant/10 border-outline-variant/40' }`}}
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
@@ -902,7 +879,7 @@ export default function ApplicationAssistantPage() {
                             onChange={() => handleToggleAnswerApproval(item.id)}
                             className="rounded"
                           />
-                          <span className={item.userApproved ? 'text-emerald-700' : 'text-on-surface-variant'}>
+                          <span className={item.userApproved ? 'text-success' : 'text-on-surface-variant'}>
                             {item.userApproved ? 'Candidate Approved' : 'Needs Approval'}
                           </span>
                         </label>
@@ -1018,7 +995,7 @@ export default function ApplicationAssistantPage() {
 
       {/* Human Approval Confirmation Modal */}
       {showApprovalModal && current && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-surface backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-surface rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-outline-variant space-y-5">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-primary">Human Approval Gate</span>

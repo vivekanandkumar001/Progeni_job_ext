@@ -459,11 +459,7 @@ export default function LandingPage() {
                   key={cycle}
                   type="button"
                   onClick={() => setBillingCycle(cycle)}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${
-                    billingCycle === cycle
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-on-surface-variant hover:text-on-surface'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${ billingCycle === cycle ? 'bg-primary text-primary-foreground' : 'text-on-surface-variant hover:text-on-surface' }`}}
                 >
                   {cycle === 'monthly' ? 'Monthly' : 'Annual'}
                   {cycle === 'yearly' && (
@@ -616,9 +612,7 @@ export default function LandingPage() {
                     <span>{faq.q}</span>
                     <span
                       aria-hidden
-                      className={`text-lg leading-none text-on-surface-variant transition-transform ${
-                        open ? 'rotate-45' : ''
-                      }`}
+                      className={`text-lg leading-none text-on-surface-variant transition-transform ${ open ? 'rotate-45' : '' }`}}
                     >
                       +
                     </span>

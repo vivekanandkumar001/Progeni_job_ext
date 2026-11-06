@@ -146,16 +146,16 @@ export default function DashboardPage() {
           className="card card-padding"
           style={{
             marginBottom: '1rem',
-            background: 'linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)',
-            border: '1px solid #bfdbfe',
+            background: 'linear-gradient(135deg, rgb(var(--info-container)) 0%, rgb(var(--surface-subtle)) 100%)',
+            border: '1px solid rgb(var(--info) / 0.3)',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <strong style={{ color: '#1e40af', fontSize: '14px' }}>
+              <strong style={{ color: 'rgb(var(--info))', fontSize: '14px' }}>
                 Profile Completeness: {completenessScore}% · Keep your profile accurate
               </strong>
-              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#475569' }}>
+              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgb(var(--on-surface-variant))' }}>
                 Adding <strong>{missingFields.slice(0, 3).join(', ')}</strong> improves job fit scoring and auto-fill accuracy.
               </p>
             </div>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
 
         <article className="card stat-card">
           <span className="stat-label">Profile completeness</span>
-          <strong className="stat-value" style={{ color: completenessScore >= 80 ? '#16a34a' : '#2563eb' }}>
+          <strong className="stat-value" style={{ color: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--info))' }}>
             {completenessScore}%
           </strong>
           <span className="stat-footnote">
@@ -192,7 +192,7 @@ export default function DashboardPage() {
 
         <article className="card stat-card">
           <span className="stat-label">Extension connection</span>
-          <strong className="stat-value" style={{ fontSize: 16, color: extensionConnected ? '#16a34a' : '#d97706' }}>
+          <strong className="stat-value" style={{ fontSize: 16, color: extensionConnected ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
             {extensionConnected ? '● Connected' : '○ Pair required'}
           </strong>
           <span className="stat-footnote">

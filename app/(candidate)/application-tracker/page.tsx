@@ -131,19 +131,19 @@ export default function ApplicationTrackerPage() {
     switch (status) {
       case 'submitted':
       case 'verified':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return 'bg-info/10 text-info border-info/20';
       case 'interview_scheduled':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'offer_received':
       case 'offer_accepted':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return 'bg-success/10 text-success border-success/20';
       case 'rejected':
       case 'closed':
-        return 'bg-zinc-800 text-zinc-400 border-zinc-700';
+        return 'bg-surface-subtle text-on-surface-variant border-outline';
       case 'approved':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return 'bg-warning/10 text-warning border-warning/20';
       default:
-        return 'bg-zinc-800/80 text-zinc-300 border-zinc-700';
+        return 'bg-surface-subtle text-on-surface-variant border-outline';
     }
   };
 
@@ -152,21 +152,21 @@ export default function ApplicationTrackerPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Application Tracker</h1>
-          <p className="text-sm text-zinc-400">
+          <h1 className="text-2xl font-bold tracking-tight text-on-surface">Application Tracker</h1>
+          <p className="text-sm text-on-surface-variant">
             Real-time multi-stage lifecycle, submission evidence verification, and interview pipeline.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/interview-center"
-            className="px-3.5 py-2 text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition"
+            className="px-3.5 py-2 text-sm font-medium rounded-lg bg-surface-subtle hover:bg-surface-variant text-on-surface border border-outline transition"
           >
             🗓 Interview Center
           </Link>
           <Link
             href="/follow-up-manager"
-            className="px-3.5 py-2 text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition"
+            className="px-3.5 py-2 text-sm font-medium rounded-lg bg-surface-subtle hover:bg-surface-variant text-on-surface border border-outline transition"
           >
             ⏰ Follow-Up Tasks
           </Link>
@@ -180,18 +180,18 @@ export default function ApplicationTrackerPage() {
       </div>
 
       {notice && (
-        <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm flex items-center justify-between">
+        <div className="p-3.5 rounded-lg bg-success/10 border border-success/20 text-success text-sm flex items-center justify-between">
           <span>{notice}</span>
-          <button onClick={() => setNotice('')} className="text-xs text-emerald-400 hover:underline">
+          <button onClick={() => setNotice('')} className="text-xs text-success hover:underline">
             Dismiss
           </button>
         </div>
       )}
 
       {error && (
-        <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center justify-between">
+        <div className="p-3.5 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError('')} className="text-xs text-rose-400 hover:underline">
+          <button onClick={() => setError('')} className="text-xs text-danger hover:underline">
             Dismiss
           </button>
         </div>
@@ -199,16 +199,12 @@ export default function ApplicationTrackerPage() {
 
       {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-wrap gap-1.5 p-1 bg-zinc-900 border border-zinc-800 rounded-xl">
+        <div className="flex flex-wrap gap-1.5 p-1 bg-surface border border-outline-variant rounded-xl">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.key}
               onClick={() => setActiveFilter(f.key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
-                activeFilter === f.key
-                  ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeFilter === f.key ? 'bg-surface-subtle text-on-surface shadow-sm border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
             >
               {f.label}
             </button>
@@ -221,11 +217,11 @@ export default function ApplicationTrackerPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search company, title, or destination..."
-            className="px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 w-64"
+            className="px-3 py-1.5 text-xs bg-surface border border-outline-variant rounded-lg text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-primary/30 w-64"
           />
           <button
             type="submit"
-            className="px-3 py-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg border border-zinc-700 transition"
+            className="px-3 py-1.5 text-xs font-medium bg-surface-subtle hover:bg-surface-variant text-on-surface rounded-lg border border-outline transition"
           >
             Search
           </button>
@@ -233,12 +229,12 @@ export default function ApplicationTrackerPage() {
       </div>
 
       {/* Applications Table / Cards */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-surface border border-outline-variant rounded-xl overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-sm text-zinc-400">Loading tracked applications...</div>
+          <div className="p-12 text-center text-sm text-on-surface-variant">Loading tracked applications...</div>
         ) : applications.length === 0 ? (
           <div className="p-12 text-center space-y-3">
-            <p className="text-zinc-400 text-sm">No applications found in this view.</p>
+            <p className="text-on-surface-variant text-sm">No applications found in this view.</p>
             <Link
               href="/job-recommendations"
               className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition"
@@ -247,34 +243,32 @@ export default function ApplicationTrackerPage() {
             </Link>
           </div>
         ) : (
-          <div className="divide-y divide-zinc-800/60">
+          <div className="divide-y divide-outline-variant">
             {applications.map((app) => (
               <div
                 key={app.id}
-                className="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:bg-zinc-900/40 transition"
+                className="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:bg-surface transition"
               >
                 <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-zinc-100 text-base">{app.jobTitle}</span>
-                    <span className="text-zinc-400 text-sm">at</span>
-                    <span className="text-zinc-200 font-medium text-sm">{app.company}</span>
+                    <span className="font-semibold text-on-surface text-base">{app.jobTitle}</span>
+                    <span className="text-on-surface-variant text-sm">at</span>
+                    <span className="text-on-surface font-medium text-sm">{app.company}</span>
                     {app.location && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-surface-subtle text-on-surface-variant border border-outline">
                         {app.location}
                       </span>
                     )}
                     {app.source && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-500">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-surface-subtle text-on-surface-variant">
                         {app.source}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
                     <span
-                      className={`px-2.5 py-0.5 rounded-md text-xs font-medium border ${getStatusColor(
-                        app.status,
-                      )}`}
+                      className={`px-2.5 py-0.5 rounded-md text-xs font-medium border ${getStatusColor( app.status, )}`}}
                     >
                       {app.status.replace(/_/g, ' ').toUpperCase()}
                     </span>
@@ -282,11 +276,7 @@ export default function ApplicationTrackerPage() {
                     {/* Submission Evidence Badge */}
                     {app.submissionEvidence ? (
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          app.submissionEvidence.verificationStatus === 'verified'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        }`}
+                        className={`px-2 py-0.5 rounded text-xs font-medium ${ app.submissionEvidence.verificationStatus === 'verified' ? 'bg-success/10 text-success border border-success/20' : 'bg-warning/10 text-warning border border-warning/20' }`}}
                         title={
                           app.submissionEvidence.confirmationReference
                             ? `Ref: ${app.submissionEvidence.confirmationReference}`
@@ -296,12 +286,12 @@ export default function ApplicationTrackerPage() {
                         ✓ {app.submissionEvidence.verificationStatus.replace(/_/g, ' ')}
                       </span>
                     ) : (
-                      <span className="text-zinc-500 text-xs">Unsubmitted</span>
+                      <span className="text-on-surface-variant text-xs">Unsubmitted</span>
                     )}
 
                     {/* Interviews count */}
                     {app.interviewsCount > 0 && (
-                      <span className="text-purple-400 font-medium">
+                      <span className="text-primary font-medium">
                         🗓 {app.interviewsCount} interview{app.interviewsCount > 1 ? 's' : ''}
                       </span>
                     )}
@@ -311,8 +301,8 @@ export default function ApplicationTrackerPage() {
                       <span
                         className={
                           app.hasOverdueFollowUp
-                            ? 'text-rose-400 font-semibold flex items-center gap-1'
-                            : 'text-amber-400 font-medium'
+                            ? 'text-danger font-semibold flex items-center gap-1'
+                            : 'text-warning font-medium'
                         }
                       >
                         ⏰ {app.pendingFollowUpsCount} follow-up{app.pendingFollowUpsCount > 1 ? 's' : ''}
@@ -320,7 +310,7 @@ export default function ApplicationTrackerPage() {
                       </span>
                     )}
 
-                    <span className="text-zinc-500">
+                    <span className="text-on-surface-variant">
                       Updated {new Date(app.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -331,7 +321,7 @@ export default function ApplicationTrackerPage() {
                   {app.status !== 'submitted' && app.status !== 'verified' && (
                     <button
                       onClick={() => openEvidenceModal(app)}
-                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 transition"
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-info/20 hover:bg-info/30 text-info border border-info/30 transition"
                     >
                       Confirm Submission
                     </button>
@@ -347,7 +337,7 @@ export default function ApplicationTrackerPage() {
                           void handleStatusChange(app, e.target.value as TrackerLifecycleStatus);
                         }
                       }}
-                      className="px-2.5 py-1.5 text-xs bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg focus:outline-none focus:border-indigo-500 cursor-pointer"
+                      className="px-2.5 py-1.5 text-xs bg-surface-subtle border border-outline text-on-surface-variant rounded-lg focus:outline-none focus:border-primary/30 cursor-pointer"
                     >
                       <option value="">Move Status →</option>
                       {app.allowedTransitions.map((target) => (
@@ -360,7 +350,7 @@ export default function ApplicationTrackerPage() {
 
                   <Link
                     href={`/application-details?id=${encodeURIComponent(app.id)}`}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-subtle hover:bg-surface-variant text-on-surface border border-outline transition"
                   >
                     View Dossier →
                   </Link>
@@ -373,18 +363,18 @@ export default function ApplicationTrackerPage() {
 
       {/* Submission Evidence Modal */}
       {evidenceModalApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-zinc-100">Record Submission Evidence</h3>
-                <p className="text-xs text-zinc-400">
+                <h3 className="text-lg font-bold text-on-surface">Record Submission Evidence</h3>
+                <p className="text-xs text-on-surface-variant">
                   {evidenceModalApp.jobTitle} at {evidenceModalApp.company}
                 </p>
               </div>
               <button
                 onClick={() => setEvidenceModalApp(null)}
-                className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold"
+                className="text-on-surface-variant hover:text-on-surface text-sm font-semibold"
               >
                 ✕
               </button>
@@ -392,7 +382,7 @@ export default function ApplicationTrackerPage() {
 
             <form onSubmit={submitEvidenceForm} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">
                   Submission Destination URL *
                 </label>
                 <input
@@ -401,19 +391,19 @@ export default function ApplicationTrackerPage() {
                   value={destUrl}
                   onChange={(e) => setDestUrl(e.target.value)}
                   placeholder="https://company.careers.com/submit/12345"
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface focus:outline-none focus:border-primary/30"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-on-surface-variant mb-1">
                     Submission Method
                   </label>
                   <select
                     value={subMethod}
                     onChange={(e: any) => setSubMethod(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface focus:outline-none focus:border-primary/30"
                   >
                     <option value="portal">Career Portal</option>
                     <option value="direct_api">Direct ATS API</option>
@@ -423,7 +413,7 @@ export default function ApplicationTrackerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-on-surface-variant mb-1">
                     Confirmation Reference Code
                   </label>
                   <input
@@ -431,13 +421,13 @@ export default function ApplicationTrackerPage() {
                     value={confRef}
                     onChange={(e) => setConfRef(e.target.value)}
                     placeholder="e.g. APP-98234 or Req-123"
-                    className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface focus:outline-none focus:border-primary/30"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">
                   Confirmation Text / Email Snippet
                 </label>
                 <textarea
@@ -445,12 +435,12 @@ export default function ApplicationTrackerPage() {
                   value={evidenceSnippet}
                   onChange={(e) => setEvidenceSnippet(e.target.value)}
                   placeholder="Paste confirmation email snippet or confirmation screen text..."
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface focus:outline-none focus:border-primary/30"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">
                   Notes
                 </label>
                 <input
@@ -458,7 +448,7 @@ export default function ApplicationTrackerPage() {
                   value={subNotes}
                   onChange={(e) => setSubNotes(e.target.value)}
                   placeholder="Optional internal notes"
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface focus:outline-none focus:border-primary/30"
                 />
               </div>
 
@@ -466,7 +456,7 @@ export default function ApplicationTrackerPage() {
                 <button
                   type="button"
                   onClick={() => setEvidenceModalApp(null)}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-surface-subtle text-on-surface-variant hover:bg-surface-variant transition"
                 >
                   Cancel
                 </button>
@@ -484,8 +474,8 @@ export default function ApplicationTrackerPage() {
       )}
 
       {/* Non-Guarantee Regulatory Disclaimer */}
-      <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800 text-xs text-zinc-500 leading-relaxed">
-        <strong className="text-zinc-400">Important Disclaimer:</strong> Auto Apply AI provides candidate-assisted tracking, readiness verification, and submission intelligence tools. Recording an application or marking it as submitted does not constitute an employment offer, interview invitation, or guarantee of hiring consideration by the employer.
+      <div className="p-4 rounded-xl bg-surface border border-outline-variant text-xs text-on-surface-variant leading-relaxed">
+        <strong className="text-on-surface-variant">Important Disclaimer:</strong> Auto Apply AI provides candidate-assisted tracking, readiness verification, and submission intelligence tools. Recording an application or marking it as submitted does not constitute an employment offer, interview invitation, or guarantee of hiring consideration by the employer.
       </div>
     </div>
   );

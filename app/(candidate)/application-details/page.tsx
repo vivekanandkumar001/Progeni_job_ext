@@ -180,7 +180,7 @@ function DossierContent() {
   if (!applicationId) {
     return (
       <div className="p-8 text-center space-y-4">
-        <p className="text-zinc-400">No application ID provided in the URL query.</p>
+        <p className="text-on-surface-variant">No application ID provided in the URL query.</p>
         <Link
           href="/application-tracker"
           className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-indigo-600 text-white"
@@ -192,16 +192,16 @@ function DossierContent() {
   }
 
   if (loading) {
-    return <div className="p-12 text-center text-sm text-zinc-400">Loading application dossier...</div>;
+    return <div className="p-12 text-center text-sm text-on-surface-variant">Loading application dossier...</div>;
   }
 
   if (!dossier) {
     return (
       <div className="p-8 text-center space-y-4">
-        <p className="text-rose-400">Application dossier could not be found or access was denied.</p>
+        <p className="text-danger">Application dossier could not be found or access was denied.</p>
         <Link
           href="/application-tracker"
-          className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-zinc-800 text-zinc-200"
+          className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-surface-subtle text-on-surface"
         >
           ← Back to Tracker
         </Link>
@@ -220,14 +220,14 @@ function DossierContent() {
         <div>
           <Link
             href="/application-tracker"
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 mb-1"
+            className="text-xs text-primary hover:text-primary font-medium flex items-center gap-1 mb-1"
           >
             ← Back to Applications
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-2xl font-bold tracking-tight text-on-surface">
             {job.title || 'Job Position'}
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-on-surface-variant">
             {job.company || 'Company'} • {job.location || 'Remote'}
           </p>
         </div>
@@ -235,7 +235,7 @@ function DossierContent() {
         <div className="flex flex-wrap items-center gap-2">
           {dossier.allowedTransitions.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400">Move Status:</span>
+              <span className="text-xs text-on-surface-variant">Move Status:</span>
               <select
                 value=""
                 onChange={(e) => {
@@ -243,7 +243,7 @@ function DossierContent() {
                     void handleTransition(e.target.value as TrackerLifecycleStatus);
                   }
                 }}
-                className="px-3 py-1.5 text-xs bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                className="px-3 py-1.5 text-xs bg-surface-subtle border border-outline text-on-surface rounded-lg focus:outline-none focus:border-primary/30"
               >
                 <option value="">Select Next Status...</option>
                 {dossier.allowedTransitions.map((status) => (
@@ -257,13 +257,13 @@ function DossierContent() {
 
           <button
             onClick={() => setShowInterviewModal(true)}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 transition"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 transition"
           >
             + Schedule Interview
           </button>
           <button
             onClick={() => setShowFollowUpModal(true)}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 transition"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-warning/20 hover:bg-warning/30 text-warning border border-warning/30 transition"
           >
             + Add Follow-Up
           </button>
@@ -271,18 +271,18 @@ function DossierContent() {
       </div>
 
       {notice && (
-        <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex justify-between items-center">
+        <div className="p-3.5 rounded-lg bg-success/10 border border-success/20 text-success text-xs flex justify-between items-center">
           <span>{notice}</span>
-          <button onClick={() => setNotice('')} className="text-xs text-emerald-400 hover:underline">
+          <button onClick={() => setNotice('')} className="text-xs text-success hover:underline">
             Dismiss
           </button>
         </div>
       )}
 
       {error && (
-        <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex justify-between items-center">
+        <div className="p-3.5 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs flex justify-between items-center">
           <span>{error}</span>
-          <button onClick={() => setError('')} className="text-xs text-rose-400 hover:underline">
+          <button onClick={() => setError('')} className="text-xs text-danger hover:underline">
             Dismiss
           </button>
         </div>
@@ -291,41 +291,37 @@ function DossierContent() {
       {/* Overview Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Status Card */}
-        <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-2">
-          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+        <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-2">
+          <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
             Current Lifecycle Status
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-zinc-100 uppercase">
+            <span className="text-lg font-bold text-on-surface uppercase">
               {app.status ? app.status.replace(/_/g, ' ') : 'DISCOVERED'}
             </span>
           </div>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-on-surface-variant">
             Last updated {new Date(app.updated_at || app.updatedAt).toLocaleString()}
           </p>
         </div>
 
         {/* Verification Card */}
-        <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-2">
-          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+        <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-2">
+          <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
             Submission Verification
           </span>
           <div>
             {evidence ? (
               <span
-                className={`inline-block px-2.5 py-1 rounded text-xs font-semibold ${
-                  evidence.verificationStatus === 'verified'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                }`}
+                className={`inline-block px-2.5 py-1 rounded text-xs font-semibold ${ evidence.verificationStatus === 'verified' ? 'bg-success/10 text-success border border-success/30' : 'bg-warning/10 text-warning border border-warning/30' }`}}
               >
                 ✓ {evidence.verificationStatus.replace(/_/g, ' ').toUpperCase()}
               </span>
             ) : (
-              <span className="text-zinc-500 text-sm font-medium">Unsubmitted / In Progress</span>
+              <span className="text-on-surface-variant text-sm font-medium">Unsubmitted / In Progress</span>
             )}
           </div>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-on-surface-variant">
             {evidence?.confirmationReference
               ? `Ref: ${evidence.confirmationReference}`
               : 'Independent verification engine'}
@@ -333,17 +329,17 @@ function DossierContent() {
         </div>
 
         {/* Next Steps / Activity Card */}
-        <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-2">
-          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+        <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-2">
+          <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
             Next Action / Focus
           </span>
-          <div className="text-sm font-semibold text-zinc-200">
+          <div className="text-sm font-semibold text-on-surface">
             {dossier.followUps.find((f) => f.status === 'pending')?.nextAction ||
               (dossier.interviews.some((i) => i.status === 'scheduled')
                 ? 'Prepare for upcoming interview'
                 : 'Maintain application monitoring')}
           </div>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-on-surface-variant">
             {dossier.interviews.filter((i) => i.status === 'scheduled').length} upcoming interview(s)
           </p>
         </div>
@@ -351,44 +347,44 @@ function DossierContent() {
 
       {/* Submission Evidence Detailed Panel */}
       {evidence && (
-        <div className="p-5 bg-zinc-900/40 border border-zinc-800 rounded-xl space-y-3">
-          <h2 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+        <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-3">
+          <h2 className="text-base font-semibold text-on-surface flex items-center gap-2">
             <span>🛡</span> Verified Submission Dossier
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div>
-              <span className="text-zinc-500 block">Method:</span>
-              <span className="font-medium text-zinc-200">
+              <span className="text-on-surface-variant block">Method:</span>
+              <span className="font-medium text-on-surface">
                 {evidence.submissionMethod.replace(/_/g, ' ')}
               </span>
             </div>
             <div>
-              <span className="text-zinc-500 block">Timestamp:</span>
-              <span className="font-medium text-zinc-200">
+              <span className="text-on-surface-variant block">Timestamp:</span>
+              <span className="font-medium text-on-surface">
                 {new Date(evidence.submittedAt).toLocaleString()}
               </span>
             </div>
             <div>
-              <span className="text-zinc-500 block">Destination:</span>
+              <span className="text-on-surface-variant block">Destination:</span>
               <a
                 href={evidence.destination}
                 target="_blank"
                 rel="noreferrer"
-                className="font-medium text-indigo-400 hover:underline truncate block"
+                className="font-medium text-primary hover:underline truncate block"
               >
                 {evidence.destination}
               </a>
             </div>
             <div>
-              <span className="text-zinc-500 block">Reference ID:</span>
-              <span className="font-mono text-zinc-200">
+              <span className="text-on-surface-variant block">Reference ID:</span>
+              <span className="font-mono text-on-surface">
                 {evidence.confirmationReference || 'None Provided'}
               </span>
             </div>
           </div>
           {evidence.notes && (
-            <p className="text-xs text-zinc-400 pt-1 border-t border-zinc-800/60">
-              <span className="text-zinc-500 font-medium">Notes:</span> {evidence.notes}
+            <p className="text-xs text-on-surface-variant pt-1 border-t border-outline-variant">
+              <span className="text-on-surface-variant font-medium">Notes:</span> {evidence.notes}
             </p>
           )}
         </div>
@@ -399,44 +395,40 @@ function DossierContent() {
         {/* Left Column: Interviews & Follow-ups */}
         <div className="space-y-6">
           {/* Scheduled Interviews Card */}
-          <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-4">
+          <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="text-base font-semibold text-on-surface">
                 Interviews ({dossier.interviews.length})
               </h2>
               <button
                 onClick={() => setShowInterviewModal(true)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                className="text-xs text-primary hover:text-primary font-medium"
               >
                 + New Stage
               </button>
             </div>
 
             {dossier.interviews.length === 0 ? (
-              <p className="text-xs text-zinc-500">No interview rounds scheduled yet.</p>
+              <p className="text-xs text-on-surface-variant">No interview rounds scheduled yet.</p>
             ) : (
               <div className="space-y-3">
                 {dossier.interviews.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-lg bg-zinc-800/60 border border-zinc-700/60 space-y-2 text-xs"
+                    className="p-3.5 rounded-lg bg-surface-subtle border border-outline space-y-2 text-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-zinc-200 capitalize">
+                      <span className="font-semibold text-on-surface capitalize">
                         {item.stage.replace(/_/g, ' ')}
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                          item.status === 'completed'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : 'bg-purple-500/10 text-purple-400'
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${ item.status === 'completed' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary' }`}}
                       >
                         {item.status.toUpperCase()}
                       </span>
                     </div>
 
-                    <div className="text-zinc-400 flex flex-wrap gap-x-4 gap-y-1">
+                    <div className="text-on-surface-variant flex flex-wrap gap-x-4 gap-y-1">
                       <span>⏰ {new Date(item.scheduledAt).toLocaleString()}</span>
                       <span>Mode: {item.interviewMode}</span>
                       {item.durationMinutes && <span>{item.durationMinutes} mins</span>}
@@ -448,7 +440,7 @@ function DossierContent() {
                           href={item.meetingLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-indigo-400 hover:underline"
+                          className="text-primary hover:underline"
                         >
                           Join Meeting Link →
                         </a>
@@ -456,15 +448,15 @@ function DossierContent() {
                     )}
 
                     {item.interviewerDetails?.name && (
-                      <p className="text-zinc-400">
+                      <p className="text-on-surface-variant">
                         Interviewer: {item.interviewerDetails.name}{' '}
                         {item.interviewerDetails.title && `(${item.interviewerDetails.title})`}
                       </p>
                     )}
 
                     {item.preparationNotes && (
-                      <p className="text-zinc-400 bg-zinc-900/60 p-2 rounded border border-zinc-800">
-                        <strong className="text-zinc-300">Notes:</strong> {item.preparationNotes}
+                      <p className="text-on-surface-variant bg-surface p-2 rounded border border-outline-variant">
+                        <strong className="text-on-surface-variant">Notes:</strong> {item.preparationNotes}
                       </p>
                     )}
                   </div>
@@ -474,18 +466,18 @@ function DossierContent() {
           </div>
 
           {/* Progeni Atlas AI Technical Simulation Card */}
-          <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-4">
+          <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-semibold text-zinc-100">
+                  <h2 className="text-base font-semibold text-on-surface">
                     AI Technical Simulation
                   </h2>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
                     PROGENI ATLAS
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-on-surface-variant">
                   Pre-interview technical simulation grounded in this role&apos;s requirements.
                 </p>
               </div>
@@ -499,12 +491,12 @@ function DossierContent() {
               </button>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px]">
+            <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[11px]">
               <span className="font-semibold">Zero-Hallucination Mock:</span> This simulation runs in Progeni Atlas with live AI proctoring, speech synthesis, and live coding. It provides practice feedback without altering official application decisions.
             </div>
 
             {simulations.length === 0 ? (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-on-surface-variant">
                 No practice simulations launched for this job yet. Click &quot;Launch Practice Room&quot; to test your technical interview readiness with live AI evaluation.
               </p>
             ) : (
@@ -512,34 +504,34 @@ function DossierContent() {
                 {simulations.map((sim) => (
                   <div
                     key={sim.id}
-                    className="p-3.5 rounded-lg bg-zinc-800/60 border border-zinc-700/60 space-y-2.5 text-xs"
+                    className="p-3.5 rounded-lg bg-surface-subtle border border-outline space-y-2.5 text-xs"
                   >
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-zinc-200">{sim.jobRole}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-zinc-800 text-zinc-400">
+                          <span className="font-semibold text-on-surface">{sim.jobRole}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-surface-subtle text-on-surface-variant">
                             AI MOCK
                           </span>
                         </div>
-                        <p className="text-[11px] text-zinc-400">
+                        <p className="text-[11px] text-on-surface-variant">
                           Session: {sim.sessionId.slice(0, 8)}... • {new Date(sim.launchedAt).toLocaleDateString()}
                         </p>
                       </div>
 
                       <div className="text-right">
                         {sim.overallScore !== undefined ? (
-                          <div className="text-base font-bold text-emerald-400">
+                          <div className="text-base font-bold text-success">
                             {sim.overallScore}
-                            <span className="text-[10px] text-zinc-500">/100</span>
+                            <span className="text-[10px] text-on-surface-variant">/100</span>
                           </div>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/20">
                             IN PROGRESS
                           </span>
                         )}
                         {sim.hiringRecommendation && (
-                          <div className="text-[9px] font-bold uppercase text-emerald-300">
+                          <div className="text-[9px] font-bold uppercase text-success">
                             {sim.hiringRecommendation.replace(/_/g, ' ')}
                           </div>
                         )}
@@ -547,28 +539,28 @@ function DossierContent() {
                     </div>
 
                     {sim.competencyPillars && (
-                      <div className="grid grid-cols-2 gap-2 text-[10px] bg-zinc-900/60 p-2 rounded border border-zinc-800">
+                      <div className="grid grid-cols-2 gap-2 text-[10px] bg-surface p-2 rounded border border-outline-variant">
                         <div className="flex justify-between">
-                          <span className="text-zinc-500">Algorithms:</span>
-                          <span className="text-zinc-300 font-mono">
+                          <span className="text-on-surface-variant">Algorithms:</span>
+                          <span className="text-on-surface-variant font-mono">
                             {sim.competencyPillars.algorithmicProblemSolving}%
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-zinc-500">Architecture:</span>
-                          <span className="text-zinc-300 font-mono">
+                          <span className="text-on-surface-variant">Architecture:</span>
+                          <span className="text-on-surface-variant font-mono">
                             {sim.competencyPillars.systemArchitecture}%
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-zinc-500">Code Quality:</span>
-                          <span className="text-zinc-300 font-mono">
+                          <span className="text-on-surface-variant">Code Quality:</span>
+                          <span className="text-on-surface-variant font-mono">
                             {sim.competencyPillars.codeQualityAndSyntax}%
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-zinc-500">Communication:</span>
-                          <span className="text-zinc-300 font-mono">
+                          <span className="text-on-surface-variant">Communication:</span>
+                          <span className="text-on-surface-variant font-mono">
                             {sim.competencyPillars.communicationAndClarity}%
                           </span>
                         </div>
@@ -576,16 +568,16 @@ function DossierContent() {
                     )}
 
                     {sim.executiveSummary && (
-                      <p className="text-[11px] text-zinc-300 line-clamp-2">
+                      <p className="text-[11px] text-on-surface-variant line-clamp-2">
                         {sim.executiveSummary}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between pt-1 border-t border-zinc-700/60 text-[11px]">
+                    <div className="flex items-center justify-between pt-1 border-t border-outline text-[11px]">
                       <button
                         onClick={() => handleSyncSimulation(sim.sessionId)}
                         disabled={syncingSimId === sim.sessionId}
-                        className="text-zinc-400 hover:text-zinc-200 transition disabled:opacity-50"
+                        className="text-on-surface-variant hover:text-on-surface transition disabled:opacity-50"
                       >
                         {syncingSimId === sim.sessionId ? 'Syncing...' : '🔄 Sync Scorecard'}
                       </button>
@@ -596,7 +588,7 @@ function DossierContent() {
                             href={sim.launchUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-2 py-0.5 rounded bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition text-[10px]"
+                            className="px-2 py-0.5 rounded bg-surface-variant hover:bg-surface-variant text-on-surface transition text-[10px]"
                           >
                             Live Room →
                           </a>
@@ -605,7 +597,7 @@ function DossierContent() {
                           href={`http://localhost:3000/candidate/interview/${encodeURIComponent(sim.sessionId)}/report`}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-0.5 rounded bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 transition text-[10px] font-medium"
+                          className="px-2 py-0.5 rounded bg-primary/30 hover:bg-primary/50 text-primary border border-primary/40 transition text-[10px] font-medium"
                         >
                           Dossier Report ↗
                         </a>
@@ -618,46 +610,40 @@ function DossierContent() {
           </div>
 
           {/* Follow-up Tasks Card */}
-          <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-4">
+          <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="text-base font-semibold text-on-surface">
                 Follow-Up Tasks ({dossier.followUps.length})
               </h2>
               <button
                 onClick={() => setShowFollowUpModal(true)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                className="text-xs text-primary hover:text-primary font-medium"
               >
                 + New Follow-Up
               </button>
             </div>
 
             {dossier.followUps.length === 0 ? (
-              <p className="text-xs text-zinc-500">No pending follow-ups for this application.</p>
+              <p className="text-xs text-on-surface-variant">No pending follow-ups for this application.</p>
             ) : (
               <div className="space-y-3">
                 {dossier.followUps.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-lg bg-zinc-800/60 border border-zinc-700/60 space-y-2 text-xs"
+                    className="p-3.5 rounded-lg bg-surface-subtle border border-outline space-y-2 text-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-zinc-200">{item.nextAction}</span>
+                      <span className="font-semibold text-on-surface">{item.nextAction}</span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                          item.status === 'completed'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : item.isOverdue
-                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                            : 'bg-amber-500/10 text-amber-400'
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${ item.status === 'completed' ? 'bg-success/10 text-success' : item.isOverdue ? 'bg-danger/10 text-danger border border-danger/30' : 'bg-warning/10 text-warning' }`}}
                       >
                         {item.isOverdue ? 'OVERDUE' : item.status.toUpperCase()}
                       </span>
                     </div>
 
-                    <div className="text-zinc-400">Due: {item.followUpDate}</div>
+                    <div className="text-on-surface-variant">Due: {item.followUpDate}</div>
                     {item.contactDetails?.name && (
-                      <p className="text-zinc-400">
+                      <p className="text-on-surface-variant">
                         Contact: {item.contactDetails.name} ({item.contactDetails.email})
                       </p>
                     )}
@@ -669,25 +655,25 @@ function DossierContent() {
         </div>
 
         {/* Right Column: Timeline Events */}
-        <div className="p-5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-4">
-          <h2 className="text-base font-semibold text-zinc-100">Chronological Audit Timeline</h2>
+        <div className="p-5 bg-surface border border-outline-variant rounded-xl space-y-4">
+          <h2 className="text-base font-semibold text-on-surface">Chronological Audit Timeline</h2>
           {dossier.timeline.length === 0 ? (
-            <p className="text-xs text-zinc-500">No timeline history recorded yet.</p>
+            <p className="text-xs text-on-surface-variant">No timeline history recorded yet.</p>
           ) : (
-            <div className="relative border-l border-zinc-800 ml-3 space-y-6">
+            <div className="relative border-l border-outline-variant ml-3 space-y-6">
               {dossier.timeline.map((event) => (
                 <div key={event.id} className="relative pl-6">
                   {/* Timeline bullet */}
-                  <span className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-zinc-900 bg-indigo-500" />
+                  <span className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-outline-variant bg-indigo-500" />
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-zinc-200">{event.title}</span>
-                      <span className="text-[10px] text-zinc-500">
+                      <span className="font-semibold text-on-surface">{event.title}</span>
+                      <span className="text-[10px] text-on-surface-variant">
                         {new Date(event.timestamp).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{event.description}</p>
-                    <span className="text-[10px] text-zinc-600 block">Actor: {event.actor}</span>
+                    <p className="text-xs text-on-surface-variant leading-relaxed">{event.description}</p>
+                    <span className="text-[10px] text-on-surface-variant block">Actor: {event.actor}</span>
                   </div>
                 </div>
               ))}
@@ -698,16 +684,16 @@ function DossierContent() {
 
       {/* Modal: Schedule Interview */}
       {showInterviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-zinc-100">Schedule Interview Round</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-on-surface">Schedule Interview Round</h3>
             <form onSubmit={handleCreateInterview} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">Interview Stage</label>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">Interview Stage</label>
                 <select
                   value={interviewStage}
                   onChange={(e) => setInterviewStage(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                 >
                   <option value="hr_screening">HR Screening</option>
                   <option value="technical_interview">Technical Interview</option>
@@ -719,7 +705,7 @@ function DossierContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">
                   Scheduled Date & Time *
                 </label>
                 <input
@@ -727,17 +713,17 @@ function DossierContent() {
                   required
                   value={interviewDate}
                   onChange={(e) => setInterviewDate(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">Mode</label>
+                  <label className="block text-xs font-medium text-on-surface-variant mb-1">Mode</label>
                   <select
                     value={interviewMode}
                     onChange={(e) => setInterviewMode(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                    className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                   >
                     <option value="video">Video Call</option>
                     <option value="phone">Phone Screen</option>
@@ -746,36 +732,36 @@ function DossierContent() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">Meeting Link</label>
+                  <label className="block text-xs font-medium text-on-surface-variant mb-1">Meeting Link</label>
                   <input
                     type="url"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
                     placeholder="https://zoom.us/..."
-                    className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                    className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">Interviewer Name</label>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">Interviewer Name</label>
                 <input
                   type="text"
                   value={interviewerName}
                   onChange={(e) => setInterviewerName(e.target.value)}
                   placeholder="e.g. John Doe"
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">Preparation Notes</label>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">Preparation Notes</label>
                 <textarea
                   rows={2}
                   value={prepNotes}
                   onChange={(e) => setPrepNotes(e.target.value)}
                   placeholder="Key talking points or areas to review..."
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                 />
               </div>
 
@@ -783,7 +769,7 @@ function DossierContent() {
                 <button
                   type="button"
                   onClick={() => setShowInterviewModal(false)}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-zinc-800 text-zinc-300"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-surface-subtle text-on-surface-variant"
                 >
                   Cancel
                 </button>
@@ -802,12 +788,12 @@ function DossierContent() {
 
       {/* Modal: Schedule Follow-Up */}
       {showFollowUpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-zinc-100">Schedule Follow-Up Task</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-on-surface">Schedule Follow-Up Task</h3>
             <form onSubmit={handleCreateFollowUp} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">
                   Follow-Up Date (YYYY-MM-DD) *
                 </label>
                 <input
@@ -815,41 +801,41 @@ function DossierContent() {
                   required
                   value={followUpDate}
                   onChange={(e) => setFollowUpDate(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">Next Action *</label>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">Next Action *</label>
                 <input
                   type="text"
                   required
                   value={nextAction}
                   onChange={(e) => setNextAction(e.target.value)}
                   placeholder="e.g. Inquire on status via recruiter email"
-                  className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                  className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">Contact Name</label>
+                  <label className="block text-xs font-medium text-on-surface-variant mb-1">Contact Name</label>
                   <input
                     type="text"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     placeholder="Recruiter Name"
-                    className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                    className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">Contact Email</label>
+                  <label className="block text-xs font-medium text-on-surface-variant mb-1">Contact Email</label>
                   <input
                     type="email"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
                     placeholder="recruiter@company.com"
-                    className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100"
+                    className="w-full px-3 py-2 text-xs bg-surface-subtle border border-outline rounded-lg text-on-surface"
                   />
                 </div>
               </div>
@@ -858,7 +844,7 @@ function DossierContent() {
                 <button
                   type="button"
                   onClick={() => setShowFollowUpModal(false)}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-zinc-800 text-zinc-300"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-surface-subtle text-on-surface-variant"
                 >
                   Cancel
                 </button>
@@ -880,7 +866,7 @@ function DossierContent() {
 
 export default function ApplicationDetailsPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-sm text-zinc-400">Loading...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-sm text-on-surface-variant">Loading...</div>}>
       <DossierContent />
     </Suspense>
   );

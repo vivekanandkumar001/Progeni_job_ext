@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import { getSupabaseClient, updatePassword } from '../../lib/api';
+import ThemeToggle from '../../components/ThemeToggle';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -58,33 +59,34 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-6 text-slate-100 relative overflow-hidden">
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-      <section className="relative z-10 w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-indigo-950/40 backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <span className="text-white font-black text-xl">P</span>
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-background p-6 text-on-surface">
+      <div className="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
+      <ThemeToggle className="absolute right-4 top-4 z-20" />
+      <section className="relative z-10 w-full max-w-md rounded-3xl border border-outline-variant bg-surface p-8 shadow-card sm:p-10">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold text-white shadow-md shadow-indigo-500/20">
+            P
           </div>
           <div>
-            <span className="text-base font-bold text-white block">
-              PROGENI <span className="text-indigo-400">AUTOAPPLY</span>
+            <span className="block text-base font-semibold text-on-surface">
+              PROGENI <span className="text-primary">AUTOAPPLY</span>
             </span>
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">
+            <span className="block text-[10px] font-medium uppercase tracking-widest text-on-surface-variant">
               Account Security
             </span>
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-white mb-2">Set New Password</h1>
-        <p className="text-xs sm:text-sm text-slate-400 mb-6">
+        <h1 className="mb-2 text-2xl font-semibold">Set New Password</h1>
+        <p className="mb-6 text-xs text-on-surface-variant sm:text-sm">
           Choose a secure password of at least 8 characters to protect your candidate workspace.
         </p>
 
         {verified ? (
           <form onSubmit={(event) => void submit(event)} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-on-surface-variant">
                 New Password
               </label>
               <input
@@ -95,12 +97,12 @@ export default function ResetPasswordPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                className="w-full rounded-xl border border-outline bg-surface px-4 py-2.5 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-on-surface-variant">
                 Confirm New Password
               </label>
               <input
@@ -111,17 +113,13 @@ export default function ResetPasswordPage() {
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                className="w-full rounded-xl border border-outline bg-surface px-4 py-2.5 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
             {message && (
               <div
-                className={`p-3 rounded-xl text-xs flex items-start gap-2 ${
-                  isSuccess
-                    ? 'bg-emerald-950/50 border border-emerald-800 text-emerald-200'
-                    : 'bg-rose-950/50 border border-rose-800 text-rose-200'
-                }`}
+                className={`flex items-start gap-2 rounded-xl border p-3 text-xs ${ isSuccess ? 'border-success/30 bg-success-container text-on-success-container' : 'border-danger/30 bg-danger-container text-on-danger-container' }`}}
                 role="alert"
               >
                 <span>{isSuccess ? '✓' : '⚠️'}</span>
@@ -132,19 +130,19 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 active:scale-[0.99] disabled:opacity-50 mt-2"
+              className="mt-2 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
             >
               {busy ? 'Saving new password…' : 'Update Password & Access Workspace'}
             </button>
           </form>
         ) : (
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 mb-6">
+          <div className="mb-6 rounded-xl border border-outline-variant bg-surface-subtle p-4 text-xs text-on-surface-variant">
             {message}
           </div>
         )}
 
-        <div className="mt-6 pt-5 border-t border-slate-800 text-center">
-          <Link href="/login" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+        <div className="mt-6 border-t border-outline-variant pt-5 text-center">
+          <Link href="/login" className="text-xs text-primary transition-colors hover:text-primary/80">
             ← Return to sign in
           </Link>
         </div>

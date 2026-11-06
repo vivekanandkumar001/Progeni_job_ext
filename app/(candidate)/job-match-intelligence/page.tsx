@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -99,7 +99,7 @@ export default function JobMatchIntelligencePage() {
             href="/skill-gap-analyzer"
             className="px-4 py-2 text-sm font-medium rounded-lg bg-surface-subtle hover:bg-surface-variant text-on-surface border border-surface-subtle transition-colors shadow-sm"
           >
-            📊 Skill Gap Analyzer
+            ðŸ“Š Skill Gap Analyzer
           </Link>
           <button
             type="button"
@@ -107,7 +107,7 @@ export default function JobMatchIntelligencePage() {
             onClick={handleRecalculate}
             className="px-4 py-2 text-sm font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors shadow-sm disabled:opacity-50"
           >
-            {recalculating ? 'Recalculating AI Fit…' : '⚡ Recalculate Matches'}
+            {recalculating ? 'Recalculating AI Fitâ€¦' : 'âš¡ Recalculate Matches'}
           </button>
         </div>
       </div>
@@ -123,28 +123,28 @@ export default function JobMatchIntelligencePage() {
             <p className="text-xs text-on-surface-variant mt-0.5">Scored across 6 dimensions</p>
           </div>
           <div className="p-4 rounded-xl border border-surface-subtle bg-surface">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-success uppercase tracking-wider block">
               Eligible to Apply
             </span>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+            <div className="text-2xl font-bold text-success mt-1">
               {summary.eligible_count}
             </div>
             <p className="text-xs text-on-surface-variant mt-0.5">Zero hard blockers</p>
           </div>
           <div className="p-4 rounded-xl border border-surface-subtle bg-surface">
-            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-info uppercase tracking-wider block">
               Potentially Eligible
             </span>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+            <div className="text-2xl font-bold text-info mt-1">
               {summary.potentially_eligible_count}
             </div>
             <p className="text-xs text-on-surface-variant mt-0.5">Minor unstated criteria</p>
           </div>
           <div className="p-4 rounded-xl border border-surface-subtle bg-surface">
-            <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider block">
               Average Match Fit
             </span>
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">
+            <div className="text-2xl font-bold text-primary mt-1">
               {summary.average_score}%
             </div>
             <p className="text-xs text-on-surface-variant mt-0.5">Weighted composite rating</p>
@@ -158,44 +158,28 @@ export default function JobMatchIntelligencePage() {
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'all'
-                ? 'border-primary text-primary font-semibold'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'all' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
           >
             All Matches ({summary?.total_matches || matches.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('eligible')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'eligible'
-                ? 'border-primary text-primary font-semibold'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'eligible' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
           >
-            ✓ Fully Eligible ({summary?.eligible_count || 0})
+            âœ“ Fully Eligible ({summary?.eligible_count || 0})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('high_fit')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'high_fit'
-                ? 'border-primary text-primary font-semibold'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'high_fit' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
           >
-            ★ High Fit (75%+)
+            â˜… High Fit (75%+)
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('potential')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'potential'
-                ? 'border-primary text-primary font-semibold'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'potential' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
           >
             Needs Review ({summary?.potentially_eligible_count || 0})
           </button>
@@ -223,7 +207,7 @@ export default function JobMatchIntelligencePage() {
           <p className="text-sm">Calculating multidimensional match scores...</p>
         </div>
       ) : error ? (
-        <div className="p-6 text-center text-red-600 bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200">
+        <div className="p-6 text-center text-danger bg-danger-container rounded-xl border border-danger/30">
           <p className="font-medium">{error}</p>
           <button
             type="button"
@@ -235,7 +219,7 @@ export default function JobMatchIntelligencePage() {
         </div>
       ) : matches.length === 0 ? (
         <div className="py-20 text-center border-2 border-dashed border-surface-subtle rounded-2xl space-y-3">
-          <div className="text-3xl">⚡</div>
+          <div className="text-3xl">âš¡</div>
           <h3 className="text-lg font-semibold text-on-surface">No Matches Calculated Yet</h3>
           <p className="text-sm text-on-surface-variant max-w-md mx-auto">
             Click &ldquo;Recalculate Matches&rdquo; to evaluate your profile and truth claims against discovered active jobs.
@@ -246,7 +230,7 @@ export default function JobMatchIntelligencePage() {
             onClick={handleRecalculate}
             className="mt-2 px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            {recalculating ? 'Evaluating...' : '⚡ Calculate Match Scores Now'}
+            {recalculating ? 'Evaluating...' : 'âš¡ Calculate Match Scores Now'}
           </button>
         </div>
       ) : (
@@ -274,23 +258,15 @@ export default function JobMatchIntelligencePage() {
                       <div className="flex items-center gap-2">
                         {/* Eligibility Badge */}
                         <span
-                          className={`inline-block px-2.5 py-0.5 text-xs font-bold rounded-full uppercase tracking-wider ${
-                            isEligible
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300/50'
-                              : isPotential
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-300/50'
-                              : isIneligible
-                              ? 'bg-red-100 text-red-800 dark:bg-red-950/70 dark:text-red-300 border border-red-300/50'
-                              : 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/50'
-                          }`}
+                          className={`inline-block px-2.5 py-0.5 text-xs font-bold rounded-full uppercase tracking-wider ${ isEligible ? 'bg-success-container text-success border border-success/40' : isPotential ? 'bg-info-container text-info border border-info/40' : isIneligible ? 'bg-danger-container text-danger border border-danger/40' : 'bg-warning-container text-warning border border-warning/40' }`}}
                         >
                           {isEligible
-                            ? '✓ Eligible'
+                            ? 'âœ“ Eligible'
                             : isPotential
-                            ? '◉ Potentially Eligible'
+                            ? 'â—‰ Potentially Eligible'
                             : isIneligible
-                            ? '✕ Ineligible'
-                            : '△ Needs Review'}
+                            ? 'âœ• Ineligible'
+                            : 'â–³ Needs Review'}
                         </span>
                         <span className="text-xs text-on-surface-variant font-mono">
                           {match.confidence}% Grounded Confidence
@@ -305,12 +281,12 @@ export default function JobMatchIntelligencePage() {
                       </p>
 
                       <div className="text-xs text-on-surface-variant flex flex-wrap items-center gap-2 pt-1">
-                        <span>📍 {job?.location || 'Location unlisted'}</span>
-                        <span>•</span>
+                        <span>ðŸ“ {job?.location || 'Location unlisted'}</span>
+                        <span>â€¢</span>
                         <span className="capitalize">{job?.workplace_mode || 'office'}</span>
-                        <span>•</span>
+                        <span>â€¢</span>
                         <span>
-                          💰{' '}
+                          ðŸ’°{' '}
                           {job?.salary_min
                             ? `${job.salary_currency || '$'}${job.salary_min.toLocaleString()} - ${
                                 job.salary_max?.toLocaleString() || 'DOE'
@@ -326,13 +302,7 @@ export default function JobMatchIntelligencePage() {
                         Overall Fit
                       </span>
                       <div
-                        className={`text-3xl font-extrabold ${
-                          match.overall_score >= 80
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : match.overall_score >= 60
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-amber-600 dark:text-amber-400'
-                        }`}
+                        className={`text-3xl font-extrabold ${ match.overall_score >= 80 ? 'text-success ' : match.overall_score >= 60 ? 'text-info ' : 'text-warning ' }`}}
                       >
                         {match.overall_score}%
                       </div>
@@ -369,7 +339,7 @@ export default function JobMatchIntelligencePage() {
 
                   {/* Blockers alert if ineligible */}
                   {match.blockers && match.blockers.length > 0 && (
-                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-700 dark:text-red-300">
+                    <div className="p-3 rounded-lg bg-danger-container border border-danger/30 text-xs text-danger">
                       <strong>Hard Blockers:</strong>
                       <ul className="list-disc list-inside mt-1 space-y-0.5">
                         {match.blockers.map((b, i) => (
@@ -383,13 +353,13 @@ export default function JobMatchIntelligencePage() {
                   <div className="space-y-2 pt-1 text-xs">
                     {match.matched_skills && match.matched_skills.length > 0 && (
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-semibold text-emerald-700 dark:text-emerald-300 mr-1">
-                          ✓ Matched Skills:
+                        <span className="font-semibold text-success mr-1">
+                          âœ“ Matched Skills:
                         </span>
                         {match.matched_skills.map((s) => (
                           <span
                             key={s}
-                            className="px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-mono text-[11px]"
+                            className="px-2 py-0.5 rounded bg-success-container/70 text-success font-mono text-[11px]"
                           >
                             {s}
                           </span>
@@ -399,13 +369,13 @@ export default function JobMatchIntelligencePage() {
 
                     {match.missing_required_skills && match.missing_required_skills.length > 0 && (
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-semibold text-red-600 dark:text-red-400 mr-1">
-                          ✕ Missing Required:
+                        <span className="font-semibold text-danger mr-1">
+                          âœ• Missing Required:
                         </span>
                         {match.missing_required_skills.map((s) => (
                           <span
                             key={s}
-                            className="px-2 py-0.5 rounded bg-red-100/70 text-red-800 dark:bg-red-950/60 dark:text-red-300 font-mono text-[11px]"
+                            className="px-2 py-0.5 rounded bg-danger-container/70 text-danger font-mono text-[11px]"
                           >
                             {s}
                           </span>
@@ -430,7 +400,7 @@ export default function JobMatchIntelligencePage() {
                           onClick={() => handleSaveJob(match.job_id)}
                           className="px-3 py-1.5 text-xs font-medium rounded-lg border border-surface-subtle hover:bg-surface-subtle text-on-surface"
                         >
-                          ★ Save Job
+                          â˜… Save Job
                         </button>
                       )}
                       {job?.application_url && (
@@ -440,7 +410,7 @@ export default function JobMatchIntelligencePage() {
                           rel="noreferrer"
                           className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                         >
-                          Apply on Original Board ↗
+                          Apply on Original Board â†—
                         </a>
                       )}
                     </div>
@@ -454,7 +424,7 @@ export default function JobMatchIntelligencePage() {
 
       {/* Detailed Match Breakdown Modal */}
       {selectedMatch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface p-4">
           <div className="bg-surface rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 space-y-5 border border-surface-subtle shadow-xl">
             <div className="flex items-start justify-between border-b border-surface-subtle pb-4">
               <div>
@@ -470,7 +440,7 @@ export default function JobMatchIntelligencePage() {
                 onClick={() => setSelectedMatch(null)}
                 className="text-on-surface-variant hover:text-on-surface text-xl font-bold"
               >
-                ✕
+                âœ•
               </button>
             </div>
 

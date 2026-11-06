@@ -101,25 +101,25 @@ export default function CandidateProfilePage() {
       </header>
 
       {/* Profile Completeness Summary */}
-      <section className="card card-padding" style={{ maxWidth: 850, marginBottom: '1.5rem', background: '#f8fafc' }}>
+      <section className="card card-padding" style={{ maxWidth: 850, marginBottom: '1.5rem', background: 'rgb(var(--surface-subtle))' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontWeight: 600, fontSize: '14px', color: '#1e293b' }}>Career Profile Completeness</span>
-          <strong style={{ fontSize: '16px', color: completenessScore >= 80 ? '#16a34a' : '#d97706' }}>
+          <span style={{ fontWeight: 600, fontSize: '14px', color: 'rgb(var(--on-surface))' }}>Career Profile Completeness</span>
+          <strong style={{ fontSize: '16px', color: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
             {completenessScore}%
           </strong>
         </div>
-        <div style={{ height: '8px', width: '100%', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+        <div style={{ height: '8px', width: '100%', background: 'rgb(var(--outline-variant))', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
           <div
             style={{
               height: '100%',
               width: `${completenessScore}%`,
-              background: completenessScore >= 80 ? '#16a34a' : '#3b82f6',
+              background: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--info))',
               transition: 'width 0.3s ease',
             }}
           />
         </div>
         {missingFields.length > 0 && (
-          <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+          <p style={{ fontSize: '12px', color: 'rgb(var(--on-surface-variant))', margin: 0 }}>
             Missing optional fields: {missingFields.join(', ')}
           </p>
         )}

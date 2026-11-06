@@ -94,20 +94,20 @@ export default function TruthEnginePage() {
   return (
     <main className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success-container text-success">
               Provenance & Evidence Layer
             </span>
-            <span className="text-xs text-slate-700 dark:text-slate-300">
+            <span className="text-xs text-on-surface-variant">
               Total Claims: {claims.length}
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-1">
+          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mt-1">
             Truth Engine & Evidence Mapping
           </h1>
-          <p className="text-sm text-slate-700 dark:text-slate-300">
+          <p className="text-sm text-on-surface-variant">
             Cryptographic-style claim verification ensuring every skill, role, metric, and credential is backed by verifiable document provenance.
           </p>
         </div>
@@ -121,7 +121,7 @@ export default function TruthEnginePage() {
           </Link>
           <Link
             href="/targeted-resume"
-            className="px-4 py-2 text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition"
+            className="px-4 py-2 text-xs font-medium border border-outline hover:bg-surface-subtle rounded-lg transition"
           >
             Targeted Generator
           </Link>
@@ -129,8 +129,8 @@ export default function TruthEnginePage() {
       </div>
 
       {/* Strict Anti-Fabrication Notice */}
-      <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs leading-relaxed flex items-start gap-3">
-        <span className="text-base font-bold text-emerald-600">🛡</span>
+      <div className="p-4 rounded-xl bg-surface-variant border border-outline-variant text-on-surface text-xs leading-relaxed flex items-start gap-3">
+        <span className="text-base font-bold text-success">🛡</span>
         <div>
           <strong className="font-semibold block mb-0.5">Strict Anti-Fabrication Policy:</strong>
           The Truth Engine blocks the automatic or speculative upgrade of unsupported career claims.
@@ -140,19 +140,19 @@ export default function TruthEnginePage() {
 
       {/* Alert Banners */}
       {error && (
-        <div className="p-3 text-sm text-rose-800 bg-rose-50 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-lg">
+        <div className="p-3 text-sm text-danger bg-danger-container border border-danger/30 rounded-lg">
           {error}
         </div>
       )}
       {notice && (
-        <div className="p-3 text-sm text-emerald-800 bg-emerald-50 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+        <div className="p-3 text-sm text-success bg-success-container border border-success/30 rounded-lg">
           {notice}
         </div>
       )}
 
       {/* Add New Claim Form Card */}
-      <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+      <div className="p-5 rounded-xl border border-outline-variant bg-surface space-y-3">
+        <h3 className="text-sm font-bold text-on-surface">
           Register New Verified Claim
         </h3>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -161,12 +161,12 @@ export default function TruthEnginePage() {
             value={newClaimText}
             onChange={(e) => setNewClaimText(e.target.value)}
             placeholder="e.g. AWS Certified Solutions Architect, Kubernetes, 6+ years experience"
-            className="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white"
+            className="flex-1 px-3 py-2 text-xs rounded-lg border border-outline bg-transparent text-on-surface"
           />
           <select
             value={newClaimCategory}
             onChange={(e) => setNewClaimCategory(e.target.value as any)}
-            className="px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+            className="px-3 py-2 text-xs rounded-lg border border-outline bg-surface text-on-surface"
           >
             <option value="skill">Skill</option>
             <option value="experience_years">Years of Experience</option>
@@ -187,13 +187,13 @@ export default function TruthEnginePage() {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg border border-outline-variant bg-surface-subtle">
         <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Category:</label>
+          <label className="text-xs font-semibold text-on-surface-variant">Category:</label>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-2.5 py-1 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+            className="px-2.5 py-1 text-xs rounded border border-outline bg-surface"
           >
             <option value="all">All Categories</option>
             <option value="skill">Skills</option>
@@ -206,11 +206,11 @@ export default function TruthEnginePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Status:</label>
+          <label className="text-xs font-semibold text-on-surface-variant">Status:</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-2.5 py-1 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+            className="px-2.5 py-1 text-xs rounded border border-outline bg-surface"
           >
             <option value="all">All Statuses</option>
             <option value="verified_from_source">Verified from Source</option>
@@ -223,9 +223,9 @@ export default function TruthEnginePage() {
 
       {/* Claims List */}
       {loading ? (
-        <div className="p-8 text-center text-xs text-slate-700 dark:text-slate-300">Loading claims...</div>
+        <div className="p-8 text-center text-xs text-on-surface-variant">Loading claims...</div>
       ) : filteredClaims.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
+        <div className="p-12 text-center rounded-2xl border border-dashed border-outline text-xs text-on-surface-variant">
           No career claims matching the selected filters.
         </div>
       ) : (
@@ -238,45 +238,45 @@ export default function TruthEnginePage() {
             return (
               <div
                 key={claim.id}
-                className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                className="p-4 rounded-xl border border-outline-variant bg-surface flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    <span className="text-sm font-bold text-on-surface">
                       {claim.claim_text}
                     </span>
-                    <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded">
+                    <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-surface-variant text-on-surface-variant rounded">
                       {claim.category.replace('_', ' ')}
                     </span>
                     {isVerified && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-full">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-success-container text-success rounded-full">
                         ✓ Verified From Source
                       </span>
                     )}
                     {isConfirmed && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 rounded-full">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-info-container text-info rounded-full">
                         Candidate Confirmed
                       </span>
                     )}
                     {isUnsupported && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 rounded-full">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-danger-container text-danger rounded-full">
                         Unsupported / Excluded
                       </span>
                     )}
                   </div>
 
                   {claim.supporting_source && (
-                    <div className="text-[11px] text-slate-700 dark:text-slate-300 font-mono bg-slate-50 dark:bg-slate-950 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-800">
+                    <div className="text-[11px] text-on-surface-variant font-mono bg-surface-subtle px-2.5 py-1 rounded border border-outline-variant">
                       <strong>Source:</strong> {claim.supporting_source.ref}
                       {claim.supporting_source.snippet && (
-                        <span className="block text-slate-700 dark:text-slate-300 mt-0.5">
+                        <span className="block text-on-surface-variant mt-0.5">
                           &quot;{claim.supporting_source.snippet}&quot;
                         </span>
                       )}
                     </div>
                   )}
 
-                  <div className="text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-3">
+                  <div className="text-[11px] text-on-surface-variant flex items-center gap-3">
                     <span>Confidence: {Math.round(claim.confidence_score * 100)}%</span>
                     <span>Created: {new Date(claim.created_at).toLocaleDateString()}</span>
                   </div>
@@ -287,7 +287,7 @@ export default function TruthEnginePage() {
                     <button
                       onClick={() => handleConfirm(claim.id, true)}
                       disabled={saving}
-                      className="px-2.5 py-1 text-xs font-medium text-emerald-600 border border-emerald-300 dark:border-emerald-800 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950 transition"
+                      className="px-2.5 py-1 text-xs font-medium text-success border border-success/30 rounded hover:bg-success-container transition"
                     >
                       Confirm
                     </button>
@@ -296,7 +296,7 @@ export default function TruthEnginePage() {
                     <button
                       onClick={() => handleConfirm(claim.id, false)}
                       disabled={saving}
-                      className="px-2.5 py-1 text-xs font-medium text-amber-600 border border-amber-300 dark:border-amber-800 rounded hover:bg-amber-50 dark:hover:bg-amber-950 transition"
+                      className="px-2.5 py-1 text-xs font-medium text-warning border border-warning/30 rounded hover:bg-warning-container transition"
                     >
                       Dispute
                     </button>
@@ -304,7 +304,7 @@ export default function TruthEnginePage() {
                   <button
                     onClick={() => handleDelete(claim.id)}
                     disabled={saving}
-                    className="px-2 py-1 text-xs text-rose-600 hover:text-rose-700"
+                    className="px-2 py-1 text-xs text-danger hover:text-danger"
                   >
                     Delete
                   </button>

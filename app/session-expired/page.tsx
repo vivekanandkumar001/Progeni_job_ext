@@ -8,9 +8,9 @@ export default function SessionExpiredPage() {
           <span className="brand-mark">P</span>
           <span>PROGENI <b>AUTOAPPLY</b></span>
         </div>
-        <p className="eyebrow" style={{ color: '#d97706' }}>SESSION SECURITY NOTICE</p>
+        <p className="eyebrow" style={{ color: 'rgb(var(--warning))' }}>SESSION SECURITY NOTICE</p>
         <h1>Session Expired</h1>
-        <p style={{ color: '#4b5563', lineHeight: 1.6 }}>
+        <p style={{ color: 'rgb(var(--on-surface-variant))', lineHeight: 1.6 }}>
           Your session has expired or was terminated following a security event (such as a global logout or password reset). Please sign in again to continue.
         </p>
         <div style={{ marginTop: 24 }}>
@@ -22,4 +22,3 @@ export default function SessionExpiredPage() {
     </main>
   );
 }
-
