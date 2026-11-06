@@ -11,6 +11,7 @@ import {
   usesCloudAuthentication,
 } from '../../lib/api';
 import AuthScreen from '../../components/AuthScreen';
+import ThemeToggle from '../../components/ThemeToggle';
 
 interface NavItem {
   href: string;
@@ -344,19 +345,19 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
 
   if (auth === 'loading') {
     return (
-      <main className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100">
-        <div className="flex flex-col items-center max-w-sm text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/25 mb-6 animate-pulse">
-            <span className="text-white font-black text-2xl">P</span>
+      <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-6 text-on-surface">
+        <div className="flex max-w-sm flex-col items-center text-center">
+          <div className="mb-6 flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-xl font-bold text-white shadow-lg shadow-indigo-500/20">
+            P
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-indigo-400 font-semibold mb-3">
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-            Connecting to Workspace
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface px-3 py-1 text-[11px] font-medium text-on-surface-variant">
+            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-primary" />
+            Connecting to workspace
           </div>
-          <h1 className="text-xl font-bold text-white mb-2">Restoring Your Session</h1>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <h1 className="text-lg font-semibold">Restoring your session</h1>
+          <p className="mt-1.5 text-xs leading-relaxed text-on-surface-variant">
             {usesCloudAuthentication
-              ? 'Authenticating with cloud workspace and syncing candidate data…'
+              ? 'Authenticating with the cloud workspace and syncing candidate data…'
               : 'Connecting to your local Progeni backend…'}
           </p>
         </div>
@@ -379,13 +380,13 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
 
   if (consent === 'loading') {
     return (
-      <main className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100">
-        <div className="flex flex-col items-center max-w-sm text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/25 mb-6 animate-pulse">
-            <span className="text-white font-black text-2xl">P</span>
+      <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-6 text-on-surface">
+        <div className="flex max-w-sm flex-col items-center text-center">
+          <div className="mb-6 flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-xl font-bold text-white shadow-lg shadow-indigo-500/20">
+            P
           </div>
-          <h1 className="text-xl font-bold text-white mb-2">Loading Career Intelligence</h1>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <h1 className="text-lg font-semibold">Loading Career Intelligence</h1>
+          <p className="mt-1.5 text-xs leading-relaxed text-on-surface-variant">
             Retrieving candidate preferences and verification state…
           </p>
         </div>
@@ -395,33 +396,33 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
 
   if (consent !== 'accepted' && pathname !== '/onboarding') {
     return (
-      <main className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-6 text-slate-100 relative overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-        <section className="relative z-10 w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-indigo-950/40 backdrop-blur-xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <span className="text-white font-black text-xl">P</span>
+      <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-background p-6 text-on-surface">
+        <div className="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
+        <section className="relative z-10 w-full max-w-xl rounded-3xl border border-outline-variant bg-surface p-8 shadow-card sm:p-10">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold text-white shadow-md shadow-indigo-500/20">
+              P
             </div>
             <div>
-              <span className="text-base font-bold text-white block">
-                PROGENI <span className="text-indigo-400">AUTOAPPLY</span>
+              <span className="block text-base font-semibold text-on-surface">
+                PROGENI <span className="text-primary">AUTOAPPLY</span>
               </span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">
+              <span className="block text-[10px] font-medium uppercase tracking-widest text-on-surface-variant">
                 Privacy & Security Guardrails
               </span>
             </div>
           </div>
           {consent === 'unavailable' ? (
             <div>
-              <h1 className="text-2xl font-bold text-white mb-3">
+              <h1 className="mb-3 text-2xl font-semibold">
                 {usesCloudAuthentication ? 'Workspace Unavailable' : 'Local Backend Unavailable'}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
+              <p className="mb-6 text-xs leading-relaxed text-on-surface-variant sm:text-sm">
                 {message || 'Start the backend from the backend folder, then retry.'}
               </p>
               <button
-                className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors"
+                className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                 disabled={busy}
                 onClick={() => void checkConsent()}
               >
@@ -430,39 +431,39 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
             </div>
           ) : (
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-xs font-semibold mb-4">
-                <span>🛡️</span> Zero Data Misuse Guarantee
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-primary-container px-3 py-1 text-xs font-medium text-on-primary-container">
+                <span aria-hidden>🛡️</span> Zero Data Misuse Guarantee
               </div>
-              <h1 className="text-2xl font-bold text-white mb-3">Before you build your workspace</h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+              <h1 className="mb-3 text-2xl font-semibold">Before you build your workspace</h1>
+              <p className="mb-4 text-xs leading-relaxed text-on-surface-variant sm:text-sm">
                 Your career profile, job targets, match scores, and application tracker
                 {usesCloudAuthentication
                   ? ' are securely persisted in your Progeni cloud workspace on MongoDB Atlas.'
                   : ' stay securely on this device.'}
                 {' '}The extension reads a job page only when you explicitly click Detect.
               </p>
-              <div className="space-y-3 mb-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80">
-                <div className="flex items-start gap-2.5 text-xs text-slate-300">
-                  <span className="text-emerald-400 font-bold mt-0.5">✓</span>
-                  <span><strong>Zero Hallucinations:</strong> Resumes and answers are grounded strictly in your confirmed master records.</span>
+              <div className="mb-6 space-y-3 rounded-2xl border border-outline-variant bg-surface-subtle p-4">
+                <div className="flex items-start gap-2.5 text-xs text-on-surface-variant">
+                  <span className="mt-0.5 font-semibold text-success">✓</span>
+                  <span><strong className="font-semibold text-on-surface">Zero Hallucinations:</strong> Resumes and answers are grounded strictly in your confirmed master records.</span>
                 </div>
-                <div className="flex items-start gap-2.5 text-xs text-slate-300">
-                  <span className="text-emerald-400 font-bold mt-0.5">✓</span>
-                  <span><strong>Human In The Loop:</strong> Applications are never auto-submitted without your explicit digital approval.</span>
+                <div className="flex items-start gap-2.5 text-xs text-on-surface-variant">
+                  <span className="mt-0.5 font-semibold text-success">✓</span>
+                  <span><strong className="font-semibold text-on-surface">Human In The Loop:</strong> Applications are never auto-submitted without your explicit digital approval.</span>
                 </div>
-                <div className="flex items-start gap-2.5 text-xs text-slate-300">
-                  <span className="text-emerald-400 font-bold mt-0.5">✓</span>
-                  <span><strong>Data Sovereignty:</strong> You can export or permanently wipe your workspace records anytime.</span>
+                <div className="flex items-start gap-2.5 text-xs text-on-surface-variant">
+                  <span className="mt-0.5 font-semibold text-success">✓</span>
+                  <span><strong className="font-semibold text-on-surface">Data Sovereignty:</strong> You can export or permanently wipe your workspace records anytime.</span>
                 </div>
               </div>
               <button
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 active:scale-[0.99] disabled:opacity-50"
+                className="w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => void giveConsent()}
               >
                 {busy ? 'Saving choice…' : 'I Understand & Agree — Continue to Dashboard'}
               </button>
-              {message && <p className="mt-3 text-xs text-rose-400" role="alert">{message}</p>}
+              {message && <p className="mt-3 text-xs text-danger" role="alert">{message}</p>}
             </div>
           )}
         </section>
@@ -472,33 +473,33 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
 
   // Sidebar Component for both desktop and mobile drawer
   const SidebarContent = () => (
-    <div className="flex flex-col h-full justify-between">
+    <div className="flex h-full flex-col justify-between">
       {/* Brand & Workspace Header */}
       <div>
-        <div className="px-5 py-5 border-b border-slate-800/80 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
-              <span className="text-white font-black text-lg tracking-wider">P</span>
+        <div className="flex items-center justify-between border-b border-outline-variant px-5 py-5">
+          <Link href="/dashboard" className="group flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold tracking-wider text-white shadow-md shadow-indigo-500/20 transition-transform duration-200 group-hover:scale-105">
+              P
             </div>
             <div>
-              <span className="text-xs font-bold text-white tracking-tight block">
-                PROGENI <span className="text-indigo-400 font-extrabold">AUTOAPPLY</span>
+              <span className="block text-xs font-semibold tracking-tight text-on-surface">
+                PROGENI <span className="font-semibold text-primary">AUTOAPPLY</span>
               </span>
-              <span className="text-[9px] text-slate-400 uppercase tracking-widest font-semibold block">
+              <span className="block text-[9px] font-medium uppercase tracking-widest text-on-surface-variant">
                 Candidate Suite
               </span>
             </div>
           </Link>
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-950/90 text-indigo-300 border border-indigo-700/60">
+          <span className="inline-flex items-center rounded border border-primary/30 bg-primary-container px-1.5 py-0.5 text-[10px] font-semibold text-on-primary-container">
             PRO
           </span>
         </div>
 
         {/* Categorized Navigation */}
-        <div className="px-3 py-4 space-y-6 overflow-y-auto max-h-[calc(100vh-210px)] custom-scrollbar">
+        <div className="custom-scrollbar max-h-[calc(100vh-210px)] space-y-6 overflow-y-auto px-3 py-4">
           {navCategories.map((category) => (
             <div key={category.title}>
-              <h3 className="px-3 mb-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <h3 className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant/80">
                 {category.title}
               </h3>
               <nav className="space-y-0.5">
@@ -509,28 +510,28 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 group ${
+                      className={`group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-colors duration-150 ${
                         active
-                          ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/10 text-white font-semibold border border-indigo-500/30 shadow-sm shadow-indigo-500/10'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/60'
+                          ? 'border border-primary/25 bg-primary-container font-semibold text-on-primary-container'
+                          : 'text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <span
                           className={`transition-colors ${
-                            active ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'
+                            active ? 'text-primary' : 'text-on-surface-variant/80 group-hover:text-on-surface'
                           }`}
                         >
-                          <Icon className="w-4 h-4" />
+                          <Icon className="h-4 w-4" />
                         </span>
                         <span className="truncate">{item.label}</span>
                       </div>
                       {item.badge && (
                         <span
-                          className={`text-[9px] px-1.5 py-0.2 rounded font-semibold ${
+                          className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${
                             active
-                              ? 'bg-indigo-500/30 text-indigo-300'
-                              : 'bg-slate-800 text-slate-400'
+                              ? 'bg-primary/15 text-primary'
+                              : 'bg-surface-variant text-on-surface-variant'
                           }`}
                         >
                           {item.badge}
@@ -546,18 +547,18 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* User Session & Status Footer */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-950/60">
-        <div className="flex items-center gap-2.5 mb-3 px-1">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-xs text-white shadow-md shadow-indigo-500/20">
+      <div className="border-t border-outline-variant bg-surface-subtle/60 p-4">
+        <div className="mb-3 flex items-center gap-2.5 px-1">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 text-xs font-semibold text-white shadow-sm shadow-indigo-500/20">
             {userEmail ? userEmail.charAt(0).toUpperCase() : 'C'}
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-xs font-semibold text-slate-200 block truncate">
+            <span className="block truncate text-xs font-medium text-on-surface">
               {userEmail || 'Active Candidate'}
             </span>
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] text-slate-400 truncate">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="truncate text-[10px] text-on-surface-variant">
                 {usesCloudAuthentication ? 'MongoDB Atlas Connected' : 'Local Workspace'}
               </span>
             </div>
@@ -569,9 +570,9 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
             type="button"
             disabled={busy}
             onClick={() => void leaveAccount()}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 border border-slate-800 hover:border-rose-900/50 transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant px-3 py-2 text-xs font-medium text-on-surface-variant transition-colors hover:border-danger/40 hover:bg-danger-container hover:text-on-danger-container"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             <span>{busy ? 'Signing out…' : 'Sign Out'}</span>
@@ -582,9 +583,9 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex antialiased">
+    <div className="flex min-h-screen bg-background text-on-surface antialiased">
       {/* DESKTOP SIDEBAR */}
-      <aside className="hidden lg:flex w-64 flex-col fixed inset-y-0 left-0 z-30 bg-slate-950/95 border-r border-slate-800/80 backdrop-blur-xl">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-outline-variant bg-surface/95 backdrop-blur-xl lg:flex">
         <SidebarContent />
       </aside>
 
@@ -592,15 +593,15 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-slate-950 border-r border-slate-800 z-50 shadow-2xl flex flex-col">
-            <div className="flex justify-end p-2 border-b border-slate-800">
+          <div className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-outline-variant bg-surface shadow-2xl">
+            <div className="flex justify-end border-b border-outline-variant p-2">
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                className="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-on-surface"
               >
                 ✕
               </button>
@@ -611,65 +612,68 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* MAIN VIEWPORT */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
         {/* ENTERPRISE TOPBAR */}
-        <header className="sticky top-0 z-20 h-16 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 sm:px-6 flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-outline-variant bg-background/80 px-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger Button */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+              className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-on-surface lg:hidden"
               aria-label="Open Navigation Menu"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
 
             {/* Breadcrumb Module Title */}
             <div className="flex items-center gap-2 text-xs">
-              <Link href="/dashboard" className="text-slate-400 hover:text-slate-200 transition-colors font-medium">
+              <Link href="/dashboard" className="font-medium text-on-surface-variant transition-colors hover:text-on-surface">
                 Workspace
               </Link>
-              <span className="text-slate-600">/</span>
-              <span className="text-white font-semibold">{activeTitle}</span>
+              <span className="text-on-surface-variant/50">/</span>
+              <span className="font-semibold text-on-surface">{activeTitle}</span>
             </div>
           </div>
 
           {/* Right Header Status & Action Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Live Sync Status Pill */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="hidden items-center gap-1.5 rounded-full border border-outline-variant bg-surface px-3 py-1 text-xs font-medium text-on-surface-variant sm:inline-flex">
+              <span className="h-2 w-2 rounded-full bg-success" />
               <span>{usesCloudAuthentication ? 'Cloud Atlas: Live' : 'Local First'}</span>
             </div>
 
             {/* Quick Action Link */}
             <Link
               href="/targeted-resume"
-              className="hidden sm:inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md shadow-indigo-600/20 transition-all duration-150 active:scale-95"
+              className="hidden items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 active:scale-95 sm:inline-flex"
             >
-              <span>🎯</span>
+              <span aria-hidden>🎯</span>
               <span>Targeted Resume</span>
             </Link>
+
+            {/* Theme control */}
+            <ThemeToggle size="sm" />
 
             {/* Notifications Shortcut */}
             <Link
               href="/notifications"
-              className="relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+              className="relative rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-on-surface"
               title="Notifications"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-500" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
             </Link>
           </div>
         </header>
 
         {/* PAGE CONTENT CONTAINER */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

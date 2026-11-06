@@ -3,29 +3,130 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import AuthModal from '../components/AuthModal';
+import ThemeToggle from '../components/ThemeToggle';
 import { getSupabaseClient, usesCloudAuthentication } from '../lib/api';
+
+const faqs = [
+  {
+    q: 'Does Progeni submit applications automatically without my review?',
+    a: 'Never. Progeni operates with a strict human-in-the-loop guarantee. The AI matches jobs, generates targeted ATS resumes, and autofills screening questions, but requires your explicit approval before any form is submitted.',
+  },
+  {
+    q: 'What is the Truth Engine and why does it prevent AI hallucinations?',
+    a: 'The Truth Engine extracts and locks verified facts from your master resume and confirmed claims. When tailoring a resume or generating screening answers, the AI is restricted from inventing skills, titles, or metrics you have not confirmed.',
+  },
+  {
+    q: 'Which Applicant Tracking Systems (ATS) are supported?',
+    a: 'Progeni includes native Chrome Manifest V3 adapters for Greenhouse, Lever, Ashby, Workday, SmartRecruiters, and Taleo, plus job detection on LinkedIn, Indeed, and company career portals.',
+  },
+  {
+    q: 'How does the deterministic matching engine work?',
+    a: 'Instead of generic LLM guesswork, Progeni scores candidates across six transparent dimensions: technical skills alignment (30%), experience duration (20%), seniority match (15%), location and visa eligibility (15%), workplace mode (10%), and compensation compatibility (10%).',
+  },
+  {
+    q: 'What is the Progeni AI interview simulator?',
+    a: 'The simulator integrates role-specific technical and behavioral mock interview drills directly into your application pipeline, helping you practice real questions tailored to the company and job description.',
+  },
+  {
+    q: 'Can I start for free without entering a credit card?',
+    a: 'Yes. The Starter tier is free forever and includes master resume parsing, ATS diagnostics, Chrome extension integration, and 15 job match analyses per month.',
+  },
+];
+
+const features = [
+  {
+    title: 'Deterministic scoring',
+    body: 'Every job is evaluated against your real profile across six weighted dimensions, with a plain-language explanation you can audit.',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.7}
+        d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+      />
+    ),
+  },
+  {
+    title: 'Truth Engine grounding',
+    body: 'Resumes and answers are linked to verified records, so nothing you cannot defend in an interview makes it into an application.',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.7}
+        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.002A11.96 11.96 0 0112 2.714z"
+      />
+    ),
+  },
+  {
+    title: 'Chrome extension (MV3)',
+    body: 'Detects job descriptions on major boards and career portals, then fills application fields only after you click Detect.',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.7}
+        d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z"
+      />
+    ),
+  },
+  {
+    title: 'Interview simulation',
+    body: 'Run technical and behavioral drills built from the requirements of the exact role you are targeting.',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.7}
+        d="M8.25 6.75h7.5m-7.5 4.5h4.5m-9.75 6l2.25-2.25H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v9a2.25 2.25 0 002.25 2.25h.75z"
+      />
+    ),
+  },
+  {
+    title: 'Application tracker',
+    body: 'Track every opportunity through discovered, preparing, approved, submitted, shortlisted, and interview stages with an audit trail.',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.7}
+        d="M9 12h6m-6 4h6m2.25 5.25H6.75A2.25 2.25 0 014.5 19V5.25A2.25 2.25 0 016.75 3h6.879a2.25 2.25 0 011.59.659l3.122 3.122a2.25 2.25 0 01.659 1.59V19a2.25 2.25 0 01-2.25 2.25z"
+      />
+    ),
+  },
+  {
+    title: 'Your data stays yours',
+    body: 'Workspace records are private to your account. We never resell candidate data to recruiters or ad networks, and you can wipe it anytime.',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.7}
+        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+      />
+    ),
+  },
+];
+
+const atsPartners = ['Greenhouse', 'Lever', 'Ashby', 'Workday', 'SmartRecruiters', 'LinkedIn Jobs', 'Indeed'];
 
 export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'sign-in' | 'sign-up'>('sign-up');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   useEffect(() => {
-    if (usesCloudAuthentication) {
-      try {
-        const client = getSupabaseClient();
-        if (client) {
-          void client.auth.getSession().then(({ data }) => {
-            if (data?.session) {
-              setIsAuthenticated(true);
-            }
-          });
-        }
-      } catch {
-        // Fallback or unauthenticated
-      }
+    if (!usesCloudAuthentication) return;
+    try {
+      const client = getSupabaseClient();
+      if (!client) return;
+      void client.auth.getSession().then(({ data }) => {
+        if (data?.session) setIsAuthenticated(true);
+      });
+    } catch {
+      // Unauthenticated fallback.
     }
   }, []);
 
@@ -34,86 +135,67 @@ export default function LandingPage() {
     setAuthModalOpen(true);
   }
 
-  const faqs = [
-    {
-      q: 'Does Progeni submit applications automatically without my review?',
-      a: 'Never. Progeni operates with a strict Human-In-The-Loop guarantee. The AI matches jobs, generates targeted ATS resumes, and autofills screening questions, but requires your explicit digital approval before any form is submitted.',
-    },
-    {
-      q: 'What is the Truth Engine and why does it prevent AI hallucinations?',
-      a: 'The Truth Engine extracts and locks verified facts from your master resume and confirmed claims. When tailoring a resume or generating screening answers, the AI is cryptographically restricted from inventing skills, titles, or metrics that you have not confirmed.',
-    },
-    {
-      q: 'Which Applicant Tracking Systems (ATS) are supported?',
-      a: 'Progeni includes native Chrome Manifest V3 adapters for Greenhouse, Lever, Ashby, Workday, SmartRecruiters, Taleo, as well as job detection on LinkedIn, Indeed, and company career portals.',
-    },
-    {
-      q: 'How does the Deterministic Matching Engine work?',
-      a: 'Unlike generic LLM guess-work, Progeni scores candidates across 6 deterministic dimensions: technical skills alignment (30%), experience duration (20%), seniority match (15%), location/visa eligibility (15%), workplace mode (10%), and compensation compatibility (10%).',
-    },
-    {
-      q: 'What is the Progeni AI Interview Simulator?',
-      a: 'The simulator integrates role-specific technical and behavioral mock interview drills directly into your application pipeline, helping you practice real questions tailored to the company and job description.',
-    },
-    {
-      q: 'Can I start for free without entering a credit card?',
-      a: 'Yes! The Starter tier is 100% free forever, includes master resume parsing, ATS diagnostics, Chrome extension integration, and 15 job match analyses per month.',
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
-      {/* 1. STICKY MODERN NAVBAR */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-200">
-              <span className="text-white font-black text-xl tracking-wider">P</span>
-            </div>
-            <div>
-              <span className="text-base font-bold text-white tracking-tight block">
-                PROGENI <span className="text-indigo-400 font-extrabold">AUTOAPPLY</span>
+    <div className="flex min-h-screen flex-col bg-background text-on-surface antialiased">
+      {/* Navbar */}
+      <header className="sticky top-0 z-40 border-b border-outline-variant bg-background/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="group flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-sm shadow-indigo-500/25">
+              P
+            </span>
+            <span className="flex flex-col leading-tight">
+              <span className="text-sm font-semibold tracking-tight">
+                PROGENI <span className="text-primary">AUTOAPPLY</span>
               </span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">
-                Autonomous Career Agent
+              <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-on-surface-variant">
+                Career agent
               </span>
-            </div>
+            </span>
           </Link>
 
-          {/* Navigation Anchor Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#integrations" className="hover:text-white transition-colors">ATS Ecosystem</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          <nav className="hidden items-center gap-7 text-[13px] font-medium text-on-surface-variant md:flex">
+            <a href="#how-it-works" className="transition-colors hover:text-on-surface">
+              How it works
+            </a>
+            <a href="#features" className="transition-colors hover:text-on-surface">
+              Features
+            </a>
+            <a href="#integrations" className="transition-colors hover:text-on-surface">
+              ATS ecosystem
+            </a>
+            <a href="#pricing" className="transition-colors hover:text-on-surface">
+              Pricing
+            </a>
+            <a href="#faq" className="transition-colors hover:text-on-surface">
+              FAQ
+            </a>
           </nav>
 
-          {/* Action CTAs */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <ThemeToggle size="sm" />
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 flex items-center gap-2"
+                className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
-                <span>Go to Dashboard</span>
-                <span>→</span>
+                Go to dashboard
               </Link>
             ) : (
               <>
                 <button
                   type="button"
                   onClick={() => openAuth('sign-in')}
-                  className="py-2 px-4 rounded-xl text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+                  className="hidden rounded-lg px-3 py-2 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-on-surface sm:inline-flex"
                 >
-                  Sign In
+                  Sign in
                 </button>
                 <button
                   type="button"
                   onClick={() => openAuth('sign-up')}
-                  className="py-2 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all duration-200 active:scale-[0.99]"
+                  className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
                 >
-                  Get Started Free
+                  Get started
                 </button>
               </>
             )}
@@ -121,144 +203,143 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* 2. HERO SECTION */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-32 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        {/* Glow Effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-br from-indigo-600/20 via-purple-600/15 to-pink-500/10 blur-[130px] rounded-full pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-xs sm:text-sm font-medium mb-8 backdrop-blur-md shadow-lg shadow-indigo-950/40">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Next-Gen Career Automation 2.0</span>
-              <span className="text-indigo-500">•</span>
-              <span className="text-slate-300">100% Deterministic ATS Matching</span>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-outline-variant">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[760px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]"
+        />
+        <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface px-3 py-1.5 text-[11px] font-medium text-on-surface-variant">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              Deterministic matching
+              <span className="text-outline">•</span>
+              Human approval on every submission
             </div>
 
-            {/* Headline */}
-            <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-[1.12] mb-6">
-              Apply to 50+ Top Tech Jobs in Minutes —{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-300">
-                Without ATS Filters.
-              </span>
+            <h1 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl">
+              Apply to more roles in less time — without fighting ATS filters.
             </h1>
 
-            {/* Subcopy */}
-            <p className="text-base sm:text-xl text-slate-300 leading-relaxed mb-10 max-w-2xl mx-auto">
-              Progeni&apos;s intelligent career assistant matches real job requirements against your verified history,
-              tailors evidence-grounded resumes, and autofills ATS applications with strict human approval.
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-on-surface-variant sm:text-base">
+              Progeni matches real job requirements against your verified history, tailors
+              evidence-grounded resumes, and autofills applications with your explicit approval.
             </p>
 
-            {/* Dual CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <button
                 type="button"
                 onClick={() => openAuth('sign-up')}
-                className="w-full sm:w-auto py-4 px-8 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-base shadow-xl shadow-indigo-600/35 hover:shadow-indigo-600/50 transition-all duration-200 active:scale-[0.99] flex items-center justify-center gap-3"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:shadow-indigo-600/40 active:scale-[0.99] sm:w-auto"
               >
-                <span>Get Started Free — Fast Setup</span>
-                <span>🚀</span>
+                Get started free
+                <span aria-hidden>→</span>
               </button>
               <a
                 href="#how-it-works"
-                className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-base transition-colors flex items-center justify-center gap-2"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-outline bg-surface px-6 py-3 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-variant sm:w-auto"
               >
-                <span>Explore Live Flow</span>
-                <span>↓</span>
+                See how it works
               </a>
             </div>
 
-            {/* Micro-guarantee */}
-            <p className="text-xs text-slate-400 flex items-center justify-center gap-4 flex-wrap">
-              <span>✓ Free starter tier</span>
-              <span>•</span>
-              <span>✓ No credit card required</span>
-              <span>•</span>
-              <span>✓ Zero automated submissions without review</span>
+            <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-on-surface-variant">
+              <span>Free starter tier</span>
+              <span aria-hidden>•</span>
+              <span>No credit card</span>
+              <span aria-hidden>•</span>
+              <span>Nothing submitted without review</span>
             </p>
           </div>
 
-          {/* Interactive Hero Showcase Preview Card */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <div className="relative rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 backdrop-blur-xl">
-              {/* Fake Window Header */}
-              <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-800">
+          {/* Product preview */}
+          <div className="mx-auto mt-12 max-w-4xl">
+            <div className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-soft sm:p-6">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant pb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                  <span className="text-xs text-slate-500 ml-2 font-mono">progeni-workspace.v2</span>
+                  <span className="h-2.5 w-2.5 rounded-full bg-danger/60" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
+                  <span className="ml-2 font-mono text-[11px] text-on-surface-variant">
+                    progeni-workspace
+                  </span>
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/80 text-emerald-300 text-xs font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  ATS Match: 96% (Exceptional)
-                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-success-container px-2.5 py-1 text-[10px] font-semibold text-on-success-container">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                  ATS match 96%
+                </span>
               </div>
 
-              {/* Showcase Content Grid */}
-              <div className="grid md:grid-cols-12 gap-6 items-center">
-                <div className="md:col-span-7 space-y-4">
+              <div className="grid items-center gap-6 md:grid-cols-12">
+                <div className="space-y-4 md:col-span-7">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xl">
-                      💼
-                    </div>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-container text-sm font-semibold text-on-primary-container">
+                      SE
+                    </span>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Staff Software Engineer</h3>
-                      <p className="text-xs text-slate-400">Stripe • San Francisco, CA (Hybrid) • $210,000 - $250,000</p>
+                      <h2 className="text-sm font-semibold">Staff Software Engineer</h2>
+                      <p className="text-[11px] text-on-surface-variant">
+                        Stripe · San Francisco, CA (Hybrid) · $210k – $250k
+                      </p>
                     </div>
                   </div>
 
-                  {/* Grounded Dimensions */}
-                  <div className="space-y-2 pt-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-300">Technical Skills Alignment</span>
-                      <span className="text-emerald-400 font-bold">96% (TypeScript, React, Next.js, Distributed Systems)</span>
+                  <div className="space-y-3 pt-1">
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between text-[11px]">
+                        <span className="text-on-surface-variant">Technical skills</span>
+                        <span className="font-semibold text-success">96%</span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-variant">
+                        <div className="h-full w-[96%] rounded-full bg-success" />
+                      </div>
                     </div>
-                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full w-[96%]" />
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs pt-1">
-                      <span className="text-slate-300">Experience & Seniority</span>
-                      <span className="text-emerald-400 font-bold">100% (7+ Years Required • 8 Years Grounded)</span>
-                    </div>
-                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full w-[100%]" />
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between text-[11px]">
+                        <span className="text-on-surface-variant">Experience & seniority</span>
+                        <span className="font-semibold text-success">100%</span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-variant">
+                        <div className="h-full w-full rounded-full bg-success" />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 flex items-start gap-2.5">
-                    <span className="text-indigo-400 text-base">🛡️</span>
+                  <div className="flex items-start gap-2.5 rounded-xl border border-outline-variant bg-surface-subtle p-3 text-[11px] leading-relaxed">
+                    <span className="mt-0.5 text-success">✓</span>
                     <div>
-                      <span className="font-semibold text-white block">Truth Engine Grounding</span>
-                      14 bullet points verified from Master Profile. 0 fabricated claims.
+                      <span className="block font-semibold">Grounded in your records</span>
+                      <span className="text-on-surface-variant">
+                        14 bullet points verified · 0 fabricated claims
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="md:col-span-5 flex flex-col gap-3 p-5 rounded-2xl bg-slate-950/80 border border-slate-800/80">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                    Application Assistant
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs flex items-center justify-between">
-                    <span className="text-slate-200">ATS Optimized Resume</span>
-                    <span className="text-emerald-400 font-semibold">Ready</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs flex items-center justify-between">
-                    <span className="text-slate-200">Grounded Cover Letter</span>
-                    <span className="text-emerald-400 font-semibold">Generated</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs flex items-center justify-between">
-                    <span className="text-slate-200">Greenhouse Form Autofill</span>
-                    <span className="text-indigo-400 font-semibold">Mapped (12/12)</span>
-                  </div>
+                <div className="flex flex-col gap-2.5 rounded-xl border border-outline-variant bg-surface-subtle p-4 md:col-span-5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">
+                    Application assistant
+                  </span>
+                  {[
+                    ['ATS optimized resume', 'Ready'],
+                    ['Grounded cover letter', 'Generated'],
+                    ['Greenhouse autofill', 'Mapped 12/12'],
+                  ].map(([label, status]) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between rounded-lg border border-outline-variant bg-surface px-3 py-2 text-[11px]"
+                    >
+                      <span>{label}</span>
+                      <span className="font-medium text-success">{status}</span>
+                    </div>
+                  ))}
                   <button
                     type="button"
                     onClick={() => openAuth('sign-up')}
-                    className="mt-2 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors shadow-md shadow-indigo-600/30"
+                    className="mt-1 w-full rounded-lg bg-primary py-2 text-[11px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
                   >
-                    Try Workspace With Your Resume →
+                    Try it with your resume
                   </button>
                 </div>
               </div>
@@ -267,343 +348,336 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. PERFORMANCE STATS STRIP */}
-      <section className="py-12 border-y border-slate-800 bg-slate-900/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-white mb-1">12,400+</div>
-              <div className="text-xs sm:text-sm text-slate-400 font-medium">Applications Tailored</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-indigo-400 mb-1">98.4%</div>
-              <div className="text-xs sm:text-sm text-slate-400 font-medium">ATS Parser Compatibility</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-purple-400 mb-1">4.8×</div>
-              <div className="text-xs sm:text-sm text-slate-400 font-medium">Faster Callback Velocity</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-emerald-400 mb-1">0%</div>
-              <div className="text-xs sm:text-sm text-slate-400 font-medium">Fabricated Qualifications</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. HOW IT WORKS SECTION */}
-      <section id="how-it-works" className="py-20 lg:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-xs uppercase tracking-widest font-extrabold text-indigo-400 mb-3">Simple 3-Step Flow</h2>
-          <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            From job discovery to verified application in seconds
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 relative">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 font-black text-xl flex items-center justify-center mb-6">
-              01
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Upload Master Resume</h3>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Upload your career profile in PDF, DOCX, or text. The Truth Engine extracts verified skills, roles, and achievements.
-            </p>
-          </div>
-
-          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 relative">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 font-black text-xl flex items-center justify-center mb-6">
-              02
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Deterministic AI Matching</h3>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Jobs are scored across 6 distinct dimensions without hallucination. View transparent match explanations and skill gap alerts.
-            </p>
-          </div>
-
-          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 relative">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 font-black text-xl flex items-center justify-center mb-6">
-              03
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Review &amp; 1-Click Autofill</h3>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Review your tailored resume and generated answers. The Chrome extension maps and autofills ATS fields with your digital approval.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. BENTO GRID FEATURES */}
-      <section id="features" className="py-20 lg:py-28 bg-slate-900/50 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs uppercase tracking-widest font-extrabold text-indigo-400 mb-3">
-              Full-Stack Platform Capabilities
-            </h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Engineered for candidates who demand truth, control, and results
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
-              <div className="text-3xl mb-4">🎯</div>
-              <h3 className="text-lg font-bold text-white mb-2">Deterministic Scoring Engine</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Evaluates job postings against your real profile across 6 distinct weights: Skills (30%), Experience (20%), Seniority (15%), Location (15%), Workplace Mode (10%), and Salary (10%).
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
-              <div className="text-3xl mb-4">🛡️</div>
-              <h3 className="text-lg font-bold text-white mb-2">Truth Engine &amp; Zero Hallucination</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Prevents generative AI from fabricating qualifications or making claims you cannot defend in an interview. Every bullet point links to verified experience.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
-              <div className="text-3xl mb-4">⚡</div>
-              <h3 className="text-lg font-bold text-white mb-2">Native Chrome Extension (MV3)</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Automatically detects job descriptions on Greenhouse, Lever, Ashby, Workday, LinkedIn, and Indeed. Fills application fields only when you click Detect.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
-              <div className="text-3xl mb-4">🤖</div>
-              <h3 className="text-lg font-bold text-white mb-2">Progeni Interview Simulation</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Seamlessly launch interactive technical and behavioral interview simulation sessions based on your actual target job requirements.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
-              <div className="text-3xl mb-4">📊</div>
-              <h3 className="text-lg font-bold text-white mb-2">Application &amp; Timeline Tracker</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Tracks applications through 14 distinct stages: discovered, preparing, approved, submitted, shortlisted, and interview scheduled with immutable audit logs.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
-              <div className="text-3xl mb-4">🔒</div>
-              <h3 className="text-lg font-bold text-white mb-2">Candidate Data Sovereignty</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Your data is stored in your private workspace. We never resell candidate records to recruiters or third-party ad networks. You can wipe data at any time.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. SUPPORTED ATS ECOSYSTEM */}
-      <section id="integrations" className="py-16 border-t border-slate-800 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-8">
-            Works natively across the modern recruitment ecosystem
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-80">
-            <span className="text-base font-bold tracking-wider text-slate-300">Greenhouse</span>
-            <span className="text-base font-bold tracking-wider text-slate-300">Lever</span>
-            <span className="text-base font-bold tracking-wider text-slate-300">Ashby</span>
-            <span className="text-base font-bold tracking-wider text-slate-300">Workday</span>
-            <span className="text-base font-bold tracking-wider text-slate-300">SmartRecruiters</span>
-            <span className="text-base font-bold tracking-wider text-slate-300">LinkedIn Jobs</span>
-            <span className="text-base font-bold tracking-wider text-slate-300">Indeed</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. TRANSPARENT PRICING */}
-      <section id="pricing" className="py-20 lg:py-28 border-t border-slate-800 bg-slate-900/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-xs uppercase tracking-widest font-extrabold text-indigo-400 mb-3">Simple Pricing</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-6">
-              Invest in your career growth with zero lock-in
-            </p>
-
-            {/* Billing Toggle */}
-            <div className="inline-flex items-center p-1 rounded-2xl bg-slate-900 border border-slate-800">
-              <button
-                type="button"
-                onClick={() => setBillingCycle('monthly')}
-                className={`py-2 px-4 rounded-xl text-xs font-semibold transition-all ${
-                  billingCycle === 'monthly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Monthly Billing
-              </button>
-              <button
-                type="button"
-                onClick={() => setBillingCycle('yearly')}
-                className={`py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  billingCycle === 'yearly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <span>Annual Billing</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                  Save 20%
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Starter */}
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white mb-1">Starter</h3>
-                <p className="text-xs text-slate-400 mb-4">Essential tools to launch your job search.</p>
-                <div className="text-3xl font-black text-white mb-6">
-                  $0 <span className="text-xs font-medium text-slate-400">/ forever</span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-300">
-                  <li className="flex items-center gap-2">✓ 15 AI Job Match Analyses / month</li>
-                  <li className="flex items-center gap-2">✓ Truth Engine Master Profile</li>
-                  <li className="flex items-center gap-2">✓ ATS Keyword Gap Diagnostics</li>
-                  <li className="flex items-center gap-2">✓ Chrome Extension Form Detection</li>
-                  <li className="flex items-center gap-2">✓ Kanban Application Tracker</li>
-                </ul>
-              </div>
-              <button
-                type="button"
-                onClick={() => openAuth('sign-up')}
-                className="mt-8 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"
-              >
-                Start Free Forever
-              </button>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="p-8 rounded-3xl bg-gradient-to-b from-indigo-950/80 to-slate-900 border-2 border-indigo-500 flex flex-col justify-between relative shadow-2xl shadow-indigo-950/60">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-indigo-500 text-white text-[10px] font-extrabold uppercase tracking-wider">
-                Most Popular
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white mb-1">Professional</h3>
-                <p className="text-xs text-indigo-300 mb-4">For active candidates targeting fast offers.</p>
-                <div className="text-3xl font-black text-white mb-6">
-                  {billingCycle === 'monthly' ? '$19' : '$15'}{' '}
-                  <span className="text-xs font-medium text-slate-400">/ month</span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-200">
-                  <li className="flex items-center gap-2">✓ <strong>Unlimited</strong> AI Job Match Scoring</li>
-                  <li className="flex items-center gap-2">✓ <strong>30 Tailored Resumes</strong> &amp; PDF Exports</li>
-                  <li className="flex items-center gap-2">✓ <strong>Progeni Interview Simulation</strong> Drills</li>
-                  <li className="flex items-center gap-2">✓ 1-Click Multi-ATS Smart Autofill</li>
-                  <li className="flex items-center gap-2">✓ Priority Support Queue</li>
-                </ul>
-              </div>
-              <button
-                type="button"
-                onClick={() => openAuth('sign-up')}
-                className="mt-8 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors shadow-lg shadow-indigo-600/30"
-              >
-                Get Started with Pro
-              </button>
-            </div>
-
-            {/* Premium Plan */}
-            <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white mb-1">Executive</h3>
-                <p className="text-xs text-slate-400 mb-4">Maximum power for high-volume senior applications.</p>
-                <div className="text-3xl font-black text-white mb-6">
-                  {billingCycle === 'monthly' ? '$39' : '$31'}{' '}
-                  <span className="text-xs font-medium text-slate-400">/ month</span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-300">
-                  <li className="flex items-center gap-2">✓ Everything in Professional</li>
-                  <li className="flex items-center gap-2">✓ Unlimited Tailored Resumes &amp; Portfolios</li>
-                  <li className="flex items-center gap-2">✓ Advanced Technical Mock Drills</li>
-                  <li className="flex items-center gap-2">✓ Multi-Persona Resume Studio (5 Profiles)</li>
-                  <li className="flex items-center gap-2">✓ 24/7 Fast-Track Priority Channel</li>
-                </ul>
-              </div>
-              <button
-                type="button"
-                onClick={() => openAuth('sign-up')}
-                className="mt-8 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"
-              >
-                Choose Executive Plan
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. INTERACTIVE FAQ ACCORDION */}
-      <section id="faq" className="py-20 lg:py-28 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-xs uppercase tracking-widest font-extrabold text-indigo-400 mb-3">Questions &amp; Answers</h2>
-          <p className="text-3xl font-extrabold text-white tracking-tight">Frequently Asked Questions</p>
-        </div>
-
-        <div className="space-y-4">
-          {faqs.map((faq, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden transition-colors"
-            >
-              <button
-                type="button"
-                onClick={() => setActiveFaq((curr) => (curr === idx ? null : idx))}
-                className="w-full text-left p-6 font-bold text-sm sm:text-base text-white flex items-center justify-between gap-4"
-              >
-                <span>{faq.q}</span>
-                <span className="text-indigo-400 text-lg">{activeFaq === idx ? '−' : '+'}</span>
-              </button>
-              {activeFaq === idx && (
-                <div className="px-6 pb-6 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-800/60 pt-4">
-                  {faq.a}
-                </div>
-              )}
+      {/* Stats */}
+      <section className="border-b border-outline-variant bg-surface-subtle/60">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-10 text-center sm:px-6 md:grid-cols-4 lg:px-8">
+          {[
+            ['12,400+', 'Applications tailored'],
+            ['98.4%', 'ATS parser compatibility'],
+            ['4.8×', 'Faster callback velocity'],
+            ['0%', 'Fabricated qualifications'],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <div className="text-2xl font-bold tracking-tight sm:text-3xl">{value}</div>
+              <div className="mt-1 text-[11px] text-on-surface-variant">{label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 9. BOTTOM CONVERSION CTA BANNER */}
-      <section className="py-16 bg-gradient-to-r from-indigo-900 via-indigo-950 to-purple-950 border-t border-slate-800 text-center relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
-            Stop filling endless forms manually.
+      {/* How it works */}
+      <section id="how-it-works" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+            Three steps
+          </p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+            From job discovery to a verified application
           </h2>
-          <p className="text-base text-indigo-200 mb-8 max-w-xl mx-auto">
-            Take control of your applications with deterministic AI accuracy. Join over 12,000+ candidates landing interviews.
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          {[
+            ['01', 'Upload your master resume', 'Add your profile in PDF, DOCX, or plain text. The Truth Engine extracts verified skills, roles, and achievements.'],
+            ['02', 'Review deterministic matches', 'Jobs are scored across six dimensions with transparent explanations and skill-gap alerts — no hallucinated fit.'],
+            ['03', 'Review, approve, autofill', 'Inspect the tailored resume and generated answers. The extension maps ATS fields and fills them only with your approval.'],
+          ].map(([step, title, body]) => (
+            <div key={step} className="rounded-2xl border border-outline-variant bg-surface p-6">
+              <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg bg-primary-container px-2 text-xs font-semibold text-on-primary-container">
+                {step}
+              </span>
+              <h3 className="mt-5 text-base font-semibold">{title}</h3>
+              <p className="mt-2 text-[13px] leading-relaxed text-on-surface-variant">{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="border-y border-outline-variant bg-surface-subtle/50 py-16 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+              Platform
+            </p>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+              Built for candidates who want control and clarity
+            </h2>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="rounded-2xl border border-outline-variant bg-surface p-6 transition-colors hover:border-outline"
+              >
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {feature.icon}
+                  </svg>
+                </span>
+                <h3 className="mt-4 text-sm font-semibold">{feature.title}</h3>
+                <p className="mt-2 text-[12px] leading-relaxed text-on-surface-variant">
+                  {feature.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ATS ecosystem */}
+      <section id="integrations" className="border-b border-outline-variant">
+        <div className="mx-auto max-w-6xl px-4 py-12 text-center sm:px-6 lg:px-8">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-on-surface-variant">
+            Works across the modern recruitment ecosystem
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+            {atsPartners.map((partner) => (
+              <span key={partner} className="text-sm font-semibold text-on-surface-variant/80">
+                {partner}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-16 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+              Pricing
+            </p>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+              Start free, upgrade when you need volume
+            </h2>
+
+            <div className="mt-6 inline-flex items-center rounded-xl border border-outline-variant bg-surface p-1">
+              {(['monthly', 'yearly'] as const).map((cycle) => (
+                <button
+                  key={cycle}
+                  type="button"
+                  onClick={() => setBillingCycle(cycle)}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                    billingCycle === cycle
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  {cycle === 'monthly' ? 'Monthly' : 'Annual'}
+                  {cycle === 'yearly' && (
+                    <span className="rounded bg-success-container px-1.5 py-0.5 text-[9px] font-bold text-on-success-container">
+                      −20%
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
+            {/* Starter */}
+            <div className="flex flex-col justify-between rounded-2xl border border-outline-variant bg-surface p-6">
+              <div>
+                <h3 className="text-base font-semibold">Starter</h3>
+                <p className="mt-1 text-[11px] text-on-surface-variant">
+                  Essential tools to launch your search.
+                </p>
+                <div className="mt-5 text-2xl font-bold">
+                  $0 <span className="text-[11px] font-medium text-on-surface-variant">forever</span>
+                </div>
+                <ul className="mt-5 space-y-2.5 text-[12px] text-on-surface-variant">
+                  {[
+                    '15 AI job match analyses / month',
+                    'Truth Engine master profile',
+                    'ATS keyword gap diagnostics',
+                    'Chrome extension form detection',
+                    'Application tracker',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-success">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                type="button"
+                onClick={() => openAuth('sign-up')}
+                className="mt-6 w-full rounded-xl border border-outline bg-surface-subtle py-2.5 text-xs font-semibold transition-colors hover:bg-surface-variant"
+              >
+                Start free
+              </button>
+            </div>
+
+            {/* Professional */}
+            <div className="relative flex flex-col justify-between rounded-2xl border-2 border-primary bg-surface p-6 shadow-card">
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
+                Most popular
+              </span>
+              <div>
+                <h3 className="text-base font-semibold">Professional</h3>
+                <p className="mt-1 text-[11px] text-on-surface-variant">
+                  For active candidates targeting fast offers.
+                </p>
+                <div className="mt-5 text-2xl font-bold">
+                  {billingCycle === 'monthly' ? '$19' : '$15'}{' '}
+                  <span className="text-[11px] font-medium text-on-surface-variant">/ month</span>
+                </div>
+                <ul className="mt-5 space-y-2.5 text-[12px]">
+                  {[
+                    'Unlimited AI job match scoring',
+                    '30 tailored resumes & PDF exports',
+                    'Interview simulation drills',
+                    'One-click multi-ATS autofill',
+                    'Priority support queue',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-success">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                type="button"
+                onClick={() => openAuth('sign-up')}
+                className="mt-6 w-full rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Get started with Pro
+              </button>
+            </div>
+
+            {/* Executive */}
+            <div className="flex flex-col justify-between rounded-2xl border border-outline-variant bg-surface p-6">
+              <div>
+                <h3 className="text-base font-semibold">Executive</h3>
+                <p className="mt-1 text-[11px] text-on-surface-variant">
+                  Maximum power for senior, high-volume searches.
+                </p>
+                <div className="mt-5 text-2xl font-bold">
+                  {billingCycle === 'monthly' ? '$39' : '$31'}{' '}
+                  <span className="text-[11px] font-medium text-on-surface-variant">/ month</span>
+                </div>
+                <ul className="mt-5 space-y-2.5 text-[12px] text-on-surface-variant">
+                  {[
+                    'Everything in Professional',
+                    'Unlimited tailored resumes & portfolios',
+                    'Advanced technical mock drills',
+                    'Multi-persona resume studio',
+                    'Fast-track priority channel',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-success">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                type="button"
+                onClick={() => openAuth('sign-up')}
+                className="mt-6 w-full rounded-xl border border-outline bg-surface-subtle py-2.5 text-xs font-semibold transition-colors hover:bg-surface-variant"
+              >
+                Choose Executive
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="border-t border-outline-variant bg-surface-subtle/40 py-16 lg:py-24">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+              FAQ
+            </p>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+              Questions, answered
+            </h2>
+          </div>
+
+          <div className="space-y-2.5">
+            {faqs.map((faq, index) => {
+              const open = activeFaq === index;
+              return (
+                <div
+                  key={faq.q}
+                  className="overflow-hidden rounded-xl border border-outline-variant bg-surface"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveFaq(open ? null : index)}
+                    aria-expanded={open}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[13px] font-medium"
+                  >
+                    <span>{faq.q}</span>
+                    <span
+                      aria-hidden
+                      className={`text-lg leading-none text-on-surface-variant transition-transform ${
+                        open ? 'rotate-45' : ''
+                      }`}
+                    >
+                      +
+                    </span>
+                  </button>
+                  {open && (
+                    <p className="border-t border-outline-variant px-5 py-4 text-[12px] leading-relaxed text-on-surface-variant">
+                      {faq.a}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="border-t border-outline-variant bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 py-16 text-center text-white">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Stop filling endless forms manually
+          </h2>
+          <p className="mt-3 text-sm text-indigo-100/80">
+            Take control of your applications with deterministic accuracy. Join thousands of
+            candidates landing more interviews.
           </p>
           <button
             type="button"
             onClick={() => openAuth('sign-up')}
-            className="py-4 px-8 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-base shadow-xl transition-all duration-200 active:scale-[0.99]"
+            className="mt-7 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
           >
-            Create Your Free Account Now →
+            Create your free account
           </button>
         </div>
       </section>
 
-      {/* 10. FOOTER */}
-      <footer className="py-10 border-t border-slate-900 bg-slate-950 text-slate-500 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="font-bold text-slate-300">PROGENI AUTOAPPLY</span>
-            <span>•</span>
-            <span>© {new Date().getFullYear()} Progeni Inc. All rights reserved.</span>
+      {/* Footer */}
+      <footer className="border-t border-outline-variant py-8 text-[11px] text-on-surface-variant">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <span className="font-semibold text-on-surface">Progeni AutoApply</span>
+            <span aria-hidden>·</span>
+            <span>© {new Date().getFullYear()} Progeni Inc.</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
-            <Link href="/privacy" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
-            <span className="text-emerald-400 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              All Systems Operational
+          <div className="flex items-center gap-5">
+            <Link href="/privacy" className="transition-colors hover:text-on-surface">
+              Privacy
+            </Link>
+            <Link href="/privacy" className="transition-colors hover:text-on-surface">
+              Terms
+            </Link>
+            <span className="inline-flex items-center gap-1.5 text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              All systems operational
             </span>
           </div>
         </div>
       </footer>
 
-      {/* AUTHENTICATION POPUP MODAL */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

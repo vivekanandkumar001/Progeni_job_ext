@@ -99,7 +99,7 @@ app.get('/api/v1/health/deep', async (_req, res) => {
         heapTotalMb: Math.round(memory.heapTotal / 1024 / 1024),
       },
       progeniAtlas: {
-        enabled: Boolean(env.PROGENI_ATLAS_BASE_URL || env.PROGENI_API_URL),
+        enabled: Boolean(process.env.PROGENI_ATLAS_BASE_URL || process.env.PROGENI_API_URL),
         mode: isLocalDevelopment ? 'mock_ready' : 'production_ready',
       },
       billingGateway: {
