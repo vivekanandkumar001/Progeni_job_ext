@@ -44,7 +44,7 @@ export default function PerformanceAnalyticsPage() {
 
         <Link
           href="/application-tracker"
-          className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition self-start sm:self-auto"
+          className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition self-start sm:self-auto"
         >
           ← Application Tracker
         </Link>

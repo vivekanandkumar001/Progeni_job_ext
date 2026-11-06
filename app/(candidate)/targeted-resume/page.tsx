@@ -51,7 +51,7 @@ export default function TargetedResumePage() {
               Strict Truth Engine Verification
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mt-1">
+          <h1 className="text-3xl font-semibold tracking-tight text-on-surface mt-1">
             Targeted Resume Generator
           </h1>
           <p className="text-sm text-on-surface-variant">
@@ -154,19 +154,19 @@ export default function TargetedResumePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-outline-variant bg-surface text-center">
               <span className="text-xs text-on-surface-variant font-medium">Alignment Match</span>
-              <div className="text-2xl font-black text-success">
+              <div className="text-2xl font-bold text-success">
                 {result.alignmentScore}%
               </div>
             </div>
             <div className="p-4 rounded-xl border border-outline-variant bg-surface text-center">
               <span className="text-xs text-on-surface-variant font-medium">Matched Keywords</span>
-              <div className="text-2xl font-black text-on-surface">
+              <div className="text-2xl font-bold text-on-surface">
                 {result.matchedKeywords.length}
               </div>
             </div>
             <div className="p-4 rounded-xl border border-outline-variant bg-surface text-center">
               <span className="text-xs text-on-surface-variant font-medium">Missing Requirements</span>
-              <div className="text-2xl font-black text-warning">
+              <div className="text-2xl font-bold text-warning">
                 {result.missingRequirements.length}
               </div>
             </div>
@@ -232,7 +232,7 @@ export default function TargetedResumePage() {
                   return (
                     <span
                       key={i}
-                      className={`px-2.5 py-1 text-xs rounded-full font-medium ${ isMatched ? 'bg-primary-container text-primary border border-primary/30 ' : 'bg-surface-variant text-on-surface-variant ' }`}}
+                      className={`px-2.5 py-1 text-xs rounded-full font-medium ${ isMatched ? 'bg-primary-container text-primary border border-primary/30 ' : 'bg-surface-variant text-on-surface-variant ' }`}
                     >
                       {skill} {isMatched && '★'}
                     </span>
@@ -248,7 +248,7 @@ export default function TargetedResumePage() {
               </p>
               <button
                 onClick={() => router.push('/resume-studio')}
-                className="px-6 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                className="px-6 py-2.5 text-xs font-bold bg-success hover:bg-success/90 text-white rounded-lg transition"
               >
                 Approve & Edit in Resume Studio →
               </button>

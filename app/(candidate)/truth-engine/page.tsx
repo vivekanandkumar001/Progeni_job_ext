@@ -104,7 +104,7 @@ export default function TruthEnginePage() {
               Total Claims: {claims.length}
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mt-1">
+          <h1 className="text-3xl font-semibold tracking-tight text-on-surface mt-1">
             Truth Engine & Evidence Mapping
           </h1>
           <p className="text-sm text-on-surface-variant">
@@ -115,7 +115,7 @@ export default function TruthEnginePage() {
         <div className="flex items-center gap-2">
           <Link
             href="/resume-studio"
-            className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+            className="px-4 py-2 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition"
           >
             Resume Studio
           </Link>
@@ -179,7 +179,7 @@ export default function TruthEnginePage() {
           <button
             onClick={handleCreateClaim}
             disabled={saving || !newClaimText.trim()}
-            className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition disabled:opacity-50"
+            className="px-4 py-2 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition disabled:opacity-50"
           >
             Add Claim
           </button>

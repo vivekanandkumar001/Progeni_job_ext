@@ -86,7 +86,7 @@ export default function FollowUpManagerPage() {
 
         <Link
           href="/application-tracker"
-          className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition self-start sm:self-auto"
+          className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition self-start sm:self-auto"
         >
           ← Application Tracker
         </Link>
@@ -121,7 +121,7 @@ export default function FollowUpManagerPage() {
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key as any)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ filter === tab.key ? 'bg-surface-subtle text-on-surface shadow-sm border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ filter === tab.key ? 'bg-surface-subtle text-on-surface shadow-sm border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}
           >
             {tab.label}
           </button>
@@ -156,7 +156,7 @@ export default function FollowUpManagerPage() {
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
                     <span
-                      className={`px-2 py-0.5 rounded text-[11px] font-semibold ${ item.status === 'completed' ? 'bg-success/10 text-success border border-success/20' : item.isOverdue ? 'bg-danger/10 text-danger border border-danger/20' : 'bg-warning/10 text-warning border border-warning/20' }`}}
+                      className={`px-2 py-0.5 rounded text-[11px] font-semibold ${ item.status === 'completed' ? 'bg-success/10 text-success border border-success/20' : item.isOverdue ? 'bg-danger/10 text-danger border border-danger/20' : 'bg-warning/10 text-warning border border-warning/20' }`}
                     >
                       {item.isOverdue ? '⚠️ OVERDUE' : item.status.toUpperCase()}
                     </span>
@@ -199,7 +199,7 @@ export default function FollowUpManagerPage() {
       {/* Modal: Log Action */}
       {actionItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-card space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-on-surface">Log Follow-Up Action</h3>
@@ -280,7 +280,7 @@ export default function FollowUpManagerPage() {
                 <button
                   type="submit"
                   disabled={submittingAction}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-success hover:bg-success/90 text-white transition disabled:opacity-50"
                 >
                   {submittingAction ? 'Logging...' : 'Confirm Action'}
                 </button>

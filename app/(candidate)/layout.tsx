@@ -397,8 +397,8 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
   if (consent !== 'accepted' && pathname !== '/onboarding') {
     return (
       <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-background p-6 text-on-surface">
-        <div className="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-2xl" />
+        <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-2xl" />
         <section className="relative z-10 w-full max-w-xl rounded-3xl border border-outline-variant bg-surface p-8 shadow-card sm:p-10">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold text-white shadow-md shadow-indigo-500/20">
@@ -510,11 +510,11 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-colors duration-150 ${ active ? 'border border-primary/25 bg-primary-container font-semibold text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface' }`}}
+                      className={`group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-colors duration-150 ${ active ? 'border border-primary/25 bg-primary-container font-semibold text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface' }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <span
-                          className={`transition-colors ${ active ? 'text-primary' : 'text-on-surface-variant/80 group-hover:text-on-surface' }`}}
+                          className={`transition-colors ${ active ? 'text-primary' : 'text-on-surface-variant/80 group-hover:text-on-surface' }`}
                         >
                           <Icon className="h-4 w-4" />
                         </span>
@@ -522,7 +522,7 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
                       </div>
                       {item.badge && (
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${ active ? 'bg-primary/15 text-primary' : 'bg-surface-variant text-on-surface-variant' }`}}
+                          className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${ active ? 'bg-primary/15 text-primary' : 'bg-surface-variant text-on-surface-variant' }`}
                         >
                           {item.badge}
                         </span>
@@ -586,7 +586,7 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-outline-variant bg-surface shadow-2xl">
+          <div className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-outline-variant bg-surface shadow-card">
             <div className="flex justify-end border-b border-outline-variant p-2">
               <button
                 type="button"

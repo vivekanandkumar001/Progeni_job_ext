@@ -133,19 +133,19 @@ export default function CandidateBillingPage() {
         <div className="flex items-center gap-2 bg-surface border border-outline-variant p-1 rounded-xl">
           <button
             onClick={() => setActiveTab('plans')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeTab === 'plans' ? 'bg-purple-600 text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeTab === 'plans' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}
           >
             Subscription Plans
           </button>
           <button
             onClick={() => setActiveTab('usage')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeTab === 'usage' ? 'bg-purple-600 text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeTab === 'usage' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}
           >
             Credit Usage ({usage.length})
           </button>
           <button
             onClick={() => setActiveTab('invoices')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeTab === 'invoices' ? 'bg-purple-600 text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeTab === 'invoices' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-on-surface-variant hover:text-on-surface' }`}
           >
             Invoices ({invoices.length})
           </button>
@@ -179,14 +179,14 @@ export default function CandidateBillingPage() {
               Active Tier
             </span>
             <span
-              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${ currentTier === 'premium' ? 'bg-primary/20 text-primary border border-primary/30' : currentTier === 'pro' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface-subtle text-on-surface-variant' }`}}
+              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${ currentTier === 'premium' ? 'bg-primary/20 text-primary border border-primary/30' : currentTier === 'pro' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface-subtle text-on-surface-variant' }`}
             >
               {currentTier}
             </span>
           </div>
 
           <div>
-            <h2 className="text-2xl font-black text-on-surface capitalize">
+            <h2 className="text-2xl font-bold text-on-surface capitalize">
               {currentTier === 'free' ? 'Free Starter' : currentTier === 'pro' ? 'Pro Accelerator' : 'Premium Elite'}
             </h2>
             <p className="text-xs text-on-surface-variant mt-1">
@@ -232,7 +232,7 @@ export default function CandidateBillingPage() {
           </div>
 
           <div className="flex items-baseline gap-3">
-            <div className="text-3xl font-black text-on-surface font-mono">
+            <div className="text-3xl font-bold text-on-surface font-mono">
               {creditBalance}
             </div>
             <span className="text-xs text-on-surface-variant">
@@ -243,7 +243,7 @@ export default function CandidateBillingPage() {
           {/* Progress Bar */}
           <div className="w-full bg-surface-subtle h-2.5 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-500 ${ percentageRemaining > 50 ? 'bg-purple-500' : percentageRemaining > 20 ? 'bg-amber-500' : 'bg-rose-500' }`}}
+              className={`h-full transition-all duration-500 ${ percentageRemaining > 50 ? 'bg-purple-500' : percentageRemaining > 20 ? 'bg-amber-500' : 'bg-rose-500' }`}
               style={{ width: `${percentageRemaining}%` }}
             />
           </div>
@@ -266,7 +266,7 @@ export default function CandidateBillingPage() {
         <div className="space-y-6">
           {/* Interval Selector */}
           <div className="flex justify-center items-center gap-3 py-2">
-            <span className={`text-xs ${billingInterval === 'month' ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}}>
+            <span className={`text-xs ${billingInterval === 'month' ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>
               Monthly Billing
             </span>
             <button
@@ -274,10 +274,10 @@ export default function CandidateBillingPage() {
               className="relative w-12 h-6 rounded-full bg-surface-subtle border border-outline p-0.5 transition"
             >
               <div
-                className={`w-5 h-5 rounded-full bg-purple-500 transition-transform ${ billingInterval === 'year' ? 'translate-x-6' : 'translate-x-0' }`}}
+                className={`w-5 h-5 rounded-full bg-purple-500 transition-transform ${ billingInterval === 'year' ? 'translate-x-6' : 'translate-x-0' }`}
               />
             </button>
-            <span className={`text-xs flex items-center gap-1.5 ${billingInterval === 'year' ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}}>
+            <span className={`text-xs flex items-center gap-1.5 ${billingInterval === 'year' ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>
               Yearly Billing
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-success/20 text-success">
                 2 MONTHS FREE
@@ -299,10 +299,10 @@ export default function CandidateBillingPage() {
               return (
                 <div
                   key={tierKey}
-                  className={`p-6 rounded-2xl border flex flex-col justify-between space-y-6 relative transition ${ isCurrent ? 'bg-surface border-primary/30 shadow-xl' : plan.popular ? 'bg-surface border-outline hover:border-outline' : 'bg-surface border-outline-variant' }`}}
+                  className={`p-6 rounded-2xl border flex flex-col justify-between space-y-6 relative transition ${ isCurrent ? 'bg-surface border-primary/30 shadow-soft' : plan.popular ? 'bg-surface border-outline hover:border-outline' : 'bg-surface border-outline-variant' }`}
                 >
                   {plan.popular && !isCurrent && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-purple-600 text-white shadow">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-primary text-primary-foreground shadow">
                       MOST POPULAR
                     </span>
                   )}
@@ -314,7 +314,7 @@ export default function CandidateBillingPage() {
                     </div>
 
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-black text-on-surface">
+                      <span className="text-3xl font-bold text-on-surface">
                         ₹{price.toLocaleString('en-IN')}
                       </span>
                       <span className="text-xs text-on-surface-variant">
@@ -355,7 +355,7 @@ export default function CandidateBillingPage() {
                       <button
                         onClick={() => handleUpgrade(tierKey)}
                         disabled={processingTier === tierKey}
-                        className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow-md disabled:opacity-50"
+                        className="w-full py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition shadow-md disabled:opacity-50"
                       >
                         {processingTier === tierKey ? 'Processing Order...' : `Upgrade to ${plan.name} →`}
                       </button>
@@ -453,7 +453,7 @@ export default function CandidateBillingPage() {
                       </td>
                       <td className="py-3">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ inv.status === 'captured' ? 'bg-success/10 text-success border border-success/20' : inv.status === 'refunded' ? 'bg-warning/10 text-warning border border-warning/20' : 'bg-danger/10 text-danger border border-danger/20' }`}}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ inv.status === 'captured' ? 'bg-success/10 text-success border border-success/20' : inv.status === 'refunded' ? 'bg-warning/10 text-warning border border-warning/20' : 'bg-danger/10 text-danger border border-danger/20' }`}
                         >
                           {inv.status}
                         </span>
@@ -481,7 +481,7 @@ export default function CandidateBillingPage() {
       {/* Modal: View Receipt */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 space-y-4 shadow-card">
             <div className="flex items-center justify-between border-b border-outline-variant pb-3">
               <div>
                 <h3 className="text-base font-bold text-on-surface">Payment Receipt</h3>
@@ -535,7 +535,7 @@ export default function CandidateBillingPage() {
       {/* Modal: Cancel Subscription */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 space-y-4 shadow-card">
             <div className="flex items-center justify-between border-b border-outline-variant pb-3">
               <h3 className="text-base font-bold text-on-surface">Cancel Auto-Renewal</h3>
               <button
@@ -577,7 +577,7 @@ export default function CandidateBillingPage() {
               <button
                 onClick={handleCancelSubscription}
                 disabled={canceling}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-danger hover:bg-danger/90 text-white text-xs font-bold transition disabled:opacity-50"
               >
                 {canceling ? 'Canceling...' : 'Confirm Cancellation'}
               </button>

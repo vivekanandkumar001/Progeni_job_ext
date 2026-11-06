@@ -183,7 +183,7 @@ function DossierContent() {
         <p className="text-on-surface-variant">No application ID provided in the URL query.</p>
         <Link
           href="/application-tracker"
-          className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-indigo-600 text-white"
+          className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-primary text-primary-foreground"
         >
           ← Return to Application Tracker
         </Link>
@@ -313,7 +313,7 @@ function DossierContent() {
           <div>
             {evidence ? (
               <span
-                className={`inline-block px-2.5 py-1 rounded text-xs font-semibold ${ evidence.verificationStatus === 'verified' ? 'bg-success/10 text-success border border-success/30' : 'bg-warning/10 text-warning border border-warning/30' }`}}
+                className={`inline-block px-2.5 py-1 rounded text-xs font-semibold ${ evidence.verificationStatus === 'verified' ? 'bg-success/10 text-success border border-success/30' : 'bg-warning/10 text-warning border border-warning/30' }`}
               >
                 ✓ {evidence.verificationStatus.replace(/_/g, ' ').toUpperCase()}
               </span>
@@ -422,7 +422,7 @@ function DossierContent() {
                         {item.stage.replace(/_/g, ' ')}
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${ item.status === 'completed' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary' }`}}
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${ item.status === 'completed' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary' }`}
                       >
                         {item.status.toUpperCase()}
                       </span>
@@ -485,7 +485,7 @@ function DossierContent() {
               <button
                 onClick={handleLaunchSimulation}
                 disabled={launchingSim}
-                className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-sm transition disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-sm transition disabled:opacity-50"
               >
                 {launchingSim ? '⚡ Initializing...' : '🚀 Launch Practice Room'}
               </button>
@@ -635,7 +635,7 @@ function DossierContent() {
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-on-surface">{item.nextAction}</span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${ item.status === 'completed' ? 'bg-success/10 text-success' : item.isOverdue ? 'bg-danger/10 text-danger border border-danger/30' : 'bg-warning/10 text-warning' }`}}
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${ item.status === 'completed' ? 'bg-success/10 text-success' : item.isOverdue ? 'bg-danger/10 text-danger border border-danger/30' : 'bg-warning/10 text-warning' }`}
                       >
                         {item.isOverdue ? 'OVERDUE' : item.status.toUpperCase()}
                       </span>
@@ -685,7 +685,7 @@ function DossierContent() {
       {/* Modal: Schedule Interview */}
       {showInterviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-card space-y-4">
             <h3 className="text-lg font-bold text-on-surface">Schedule Interview Round</h3>
             <form onSubmit={handleCreateInterview} className="space-y-3">
               <div>
@@ -776,7 +776,7 @@ function DossierContent() {
                 <button
                   type="submit"
                   disabled={schedulingInterview}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-purple-600 hover:bg-purple-500 text-white"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {schedulingInterview ? 'Saving...' : 'Save Interview'}
                 </button>
@@ -789,7 +789,7 @@ function DossierContent() {
       {/* Modal: Schedule Follow-Up */}
       {showFollowUpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-card space-y-4">
             <h3 className="text-lg font-bold text-on-surface">Schedule Follow-Up Task</h3>
             <form onSubmit={handleCreateFollowUp} className="space-y-3">
               <div>
@@ -851,7 +851,7 @@ function DossierContent() {
                 <button
                   type="submit"
                   disabled={schedulingFollowUp}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-warning hover:bg-warning/90 text-white"
                 >
                   {schedulingFollowUp ? 'Saving...' : 'Save Follow-Up'}
                 </button>
