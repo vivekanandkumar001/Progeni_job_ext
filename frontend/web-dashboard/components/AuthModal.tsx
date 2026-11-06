@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import {
+  getSupabaseClient,
   requestPasswordReset,
   resendSignupOtp,
   signIn,
@@ -87,6 +88,36 @@ export default function AuthModal({
     }, 1000);
     return () => clearInterval(interval);
   }, [mode, resendCountdown]);
+
+  // Automatically detect email confirmation (e.g. user clicked link in email)
+  useEffect(() => {
+    if (!isOpen || mode !== 'verify-otp') return;
+    try {
+      const client = getSupabaseClient();
+      if (!client) return;
+
+      const {
+        data: { subscription },
+      } = client.auth.onAuthStateChange((event, session) => {
+        if (
+          session &&
+          (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED')
+        ) {
+          setIsSuccess(true);
+          setMessage('Email confirmed! Redirecting to workspace…');
+          setTimeout(() => {
+            window.location.replace(nextPath);
+          }, 600);
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    } catch {
+      // Ignore if Supabase is unconfigured in local dev
+    }
+  }, [isOpen, mode, nextPath]);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -307,6 +338,15 @@ export default function AuthModal({
           {/* STEP: OTP VERIFICATION */}
           {mode === 'verify-otp' ? (
             <div className="space-y-4">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs leading-relaxed text-on-surface">
+                <div className="flex items-center gap-1.5 font-semibold text-primary mb-1">
+                  <span>✉️</span> Verification sent to {email}
+                </div>
+                <p className="text-[11.5px] text-on-surface-variant">
+                  Enter the <strong>6-digit code</strong> from your email below, <strong>OR</strong> simply click the <strong>&ldquo;Confirm email address&rdquo;</strong> link in your email to sign in instantly.
+                </p>
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-on-surface mb-2">
                   6-Digit Verification Code (OTP)
@@ -323,9 +363,6 @@ export default function AuthModal({
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="w-full rounded-xl border border-outline bg-surface-subtle px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.5em] text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
-                <span className="mt-1.5 block text-center text-[11px] text-on-surface-variant">
-                  Code sent to <strong className="text-on-surface">{email}</strong>
-                </span>
               </div>
 
               {/* Verify Button */}
