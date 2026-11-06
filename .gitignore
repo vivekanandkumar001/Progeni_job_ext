@@ -29,3 +29,4 @@ Desktop.ini
 .opencode
 .vercel
 scratch/
+.env*
