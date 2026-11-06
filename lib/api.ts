@@ -332,6 +332,57 @@ export async function signUp(email: string, password: string): Promise<boolean> 
   return Boolean(data.session);
 }
 
+export async function verifyEmailOtp(email: string, token: string): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) {
+    if (token.trim().length === 6) return true;
+    throw new Error('Verification is unavailable in local development.');
+  }
+
+  const trimmedToken = token.trim();
+  const trimmedEmail = email.trim();
+
+  // Try signup token type first
+  let { data, error } = await client.auth.verifyOtp({
+    email: trimmedEmail,
+    token: trimmedToken,
+    type: 'signup',
+  });
+
+  // If signup type fails, try email type
+  if (error) {
+    const retry = await client.auth.verifyOtp({
+      email: trimmedEmail,
+      token: trimmedToken,
+      type: 'email',
+    });
+    if (!retry.error) {
+      data = retry.data;
+      error = null;
+    }
+  }
+
+  if (error) {
+    throw new Error(error.message || 'The verification code is invalid or has expired.');
+  }
+
+  return Boolean(data.session);
+}
+
+export async function resendSignupOtp(email: string): Promise<void> {
+  const client = getSupabaseClient();
+  if (!client) return;
+
+  const { error } = await client.auth.resend({
+    type: 'signup',
+    email: email.trim(),
+  });
+
+  if (error) {
+    throw new Error(error.message || 'Could not resend verification code. Please wait a minute and retry.');
+  }
+}
+
 export async function requestPasswordReset(email: string): Promise<void> {
   const client = getSupabaseClient();
   if (!client) throw new Error('Password recovery is unavailable in local development.');
