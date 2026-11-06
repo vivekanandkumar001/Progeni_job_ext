@@ -204,7 +204,7 @@ export default function AuthScreen({
             <span>🛡️</span>
             <span>Zero-Hallucination Verified Applications</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
             Land 4× more interviews with <span className="text-primary">grounded AI accuracy.</span>
           </h1>
           <p className="mt-4 text-base leading-relaxed text-on-surface-variant">

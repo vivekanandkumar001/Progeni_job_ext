@@ -219,21 +219,21 @@ export default function JobRecommendationsPage() {
         <button
           type="button"
           onClick={() => handleTabChange('personalized')}
-          className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'personalized' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+          className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'personalized' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
         >
           âœ¦ Recommended For You
         </button>
         <button
           type="button"
           onClick={() => handleTabChange('all')}
-          className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'all' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+          className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'all' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
         >
           ðŸ” Explore All Postings
         </button>
         <button
           type="button"
           onClick={() => handleTabChange('saved')}
-          className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'saved' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+          className={`py-3 text-sm font-medium border-b-2 transition-colors ${ tab === 'saved' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
         >
           â˜… Saved Jobs
         </button>
@@ -318,7 +318,7 @@ export default function JobRecommendationsPage() {
           <button
             type="button"
             onClick={loadJobs}
-            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700"
+            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-danger text-white hover:bg-red-700"
           >
             Retry
           </button>
@@ -467,7 +467,7 @@ export default function JobRecommendationsPage() {
                         </span>
                         {job.personalized_score !== undefined && (
                           <span
-                            className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${ job.personalized_score >= 70 ? 'bg-success-container text-success ' : job.personalized_score >= 40 ? 'bg-info-container text-info ' : 'bg-surface-subtle text-on-surface-variant' }`}}
+                            className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${ job.personalized_score >= 70 ? 'bg-success-container text-success ' : job.personalized_score >= 40 ? 'bg-info-container text-info ' : 'bg-surface-subtle text-on-surface-variant' }`}
                           >
                             {job.personalized_score}% Match
                           </span>
@@ -481,7 +481,7 @@ export default function JobRecommendationsPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleSave(job)}
-                      className={`p-1.5 rounded-lg border transition-colors ${ job.is_saved ? 'border-warning/30 text-warning bg-warning-container ' : 'border-surface-subtle text-on-surface-variant hover:text-on-surface hover:bg-surface-subtle' }`}}
+                      className={`p-1.5 rounded-lg border transition-colors ${ job.is_saved ? 'border-warning/30 text-warning bg-warning-container ' : 'border-surface-subtle text-on-surface-variant hover:text-on-surface hover:bg-surface-subtle' }`}
                       title={job.is_saved ? 'Unsave job' : 'Save job'}
                     >
                       {job.is_saved ? 'â˜…' : 'â˜†'}
@@ -591,7 +591,7 @@ export default function JobRecommendationsPage() {
       {/* Job Details Modal Drawer */}
       {selectedJob && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface p-4">
-          <div className="bg-surface rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 space-y-5 border border-surface-subtle shadow-xl">
+          <div className="bg-surface rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 space-y-5 border border-surface-subtle shadow-soft">
             <div className="flex items-start justify-between border-b border-surface-subtle pb-4">
               <div>
                 <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-surface-subtle uppercase tracking-wider mb-1">
@@ -703,7 +703,7 @@ export default function JobRecommendationsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface p-4">
           <form
             onSubmit={handleImportSubmit}
-            className="bg-surface rounded-2xl max-w-lg w-full p-6 space-y-4 border border-surface-subtle shadow-xl"
+            className="bg-surface rounded-2xl max-w-lg w-full p-6 space-y-4 border border-surface-subtle shadow-soft"
           >
             <div className="flex items-center justify-between border-b border-surface-subtle pb-3">
               <h3 className="text-lg font-bold text-on-surface">Import Job Posting</h3>

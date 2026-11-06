@@ -158,28 +158,28 @@ export default function JobMatchIntelligencePage() {
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'all' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'all' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
           >
             All Matches ({summary?.total_matches || matches.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('eligible')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'eligible' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'eligible' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
           >
             âœ“ Fully Eligible ({summary?.eligible_count || 0})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('high_fit')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'high_fit' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'high_fit' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
           >
             â˜… High Fit (75%+)
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('potential')}
-            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'potential' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+            className={`py-2 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'potential' ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
           >
             Needs Review ({summary?.potentially_eligible_count || 0})
           </button>
@@ -212,7 +212,7 @@ export default function JobMatchIntelligencePage() {
           <button
             type="button"
             onClick={loadData}
-            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700"
+            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-danger text-white hover:bg-red-700"
           >
             Retry
           </button>
@@ -258,7 +258,7 @@ export default function JobMatchIntelligencePage() {
                       <div className="flex items-center gap-2">
                         {/* Eligibility Badge */}
                         <span
-                          className={`inline-block px-2.5 py-0.5 text-xs font-bold rounded-full uppercase tracking-wider ${ isEligible ? 'bg-success-container text-success border border-success/40' : isPotential ? 'bg-info-container text-info border border-info/40' : isIneligible ? 'bg-danger-container text-danger border border-danger/40' : 'bg-warning-container text-warning border border-warning/40' }`}}
+                          className={`inline-block px-2.5 py-0.5 text-xs font-bold rounded-full uppercase tracking-wider ${ isEligible ? 'bg-success-container text-success border border-success/40' : isPotential ? 'bg-info-container text-info border border-info/40' : isIneligible ? 'bg-danger-container text-danger border border-danger/40' : 'bg-warning-container text-warning border border-warning/40' }`}
                         >
                           {isEligible
                             ? 'âœ“ Eligible'
@@ -302,7 +302,7 @@ export default function JobMatchIntelligencePage() {
                         Overall Fit
                       </span>
                       <div
-                        className={`text-3xl font-extrabold ${ match.overall_score >= 80 ? 'text-success ' : match.overall_score >= 60 ? 'text-info ' : 'text-warning ' }`}}
+                        className={`text-3xl font-semibold ${ match.overall_score >= 80 ? 'text-success ' : match.overall_score >= 60 ? 'text-info ' : 'text-warning ' }`}
                       >
                         {match.overall_score}%
                       </div>
@@ -425,7 +425,7 @@ export default function JobMatchIntelligencePage() {
       {/* Detailed Match Breakdown Modal */}
       {selectedMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface p-4">
-          <div className="bg-surface rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 space-y-5 border border-surface-subtle shadow-xl">
+          <div className="bg-surface rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 space-y-5 border border-surface-subtle shadow-soft">
             <div className="flex items-start justify-between border-b border-surface-subtle pb-4">
               <div>
                 <h2 className="text-2xl font-bold text-on-surface">

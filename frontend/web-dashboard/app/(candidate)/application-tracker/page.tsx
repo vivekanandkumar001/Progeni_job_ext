@@ -172,7 +172,7 @@ export default function ApplicationTrackerPage() {
           </Link>
           <Link
             href="/performance-analytics"
-            className="px-3.5 py-2 text-sm font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-sm"
+            className="px-3.5 py-2 text-sm font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition shadow-sm"
           >
             📈 Performance Analytics
           </Link>
@@ -204,7 +204,7 @@ export default function ApplicationTrackerPage() {
             <button
               key={f.key}
               onClick={() => setActiveFilter(f.key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeFilter === f.key ? 'bg-surface-subtle text-on-surface shadow-sm border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeFilter === f.key ? 'bg-surface-subtle text-on-surface shadow-sm border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}
             >
               {f.label}
             </button>
@@ -237,7 +237,7 @@ export default function ApplicationTrackerPage() {
             <p className="text-on-surface-variant text-sm">No applications found in this view.</p>
             <Link
               href="/job-recommendations"
-              className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition"
+              className="inline-block px-4 py-2 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition"
             >
               Explore Job Postings
             </Link>
@@ -268,7 +268,7 @@ export default function ApplicationTrackerPage() {
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
                     <span
-                      className={`px-2.5 py-0.5 rounded-md text-xs font-medium border ${getStatusColor( app.status, )}`}}
+                      className={`px-2.5 py-0.5 rounded-md text-xs font-medium border ${getStatusColor( app.status, )}`}
                     >
                       {app.status.replace(/_/g, ' ').toUpperCase()}
                     </span>
@@ -276,7 +276,7 @@ export default function ApplicationTrackerPage() {
                     {/* Submission Evidence Badge */}
                     {app.submissionEvidence ? (
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium ${ app.submissionEvidence.verificationStatus === 'verified' ? 'bg-success/10 text-success border border-success/20' : 'bg-warning/10 text-warning border border-warning/20' }`}}
+                        className={`px-2 py-0.5 rounded text-xs font-medium ${ app.submissionEvidence.verificationStatus === 'verified' ? 'bg-success/10 text-success border border-success/20' : 'bg-warning/10 text-warning border border-warning/20' }`}
                         title={
                           app.submissionEvidence.confirmationReference
                             ? `Ref: ${app.submissionEvidence.confirmationReference}`
@@ -364,7 +364,7 @@ export default function ApplicationTrackerPage() {
       {/* Submission Evidence Modal */}
       {evidenceModalApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-card space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-on-surface">Record Submission Evidence</h3>
@@ -463,7 +463,7 @@ export default function ApplicationTrackerPage() {
                 <button
                   type="submit"
                   disabled={submittingEvidence}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition disabled:opacity-50"
                 >
                   {submittingEvidence ? 'Recording...' : 'Verify & Submit'}
                 </button>

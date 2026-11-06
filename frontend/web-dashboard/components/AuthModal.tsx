@@ -206,7 +206,7 @@ export default function AuthModal({
           </div>
           <div>
             <span className="block text-xs font-bold tracking-tight">
-              PROGENI <span className="text-primary font-extrabold">AUTOAPPLY</span>
+              PROGENI <span className="text-primary font-semibold">AUTOAPPLY</span>
             </span>
             <span className="block text-[10px] uppercase tracking-wider text-on-surface-variant">
               Enterprise Candidate Suite

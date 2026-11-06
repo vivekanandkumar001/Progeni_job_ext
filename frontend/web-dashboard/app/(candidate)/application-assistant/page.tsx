@@ -411,7 +411,7 @@ export default function ApplicationAssistantPage() {
                   <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">
                     {current.jobSnapshot.platform || 'Direct ATS'}
                   </span>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ current.status === 'prepared' ? 'bg-success-container text-success' : current.status === 'submitted' ? 'bg-info-container text-info' : 'bg-warning-container text-warning' }`}}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ current.status === 'prepared' ? 'bg-success-container text-success' : current.status === 'submitted' ? 'bg-info-container text-info' : 'bg-warning-container text-warning' }`}>
                     Status: {current.status.toUpperCase()}
                   </span>
                 </div>
@@ -425,10 +425,10 @@ export default function ApplicationAssistantPage() {
               {/* Match Score & Export */}
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <div className="text-2xl font-black text-primary">
+                  <div className="text-2xl font-bold text-primary">
                     {current.matchSnapshot.score}%
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ current.matchSnapshot.eligible ? 'bg-success-container text-success' : 'bg-warning-container text-warning' }`}}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ current.matchSnapshot.eligible ? 'bg-success-container text-success' : 'bg-warning-container text-warning' }`}>
                     {current.matchSnapshot.status.replace(/_/g, ' ').toUpperCase()}
                   </span>
                 </div>
@@ -469,10 +469,10 @@ export default function ApplicationAssistantPage() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-on-surface">Application Technical Readiness:</span>
-                  <span className="text-base font-black text-primary">{current.readiness.score}/100</span>
+                  <span className="text-base font-bold text-primary">{current.readiness.score}/100</span>
                   <span className="text-xs text-on-surface-variant">({current.readiness.summary})</span>
                 </div>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ current.readiness.isReadyForSubmission ? 'bg-success-container text-success' : 'bg-warning-container text-warning' }`}}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ current.readiness.isReadyForSubmission ? 'bg-success-container text-success' : 'bg-warning-container text-warning' }`}>
                   {current.readiness.isReadyForSubmission ? 'READY FOR SUBMISSION' : 'PREPARATION IN PROGRESS'}
                 </span>
               </div>
@@ -480,7 +480,7 @@ export default function ApplicationAssistantPage() {
               {/* Progress Bar */}
               <div className="w-full bg-outline-variant/30 rounded-full h-2.5 overflow-hidden flex">
                 <div
-                  className={`h-full transition-all duration-300 ${ current.readiness.score >= 90 ? 'bg-emerald-500' : current.readiness.score >= 60 ? 'bg-primary' : 'bg-amber-500' }`}}
+                  className={`h-full transition-all duration-300 ${ current.readiness.score >= 90 ? 'bg-emerald-500' : current.readiness.score >= 60 ? 'bg-primary' : 'bg-amber-500' }`}
                   style={{ width: `${current.readiness.score}%` }}
                 />
               </div>
@@ -527,7 +527,7 @@ export default function ApplicationAssistantPage() {
             </div>
 
             {/* Human Approval Gate Bar */}
-            <div className={`p-4 rounded-lg border flex flex-col md:flex-row md:items-center justify-between gap-3 ${ current.approval.isApproved ? 'bg-success-container/60 border-success/30 text-success' : 'bg-warning-container/60 border-warning/30 text-warning' }`}}>
+            <div className={`p-4 rounded-lg border flex flex-col md:flex-row md:items-center justify-between gap-3 ${ current.approval.isApproved ? 'bg-success-container/60 border-success/30 text-success' : 'bg-warning-container/60 border-warning/30 text-warning' }`}>
               <div className="flex items-start gap-3">
                 <span className="text-xl">{current.approval.isApproved ? '🛡️' : '⚠️'}</span>
                 <div>
@@ -578,7 +578,7 @@ export default function ApplicationAssistantPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}
-                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${ activeTab === tab.id ? 'border-primary text-primary font-bold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${ activeTab === tab.id ? 'border-primary text-primary font-bold' : 'border-transparent text-on-surface-variant hover:text-on-surface' }`}
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -596,7 +596,7 @@ export default function ApplicationAssistantPage() {
                   {current.readiness.checklist.map((item, index) => (
                     <div
                       key={index}
-                      className={`p-3 rounded-lg border text-sm flex items-center justify-between ${ item.ready ? 'bg-surface border-success/30' : 'bg-surface-variant/20 border-outline-variant/40' }`}}
+                      className={`p-3 rounded-lg border text-sm flex items-center justify-between ${ item.ready ? 'bg-surface border-success/30' : 'bg-surface-variant/20 border-outline-variant/40' }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className={item.ready ? 'text-success font-bold' : 'text-warning'}>
@@ -857,7 +857,7 @@ export default function ApplicationAssistantPage() {
                 {current.screeningAnswers.map((item) => (
                   <div
                     key={item.id}
-                    className={`p-4 rounded-xl border transition-colors ${ item.userApproved ? 'bg-surface border-success/30' : 'bg-surface-variant/10 border-outline-variant/40' }`}}
+                    className={`p-4 rounded-xl border transition-colors ${ item.userApproved ? 'bg-surface border-success/30' : 'bg-surface-variant/10 border-outline-variant/40' }`}
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
@@ -996,7 +996,7 @@ export default function ApplicationAssistantPage() {
       {/* Human Approval Confirmation Modal */}
       {showApprovalModal && current && (
         <div className="fixed inset-0 bg-surface backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-outline-variant space-y-5">
+          <div className="bg-surface rounded-2xl max-w-xl w-full p-6 shadow-card border border-outline-variant space-y-5">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-primary">Human Approval Gate</span>
               <h3 className="text-xl font-bold text-on-surface mt-0.5">Explicit Application Confirmation</h3>

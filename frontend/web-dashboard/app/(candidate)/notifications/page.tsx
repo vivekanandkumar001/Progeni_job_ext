@@ -89,7 +89,7 @@ export default function NotificationsPage() {
           </button>
           <Link
             href="/application-tracker"
-            className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition"
+            className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition"
           >
             ← Application Tracker
           </Link>
@@ -106,13 +106,13 @@ export default function NotificationsPage() {
       <div className="flex gap-2">
         <button
           onClick={() => setUnreadOnly(false)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ !unreadOnly ? 'bg-surface-subtle text-on-surface border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ !unreadOnly ? 'bg-surface-subtle text-on-surface border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}
         >
           All Notifications
         </button>
         <button
           onClick={() => setUnreadOnly(true)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ unreadOnly ? 'bg-surface-subtle text-on-surface border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ unreadOnly ? 'bg-surface-subtle text-on-surface border border-outline' : 'text-on-surface-variant hover:text-on-surface' }`}
         >
           Unread Only
         </button>
@@ -129,7 +129,7 @@ export default function NotificationsPage() {
             {notifications.map((item) => (
               <div
                 key={item.id}
-                className={`p-4 flex items-start justify-between gap-4 transition ${ item.read ? 'bg-transparent' : 'bg-primary/10' }`}}
+                className={`p-4 flex items-start justify-between gap-4 transition ${ item.read ? 'bg-transparent' : 'bg-primary/10' }`}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-xl pt-0.5">{getTypeIcon(item.type)}</span>

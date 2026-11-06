@@ -82,7 +82,7 @@ export default function ResumeAnalyzerPage() {
               Analyzing: {masterResume?.title} (v{masterResume?.version})
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mt-1">
+          <h1 className="text-3xl font-semibold tracking-tight text-on-surface mt-1">
             ATS Compatibility Diagnostics
           </h1>
           <p className="text-sm text-on-surface-variant">
@@ -93,7 +93,7 @@ export default function ResumeAnalyzerPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/resume-studio"
-            className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+            className="px-4 py-2 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition"
           >
             Open in Studio
           </Link>
@@ -130,7 +130,7 @@ export default function ResumeAnalyzerPage() {
           <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-4 border-b md:border-b-0 md:border-r border-outline-variant">
             <div className="relative w-36 h-36 flex items-center justify-center rounded-full border-8 border-success/30 bg-success-container">
               <div className="text-center">
-                <span className="text-4xl font-extrabold text-on-surface">
+                <span className="text-4xl font-semibold text-on-surface">
                   {diagnosis.overallScore}
                 </span>
                 <span className="text-xs text-on-surface-variant block font-medium">/ 100</span>
@@ -248,7 +248,7 @@ export default function ResumeAnalyzerPage() {
           <button
             onClick={handleCompareJD}
             disabled={analyzingJD || !jobDescription.trim()}
-            className="px-5 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition disabled:opacity-50"
+            className="px-5 py-2 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition disabled:opacity-50"
           >
             {analyzingJD ? 'Analyzing Keyword Gaps...' : 'Run Keyword Gap Analysis'}
           </button>
@@ -260,7 +260,7 @@ export default function ResumeAnalyzerPage() {
             <div className="flex items-center justify-between border-b border-outline-variant pb-3">
               <div>
                 <span className="text-xs text-on-surface-variant font-semibold uppercase">Keyword Match Alignment</span>
-                <div className="text-2xl font-black text-on-surface">
+                <div className="text-2xl font-bold text-on-surface">
                   {comparison.matchPercentage}%
                 </div>
               </div>

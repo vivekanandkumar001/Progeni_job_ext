@@ -64,7 +64,7 @@ export default function SkillGapAnalyzerPage() {
           <button
             type="button"
             onClick={loadGaps}
-            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700"
+            className="mt-3 px-4 py-1.5 text-xs font-medium rounded-lg bg-danger text-white hover:bg-red-700"
           >
             Retry
           </button>
@@ -139,7 +139,7 @@ export default function SkillGapAnalyzerPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span
-                          className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider mb-1 ${ gap.importance === 'required' ? 'bg-danger-container text-danger ' : 'bg-info-container text-info ' }`}}
+                          className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider mb-1 ${ gap.importance === 'required' ? 'bg-danger-container text-danger ' : 'bg-info-container text-info ' }`}
                         >
                           {gap.importance === 'required' ? 'High Priority (Required)' : 'Bonus (Preferred)'}
                         </span>
@@ -173,7 +173,7 @@ export default function SkillGapAnalyzerPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-on-surface font-mono">{item.skill}</span>
                         <span
-                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${ item.importance === 'high' ? 'bg-danger-container text-danger ' : 'bg-info-container text-info ' }`}}
+                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${ item.importance === 'high' ? 'bg-danger-container text-danger ' : 'bg-info-container text-info ' }`}
                         >
                           {item.importance} priority
                         </span>

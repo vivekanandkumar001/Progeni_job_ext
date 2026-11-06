@@ -311,7 +311,7 @@ export default function ResumeStudioPage() {
               v{activeResume?.version} ({activeResume?.status})
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mt-1">
+          <h1 className="text-3xl font-semibold tracking-tight text-on-surface mt-1">
             Resume Studio & Builder
           </h1>
           <p className="text-sm text-on-surface-variant">
@@ -342,13 +342,13 @@ export default function ResumeStudioPage() {
 
           <button
             onClick={() => handleExport('pdf')}
-            className="px-3 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition"
+            className="px-3 py-1.5 text-xs font-semibold bg-danger hover:bg-danger/90 text-white rounded-lg transition"
           >
             Export PDF
           </button>
           <button
             onClick={() => handleExport('docx')}
-            className="px-3 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+            className="px-3 py-1.5 text-xs font-semibold bg-info hover:bg-info/90 text-white rounded-lg transition"
           >
             Export Word (.docx)
           </button>
@@ -415,7 +415,7 @@ export default function ResumeStudioPage() {
           <button
             onClick={handlePublish}
             disabled={saving}
-            className="px-4 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+            className="px-4 py-1.5 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition"
           >
             Publish New Version
           </button>
@@ -449,7 +449,7 @@ export default function ResumeStudioPage() {
               <button
                 key={tabKey}
                 onClick={() => setActiveTab(tabKey)}
-                className={`px-3 py-2 border-b-2 whitespace-nowrap transition ${ activeTab === tabKey ? 'border-success/30 text-success font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface ' }`}}
+                className={`px-3 py-2 border-b-2 whitespace-nowrap transition ${ activeTab === tabKey ? 'border-success/30 text-success font-semibold' : 'border-transparent text-on-surface-variant hover:text-on-surface ' }`}
               >
                 {label}
               </button>
@@ -543,7 +543,7 @@ export default function ResumeStudioPage() {
                 <h3 className="text-base font-bold text-on-surface">Work Experience</h3>
                 <button
                   onClick={addWorkExperience}
-                  className="px-3 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                  className="px-3 py-1 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition"
                 >
                   + Add Experience
                 </button>
@@ -604,7 +604,7 @@ export default function ResumeStudioPage() {
                 <h3 className="text-base font-bold text-on-surface">Education History</h3>
                 <button
                   onClick={addEducation}
-                  className="px-3 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                  className="px-3 py-1 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition"
                 >
                   + Add Degree
                 </button>
@@ -670,7 +670,7 @@ export default function ResumeStudioPage() {
                       el.value = '';
                     }
                   }}
-                  className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                  className="px-4 py-2 text-xs font-semibold bg-success hover:bg-success/90 text-white rounded-lg transition"
                 >
                   Add
                 </button>
@@ -783,7 +783,7 @@ export default function ResumeStudioPage() {
             </div>
 
             {/* Resume Sheet */}
-            <div className={`p-6 text-on-surface font-sans space-y-4 max-h-[750px] overflow-y-auto ${ activeResume?.template === 'classic' ? 'font-serif' : 'font-sans' }`}}>
+            <div className={`p-6 text-on-surface font-sans space-y-4 max-h-[750px] overflow-y-auto ${ activeResume?.template === 'classic' ? 'font-serif' : 'font-sans' }`}>
               {/* Header */}
               <div className="border-b border-outline pb-3">
                 <h2 className="text-xl font-bold tracking-tight text-on-surface">

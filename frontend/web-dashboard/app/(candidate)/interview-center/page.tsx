@@ -170,7 +170,7 @@ export default function InterviewCenterPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowSimModal(true)}
-            className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-purple-600 hover:bg-purple-500 text-white shadow-sm transition"
+            className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition"
           >
             ⚡ Practice with Progeni Atlas AI
           </button>
@@ -182,7 +182,7 @@ export default function InterviewCenterPage() {
           </button>
           <Link
             href="/application-tracker"
-            className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition"
+            className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition"
           >
             ← Application Tracker
           </Link>
@@ -213,7 +213,7 @@ export default function InterviewCenterPage() {
           <button
             key={s.key}
             onClick={() => setActiveStage(s.key)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeStage === s.key ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface border border-outline-variant text-on-surface-variant hover:text-on-surface' }`}}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${ activeStage === s.key ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface border border-outline-variant text-on-surface-variant hover:text-on-surface' }`}
           >
             {s.label}
           </button>
@@ -285,7 +285,7 @@ export default function InterviewCenterPage() {
                         href={item.meetingLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium transition"
                       >
                         🎥 Open Video Meeting →
                       </a>
@@ -610,7 +610,7 @@ export default function InterviewCenterPage() {
       {/* Modal: Log Feedback */}
       {feedbackInterview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-card space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-on-surface">Post-Interview Evaluation</h3>
@@ -637,7 +637,7 @@ export default function InterviewCenterPage() {
                       type="button"
                       key={star}
                       onClick={() => setRating(star)}
-                      className={`text-xl ${rating >= star ? 'text-warning' : 'text-on-surface-variant'}`}}
+                      className={`text-xl ${rating >= star ? 'text-warning' : 'text-on-surface-variant'}`}
                     >
                       ★
                     </button>
@@ -709,7 +709,7 @@ export default function InterviewCenterPage() {
                 <button
                   type="submit"
                   disabled={submittingFeedback}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-success hover:bg-success/90 text-white transition disabled:opacity-50"
                 >
                   {submittingFeedback ? 'Saving...' : 'Save Evaluation'}
                 </button>
@@ -722,7 +722,7 @@ export default function InterviewCenterPage() {
       {/* Modal: Custom Practice Simulation */}
       {showSimModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface backdrop-blur-sm">
-          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-card space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-on-surface">Launch AI Practice Simulation</h3>
@@ -787,7 +787,7 @@ export default function InterviewCenterPage() {
                 <button
                   type="submit"
                   disabled={launchingSimId === 'custom'}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition disabled:opacity-50"
                 >
                   {launchingSimId === 'custom' ? 'Initializing Progeni...' : '🚀 Launch Live Room'}
                 </button>
