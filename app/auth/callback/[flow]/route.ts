@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -8,7 +9,11 @@ export async function GET(request: NextRequest) {
   }
 
   const code = request.nextUrl.searchParams.get('code');
-  if (!code) {
+  const token_hash = request.nextUrl.searchParams.get('token_hash');
+  const typeParam = request.nextUrl.searchParams.get('type');
+  const type = (typeParam || (flow === 'recovery' ? 'recovery' : 'signup')) as EmailOtpType;
+
+  if (!code && !token_hash) {
     return NextResponse.redirect(new URL('/login?error=callback', request.url));
   }
 
@@ -35,8 +40,16 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) {
+  let authError: unknown = null;
+  if (token_hash) {
+    const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+    authError = error;
+  } else if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    authError = error;
+  }
+
+  if (authError) {
     const signInUrl = new URL('/login', request.url);
     signInUrl.searchParams.set('error', 'callback');
     const redirect = NextResponse.redirect(signInUrl);
