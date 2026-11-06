@@ -130,7 +130,7 @@ export default function DashboardPage() {
           <h1>Good to see you{profile.fullName ? `, ${profile.fullName.split(' ')[0]}` : ''}.</h1>
           <p>Understand job fit, prepare carefully, and keep your search organized.</p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex flex-wrap gap-2">
           <Link className="button button-secondary" href="/onboarding">
             ✦ Onboarding wizard
           </Link>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
             border: '1px solid rgb(var(--info) / 0.3)',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <strong style={{ color: 'rgb(var(--info))', fontSize: '14px' }}>
                 Profile Completeness: {completenessScore}% · Keep your profile accurate
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                 Adding <strong>{missingFields.slice(0, 3).join(', ')}</strong> improves job fit scoring and auto-fill accuracy.
               </p>
             </div>
-            <Link className="button button-primary" href="/onboarding" style={{ padding: '6px 14px', fontSize: '13px' }}>
+            <Link className="button button-primary" href="/onboarding">
               Complete profile in wizard →
             </Link>
           </div>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
 
         <article className="card stat-card">
           <span className="stat-label">Extension connection</span>
-          <strong className="stat-value" style={{ fontSize: 16, color: extensionConnected ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
+          <strong className="stat-value text-base" style={{ color: extensionConnected ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
             {extensionConnected ? '● Connected' : '○ Pair required'}
           </strong>
           <span className="stat-footnote">
@@ -396,7 +396,7 @@ export default function DashboardPage() {
                   {new Date(application.updatedAt).toLocaleDateString()}
                 </span>
               </div>
-              <span className="score-chip" style={{ minWidth: 90 }}>
+              <span className="score-chip min-w-[90px]">
                 {application.status}
               </span>
             </div>

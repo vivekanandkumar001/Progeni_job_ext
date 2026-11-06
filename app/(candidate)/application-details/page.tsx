@@ -664,7 +664,7 @@ function DossierContent() {
               {dossier.timeline.map((event) => (
                 <div key={event.id} className="relative pl-6">
                   {/* Timeline bullet */}
-                  <span className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-outline-variant bg-indigo-500" />
+                  <span className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-outline-variant bg-primary" />
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-on-surface">{event.title}</span>

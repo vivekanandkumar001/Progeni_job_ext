@@ -26,6 +26,28 @@ interface AuthScreenProps {
 const inputClass =
   'w-full rounded-xl border border-outline bg-surface px-3.5 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/70 outline-none transition-colors focus:border-primary/70 focus:ring-2 focus:ring-primary/15';
 
+function formatAuthError(error: unknown): string {
+  if (!(error instanceof Error)) return 'Authentication failed. Please verify credentials.';
+  const msg = error.message.toLowerCase();
+
+  if (msg.includes('rate limit') || msg.includes('rate_limit') || msg.includes('email rate limit exceeded')) {
+    return 'Email rate limit reached. Please check your inbox (and Spam folder) for the verification code sent earlier. If you did not receive it, wait 2-3 minutes before resending, or configure custom SMTP in Supabase.';
+  }
+  if (msg.includes('user already registered') || msg.includes('already exists') || msg.includes('identity already exists')) {
+    return 'An account with this email already exists. You can sign in directly with your password, or enter the code sent to your email to verify.';
+  }
+  if (msg.includes('invalid credentials') || msg.includes('invalid login credentials')) {
+    return 'Incorrect email or password. Please verify and try again.';
+  }
+  if (msg.includes('token has expired') || msg.includes('otp has expired')) {
+    return 'This verification code has expired. Please click "Resend OTP Code" to get a fresh code.';
+  }
+  if (msg.includes('token is invalid') || msg.includes('invalid token')) {
+    return 'Invalid verification code. Please double-check the 6 digits from your email.';
+  }
+  return error.message;
+}
+
 export default function AuthScreen({
   initialMode = 'sign-in',
   onSuccess,
@@ -108,14 +130,27 @@ export default function AuthScreen({
         setIsSuccessMessage(true);
         setMessage('Password reset instructions sent. Please check your email inbox.');
       } else if (mode === 'sign-up') {
-        const sessionCreated = await signUp(email.trim(), password);
-        if (!sessionCreated) {
-          setMode('verify-otp');
-          setResendCountdown(60);
-          setIsSuccessMessage(true);
-          setMessage(`Verification code dispatched to ${email.trim()}. Enter the 6-digit code below.`);
-        } else {
-          handleNavigateAfterAuth();
+        try {
+          const sessionCreated = await signUp(email.trim(), password);
+          if (!sessionCreated) {
+            setMode('verify-otp');
+            setResendCountdown(60);
+            setIsSuccessMessage(true);
+            setMessage(`Verification code dispatched to ${email.trim()}. Enter the 6-digit code below.`);
+          } else {
+            handleNavigateAfterAuth();
+          }
+        } catch (signUpErr) {
+          const rawErr = signUpErr instanceof Error ? signUpErr.message.toLowerCase() : '';
+          if (rawErr.includes('rate limit') || rawErr.includes('already registered')) {
+            setMode('verify-otp');
+            setResendCountdown(60);
+            setMessage(
+              'A verification code was previously sent to your email. Check your inbox and spam folder, then enter the 6-digit code below.'
+            );
+          } else {
+            throw signUpErr;
+          }
         }
       } else if (mode === 'verify-otp') {
         if (otp.trim().length < 6) {
@@ -134,7 +169,7 @@ export default function AuthScreen({
         handleNavigateAfterAuth();
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Authentication failed. Please verify credentials.');
+      setMessage(formatAuthError(error));
     } finally {
       setBusy(false);
     }
@@ -151,7 +186,7 @@ export default function AuthScreen({
       setIsSuccessMessage(true);
       setMessage(`A fresh 6-digit verification code has been dispatched to ${email.trim()}.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not resend verification code.');
+      setMessage(formatAuthError(error));
     } finally {
       setBusy(false);
     }
@@ -354,6 +389,28 @@ export default function AuthScreen({
                   {busy ? 'Verifying Code…' : 'Verify & Activate Account'}
                 </button>
 
+                {/* Helpful spam / sign-in tip */}
+                <div className="rounded-xl border border-outline-variant bg-surface-subtle p-3 text-[11px] leading-relaxed text-on-surface-variant">
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary text-sm">💡</span>
+                    <span>
+                      Check your <strong>Spam / Promotions</strong> folder if not in primary inbox.
+                      Already verified?{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMode('sign-in');
+                          setMessage('');
+                          setIsSuccessMessage(false);
+                        }}
+                        className="text-primary font-semibold underline hover:opacity-80"
+                      >
+                        Sign in with password
+                      </button>
+                    </span>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between pt-2 border-t border-outline-variant text-xs">
                   <button
                     type="button"
@@ -463,7 +520,7 @@ export default function AuthScreen({
                       className={inputClass}
                     />
                     <div className="mt-1 flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                      <span className="text-emerald-500 font-bold">✓</span>
+                      <span className="font-semibold text-success">✓</span>
                       <span>An email verification code (OTP) will be sent upon submission.</span>
                     </div>
                   </div>
@@ -489,7 +546,7 @@ export default function AuthScreen({
               <div
                 className={`rounded-xl border p-3 text-xs leading-relaxed ${
                   isSuccessMessage
-                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                    ? 'border-success/30 bg-success/10 text-success'
                     : 'border-danger/30 bg-danger/10 text-danger'
                 }`}
               >

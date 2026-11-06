@@ -157,17 +157,17 @@ export default function PrivacySettingsPage() {
         </div>
       </header>
 
-      {notice && <p className="notice" style={{ maxWidth: 820, marginBottom: 16 }}>{notice}</p>}
-      {error && <p className="form-error" role="alert" style={{ maxWidth: 820, marginBottom: 16 }}>{error}</p>}
+      {notice && <p className="notice mb-4 max-w-[820px]">{notice}</p>}
+      {error && <p className="form-error mb-4 max-w-[820px]" role="alert">{error}</p>}
 
       {/* Account Info & Extension Pairing Card */}
-      <section className="card card-padding" style={{ maxWidth: 820, marginBottom: 24 }}>
+      <section className="card card-padding mb-6 max-w-[820px]">
         <h2 className="card-title">Chrome extension pairing</h2>
-        <p className="card-description" style={{ marginTop: 8, lineHeight: 1.7 }}>
+        <p className="card-description mt-2 leading-relaxed">
           Pair your browser extension securely with your account using a one-time code without entering your password in the extension.
         </p>
         {pairingCode ? (
-          <div style={{ marginTop: 14, padding: '16px', background: 'rgb(var(--success-container))', border: '1px solid rgb(var(--success) / 0.3)', borderRadius: 8 }}>
+          <div className="mt-3.5 rounded-lg border border-success/30 bg-success-container p-4">
             <p style={{ fontSize: '0.875rem', color: 'rgb(var(--success))', fontWeight: 600 }}>Your 5-Minute Pairing Code:</p>
             <p style={{ fontSize: '1.75rem', fontFamily: 'monospace', fontWeight: 700, color: 'rgb(var(--success))', letterSpacing: '2px', marginTop: 4 }}>
               {pairingCode}
@@ -177,16 +177,16 @@ export default function PrivacySettingsPage() {
             </p>
           </div>
         ) : (
-          <button className="button button-primary" style={{ marginTop: 14 }} disabled={busy} onClick={() => void handleGeneratePairingCode()}>
+          <button className="button button-primary mt-3.5" disabled={busy} onClick={() => void handleGeneratePairingCode()}>
             {busy ? 'Generating…' : 'Generate extension pairing code'}
           </button>
         )}
       </section>
 
       {/* Active Sessions & Device Management Card */}
-      <section className="card card-padding" style={{ maxWidth: 820, marginBottom: 24 }}>
+      <section className="card card-padding mb-6 max-w-[820px]">
         <h2 className="card-title">Active sessions & devices</h2>
-        <p className="card-description" style={{ marginTop: 8, lineHeight: 1.7 }}>
+        <p className="card-description mt-2 leading-relaxed">
           Review browsers and devices where your account is currently signed in.
         </p>
         {sessions.length > 0 ? (
@@ -225,18 +225,18 @@ export default function PrivacySettingsPage() {
         ) : (
           <p style={{ marginTop: 12, fontSize: '0.875rem', color: 'rgb(var(--on-surface-variant))' }}>No active remote sessions recorded.</p>
         )}
-        <button className="button button-secondary" style={{ marginTop: 16 }} disabled={busy} onClick={() => void handleLogoutAll()}>
+        <button className="button button-secondary mt-4" disabled={busy} onClick={() => void handleLogoutAll()}>
           Log out of all devices
         </button>
       </section>
 
       {/* Multi-Factor Authentication (MFA) Card */}
-      <section className="card card-padding" style={{ maxWidth: 820, marginBottom: 24 }}>
+      <section className="card card-padding mb-6 max-w-[820px]">
         <h2 className="card-title">Multi-factor authentication (MFA)</h2>
-        <p className="card-description" style={{ marginTop: 8, lineHeight: 1.7 }}>
+        <p className="card-description mt-2 leading-relaxed">
           Add an extra layer of protection to your account by requiring an authenticator code when signing in or performing sensitive actions.
         </p>
-        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Current status: </span>
             <span style={{
@@ -262,12 +262,12 @@ export default function PrivacySettingsPage() {
       </section>
 
       {/* Workspace Data & Account Deletion Card */}
-      <section className="card card-padding" style={{ maxWidth: 820 }}>
+      <section className="card card-padding max-w-[820px]">
         <h2 className="card-title">Danger zone</h2>
-        <p className="card-description" style={{ marginTop: 8, lineHeight: 1.7 }}>
+        <p className="card-description mt-2 leading-relaxed">
           Clear your candidate workspace data or permanently delete your account.
         </p>
-        <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+        <div className="mt-4 flex flex-wrap gap-3">
           <button className="button" style={{ color: 'rgb(var(--danger))', borderColor: 'rgb(var(--danger) / 0.25)', background: 'rgb(var(--danger-container))' }} disabled={busy} onClick={() => void handleClearWorkspace()}>
             Clear workspace data only
           </button>

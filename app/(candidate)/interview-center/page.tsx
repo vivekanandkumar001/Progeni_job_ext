@@ -511,7 +511,7 @@ export default function InterviewCenterPage() {
                       </div>
                       <div className="w-full bg-surface-variant h-1 rounded mt-1 overflow-hidden">
                         <div
-                          className="bg-purple-500 h-full"
+                          className="bg-primary h-full"
                           style={{ width: `${sim.competencyPillars.algorithmicProblemSolving}%` }}
                         />
                       </div>
@@ -526,7 +526,7 @@ export default function InterviewCenterPage() {
                       </div>
                       <div className="w-full bg-surface-variant h-1 rounded mt-1 overflow-hidden">
                         <div
-                          className="bg-indigo-500 h-full"
+                          className="bg-primary/80 h-full"
                           style={{ width: `${sim.competencyPillars.systemArchitecture}%` }}
                         />
                       </div>
@@ -541,7 +541,7 @@ export default function InterviewCenterPage() {
                       </div>
                       <div className="w-full bg-surface-variant h-1 rounded mt-1 overflow-hidden">
                         <div
-                          className="bg-emerald-500 h-full"
+                          className="bg-success h-full"
                           style={{ width: `${sim.competencyPillars.codeQualityAndSyntax}%` }}
                         />
                       </div>
@@ -556,7 +556,7 @@ export default function InterviewCenterPage() {
                       </div>
                       <div className="w-full bg-surface-variant h-1 rounded mt-1 overflow-hidden">
                         <div
-                          className="bg-blue-500 h-full"
+                          className="bg-info h-full"
                           style={{ width: `${sim.competencyPillars.communicationAndClarity}%` }}
                         />
                       </div>
