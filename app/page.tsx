@@ -21,6 +21,7 @@ import {
   Zap,
 } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
+import LandingHeader from '../components/LandingHeader';
 import ThemeToggle from '../components/ThemeToggle';
 import { getSupabaseClient, usesCloudAuthentication } from '../lib/api';
 
@@ -153,65 +154,12 @@ export default function LandingPage() {
 
   return (
     <div className="page-canvas flex min-h-screen flex-col bg-background text-on-surface antialiased">
-      {/* ============================== HEADER ============================== */}
-      <header className="sticky top-0 z-40 border-b border-outline-variant bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="group flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 text-sm font-extrabold text-white shadow-md shadow-indigo-500/25 transition-transform group-hover:scale-105">
-              P
-            </span>
-            <span className="flex flex-col leading-tight">
-              <span className="text-[13px] font-bold tracking-tight">
-                PROGENI <span className="text-primary">AUTOAPPLY</span>
-              </span>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
-                Career intelligence
-              </span>
-            </span>
-          </Link>
-
-          <nav className="hidden items-center gap-7 text-[12.5px] font-medium text-on-surface-variant lg:flex">
-            {[
-              ['How it works', '#how-it-works'],
-              ['Features', '#features'],
-              ['Integrations', '#integrations'],
-              ['Pricing', '#pricing'],
-              ['FAQ', '#faq'],
-            ].map(([label, href]) => (
-              <a key={href} href={href} className="transition-colors hover:text-on-surface">
-                {label}
-              </a>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <ThemeToggle size="sm" />
-            {isAuthenticated ? (
-              <Link className="button button-primary button-sm" href="/dashboard">
-                Open workspace
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => openAuth('sign-in')}
-                  className="hidden rounded-[10px] px-3 py-2 text-[12px] font-semibold text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-on-surface sm:block"
-                >
-                  Sign in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAuth('sign-up')}
-                  className="button button-primary button-sm"
-                >
-                  Get started
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* ============================== REDESIGNED HEADER ============================== */}
+      <LandingHeader
+        isAuthenticated={isAuthenticated}
+        openAuth={openAuth}
+        primaryAction={primaryAction}
+      />
 
       <main className="flex-1">
         {/* ============================== HERO ============================== */}
@@ -255,7 +203,7 @@ export default function LandingPage() {
             </div>
 
             {/* Product preview */}
-            <div className="relative">
+            <div id="extension" className="relative scroll-mt-28">
               <div className="absolute -inset-3 rounded-[28px] bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 blur-2xl" />
               <div className="relative overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-card">
                 <div className="flex items-center justify-between border-b border-outline-variant px-4 py-3">
@@ -318,7 +266,7 @@ export default function LandingPage() {
           </div>
 
           {/* Partner strip */}
-          <div id="integrations" className="border-t border-outline-variant bg-surface/60">
+          <div id="integrations" className="border-t border-outline-variant bg-surface/60 scroll-mt-28">
             <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-5 sm:px-6 lg:px-8">
               <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
                 Works with
@@ -333,7 +281,7 @@ export default function LandingPage() {
         </section>
 
         {/* ============================== HOW IT WORKS ============================== */}
-        <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20 scroll-mt-28">
           <div className="mx-auto max-w-2xl text-center">
             <span className="eyebrow">How it works</span>
             <h2 className="text-[28px] font-extrabold tracking-tight sm:text-[34px]">
@@ -386,7 +334,7 @@ export default function LandingPage() {
         </section>
 
         {/* ============================== FEATURES ============================== */}
-        <section id="features" className="border-y border-outline-variant bg-surface-subtle/40">
+        <section id="features" className="border-y border-outline-variant bg-surface-subtle/40 scroll-mt-28">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div className="max-w-xl">
@@ -424,7 +372,7 @@ export default function LandingPage() {
         </section>
 
         {/* ============================== TRUTH ENGINE ============================== */}
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <section id="truth-engine" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20 scroll-mt-28">
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div>
               <span className="eyebrow">Truth Engine</span>
@@ -494,7 +442,7 @@ export default function LandingPage() {
         </section>
 
         {/* ============================== PRICING ============================== */}
-        <section id="pricing" className="border-y border-outline-variant bg-surface-subtle/40">
+        <section id="pricing" className="border-y border-outline-variant bg-surface-subtle/40 scroll-mt-28">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <span className="eyebrow">Pricing</span>
@@ -570,7 +518,7 @@ export default function LandingPage() {
         </section>
 
         {/* ============================== FAQ ============================== */}
-        <section id="faq" className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <section id="faq" className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20 scroll-mt-28">
           <div className="mx-auto max-w-2xl text-center">
             <span className="eyebrow">FAQ</span>
             <h2 className="text-[28px] font-extrabold tracking-tight sm:text-[34px]">
@@ -610,7 +558,7 @@ export default function LandingPage() {
         </section>
 
         {/* ============================== CTA ============================== */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8">
+        <section id="get-started" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8 scroll-mt-28">
           <div className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-primary-container via-surface to-secondary-container/40 px-6 py-12 text-center sm:px-12">
             <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-primary/15 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-12 h-56 w-56 rounded-full bg-secondary/15 blur-3xl" />
