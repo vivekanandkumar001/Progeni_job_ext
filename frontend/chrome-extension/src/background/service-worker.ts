@@ -148,6 +148,7 @@ async function handleApiMessage(message: {
   notes?: string;
   email?: string;
   password?: string;
+  code?: string;
 }): Promise<ApiResponse> {
   await trustedStorageReady;
   switch (message.type) {

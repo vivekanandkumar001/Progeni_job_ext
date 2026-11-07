@@ -15,6 +15,18 @@ export interface ExtractedJob {
   matchScore: number;
 }
 
+export interface JobExtractionResult {
+  supported: boolean;
+  platform: string | null;
+  policy: string;
+  job: ExtractedJob | null;
+  confidence: number;
+  missingFields: string[];
+  reason?: string;
+  detectedFields?: FormField[];
+  canAutoFill?: boolean;
+}
+
 const knownSkills = [
   'Python', 'JavaScript', 'TypeScript', 'Java', 'C++', 'C#', 'Go', 'Rust',
   'React', 'Next.js', 'Node.js', 'Express', 'Django', 'Flask', 'FastAPI',
@@ -169,6 +181,7 @@ export function extractJob(url: string, document: Document): JobExtractionResult
     experienceMin,
     matchedSkills,
     missingSkills: [], // Will be filled in when comparing with candidate profile
+    matchScore: 0,
   };
 
   const missingFields = [

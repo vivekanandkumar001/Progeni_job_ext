@@ -32,6 +32,10 @@ export type MsgType =
   | 'PREVIEW_AUTOFILL'
   | 'APPLY_AUTOFILL'
   | 'PAGE_READY'
+  | 'GET_PROFILE_SKILLS'
+  | 'GET_PROFILE_EXPERIENCE'
+  | 'COMPUTE_MATCH_SCORE'
+  | 'GENERATE_COVER_LETTER'
   | 'ERROR';
 
 export const DETECTED_JOB_STORAGE_KEY = 'pendingDetectedJob';

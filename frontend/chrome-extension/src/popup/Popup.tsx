@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ensureSupabaseHostPermission, makeRequestId, sendMessage } from '../shared/messages';
+import { ensureSupabaseHostPermission, makeRequestId, sendMessage, sendTabMessage } from '../shared/messages';
 
 interface ResponseData {
   ok?: boolean;
@@ -12,6 +12,112 @@ interface ResponseData {
   status?: string;
   job?: { title?: string; company?: string };
   error?: string;
+  skills?: string[];
+  experience_years?: number | null;
+}
+
+type IconName =
+  | 'radar'
+  | 'sparkles'
+  | 'shield'
+  | 'wand'
+  | 'copy'
+  | 'external'
+  | 'logout'
+  | 'check'
+  | 'alert'
+  | 'panel'
+  | 'search';
+
+const iconPaths: Record<IconName, React.ReactNode> = {
+  radar: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 12l6-6" />
+    </>
+  ),
+  sparkles: (
+    <>
+      <path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3z" />
+      <path d="M18.5 15l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9.9-2.3z" />
+    </>
+  ),
+  shield: (
+    <>
+      <path d="M12 3l7 3v5.5c0 4.3-2.9 8-7 9.5-4.1-1.5-7-5.2-7-9.5V6l7-3z" />
+      <path d="M9 12l2 2 4-4" />
+    </>
+  ),
+  wand: (
+    <>
+      <path d="M15 4V2M15 10V8M12.5 6h-2M17.5 6h2M18.4 3.6l1.4-1.4M18.4 8.4l1.4 1.4M11.6 3.6L10.2 2.2" />
+      <path d="M3 21l9-9 2 2-9 9-2-2z" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1" />
+    </>
+  ),
+  external: (
+    <>
+      <path d="M14 3h7v7" />
+      <path d="M21 3l-9 9" />
+      <path d="M21 14v5a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h5" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </>
+  ),
+  check: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M12 3l9.5 17H2.5L12 3z" />
+      <path d="M12 9v5M12 17.5v.5" />
+    </>
+  ),
+  panel: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M15 4v16" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </>
+  ),
+};
+
+function Icon({ name, className = 'icon' }: { name: IconName; className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {iconPaths[name]}
+    </svg>
+  );
 }
 
 export default function Popup() {
@@ -24,8 +130,14 @@ export default function Popup() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
   const [job, setJob] = useState<ResponseData['job'] | null>(null);
-  const [matchScore, setMatchScore] = useState<{ score: number; matchedSkills: string[]; missingSkills: string[]; explanation: string[] } | null>(null);
+  const [matchScore, setMatchScore] = useState<{
+    score: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    explanation: string[];
+  } | null>(null);
   const [coverLetter, setCoverLetter] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [smartApplyResult, setSmartApplyResult] = useState<{
     ok: boolean;
     injectedCount: number;
@@ -113,6 +225,7 @@ export default function Popup() {
     setStatus('Checking the active tab…');
     setJob(null);
     setMatchScore(null);
+    setCoverLetter(null);
     try {
       const activeTab = await sendMessage<ResponseData & { url?: string; tabId?: number }>({
         type: 'GET_ACTIVE_TAB',
@@ -134,13 +247,13 @@ export default function Popup() {
       }
       setJob(result.job || null);
 
-      // Compute match score against candidate profile
       if (result.job && authenticated) {
         try {
           const profileResult = await sendMessage<ResponseData>({ type: 'GET_PROFILE_SKILLS' });
           if (profileResult.ok && profileResult.skills) {
             const expResult = await sendMessage<ResponseData>({ type: 'GET_PROFILE_EXPERIENCE' });
-            const candExp = Number(profileResult.experience_years) || Number(expResult.experience_years) || null;
+            const candExp =
+              Number(profileResult.experience_years) || Number(expResult.experience_years) || null;
             const matchResult = await sendMessage<any>({
               type: 'COMPUTE_MATCH_SCORE',
               payload: {
@@ -151,13 +264,12 @@ export default function Popup() {
             });
             if (matchResult && matchResult.score !== undefined) {
               setMatchScore(matchResult);
-              setStatus(`Job detected. Match score: ${matchResult.score}% - ${matchResult.explanation?.join('; ') || ''}`);
+              setStatus(`Job detected. Match score: ${matchResult.score}%.`);
             }
           } else {
             setStatus('Job detected. Profile skills not available for match scoring.');
           }
         } catch (matchError) {
-          // Match scoring failure is non-critical
           setStatus('Job detected. Match scoring unavailable.');
           console.error('Match scoring error:', matchError);
         }
@@ -185,7 +297,7 @@ export default function Popup() {
       });
       if (result.ok && result.coverLetter) {
         setCoverLetter(result.coverLetter);
-        setStatus('Cover letter generated successfully!');
+        setStatus('Cover letter generated successfully.');
       } else {
         setStatus(result.error || 'Failed to generate cover letter.');
       }
@@ -197,13 +309,30 @@ export default function Popup() {
     }
   }
 
+  async function copyCoverLetter() {
+    if (!coverLetter) return;
+    try {
+      await navigator.clipboard.writeText(coverLetter);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = coverLetter;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    }
+  }
+
   async function smartApplyJob() {
     if (!job || !authenticated) return;
     setBusy(true);
     setStatus('Smart Auto-Apply running…');
     setSmartApplyResult(null);
     try {
-      // Step 1: Get active tab and detect form fields
       const activeTab = await sendMessage<ResponseData & { url?: string; tabId?: number }>({
         type: 'GET_ACTIVE_TAB',
       });
@@ -211,7 +340,6 @@ export default function Popup() {
         throw new Error('Please open a job application page in the active tab.');
       }
 
-      // Step 2: Detect form fields on the job site
       const formResult = await sendTabMessage<any>(activeTab.tabId, {
         type: 'PREVIEW_AUTOFILL',
         payload: {
@@ -221,7 +349,7 @@ export default function Popup() {
             phone: '',
             location: '',
           },
-          isApplicationApproved: true, // Smart mode: allow auto-approval
+          isApplicationApproved: true,
         },
       });
 
@@ -229,24 +357,17 @@ export default function Popup() {
         throw new Error(formResult.error || 'Could not detect form fields.');
       }
 
-      // Step 3: Auto-approve all fields for smart mode, then execute autofill
       const autoApprovePlan = {
         ...formResult.plan,
-        fields: formResult.plan.fields.map((f: any) => ({
-          ...f,
-          approved: true, // Auto-approve all fields in smart mode
-        })),
+        fields: formResult.plan.fields.map((f: any) => ({ ...f, approved: true })),
         isApplicationApproved: true,
       };
 
       const autoResult = await sendTabMessage<any>(activeTab.tabId, {
         type: 'APPLY_AUTOFILL',
-        payload: {
-          plan: autoApprovePlan,
-        },
+        payload: { plan: autoApprovePlan },
       });
 
-      // Step 4: Show results
       const injectedCount = autoResult?.injectedCount || 0;
       const skippedCount = autoResult?.skippedCount || 0;
 
@@ -254,7 +375,9 @@ export default function Popup() {
         ok: injectedCount > 0,
         injectedCount,
         skippedCount,
-        message: `Safely filled ${injectedCount} fields. ${skippedCount > 0 ? `(${skippedCount} fields skipped for safety - resume, captcha, or file inputs)` : ''} Review form and click job's "Apply" button to submit.`,
+        message: `Safely filled ${injectedCount} fields.${
+          skippedCount > 0 ? ` ${skippedCount} skipped for safety.` : ''
+        } Review the form and submit manually.`,
       });
 
       setStatus(`${injectedCount} fields auto-filled. Please review and submit manually.`);
@@ -274,9 +397,10 @@ export default function Popup() {
 
   async function openDashboard() {
     await chrome.tabs.create({
-      url: import.meta.env.DEV || import.meta.env.PROGENI_LOCAL
-        ? 'http://localhost:3000/dashboard'
-        : 'https://job.progeni.live/dashboard',
+      url:
+        import.meta.env.DEV || import.meta.env.PROGENI_LOCAL
+          ? 'http://localhost:3000/dashboard'
+          : 'https://job.progeni.live/dashboard',
     });
     window.close();
   }
@@ -297,7 +421,20 @@ export default function Popup() {
   }
 
   if (authenticated === null) {
-    return <main className="popup"><p className="status">Connecting to your Progeni account…</p></main>;
+    return (
+      <main className="popup">
+        <header className="brand">
+          <div className="brand-mark">P</div>
+          <div className="brand-text">
+            <strong>Progeni AutoApply</strong>
+            <span>Connecting to your workspace…</span>
+          </div>
+        </header>
+        <section className="card">
+          <div className="empty-note">Connecting to your Progeni account…</div>
+        </section>
+      </main>
+    );
   }
 
   if (!authenticated) {
@@ -305,59 +442,120 @@ export default function Popup() {
       <main className="popup">
         <header className="brand">
           <div className="brand-mark">P</div>
-          <div><strong>Progeni AutoApply</strong><span>Sign in to your career workspace</span></div>
+          <div className="brand-text">
+            <strong>Progeni AutoApply</strong>
+            <span>Sign in to your career workspace</span>
+          </div>
+          <span className="brand-badge">
+            <Icon name="shield" /> SECURE
+          </span>
         </header>
+
         <section className="card">
-          <h1>{authMode === 'sign-up' ? 'Create your account' : 'Welcome back'}</h1>
+          <p className="eyebrow">Welcome</p>
+          <h1>{authMode === 'sign-up' ? 'Create your account' : 'Sign back in'}</h1>
           <p>Use the same account as your Progeni web dashboard.</p>
+
+          <div className="segmented" role="tablist" aria-label="Authentication mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={authMode === 'sign-in'}
+              className={authMode === 'sign-in' ? 'active' : ''}
+              onClick={() => {
+                setAuthMode('sign-in');
+                setStatus('');
+              }}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={authMode === 'sign-up'}
+              className={authMode === 'sign-up' ? 'active' : ''}
+              onClick={() => {
+                setAuthMode('sign-up');
+                setStatus('');
+              }}
+            >
+              Create account
+            </button>
+          </div>
+
           <form className="form-grid" onSubmit={(event) => void submitAuth(event)}>
-            <label className="full-width">Email
-              <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+            <label className="full-width">
+              Email
+              <input
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+              />
             </label>
-            <label className="full-width">Password
-              <input type="password" autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} />
+            <label className="full-width">
+              Password
+              <input
+                type="password"
+                autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'}
+                minLength={8}
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="At least 8 characters"
+              />
             </label>
             <button className="primary full-width" disabled={busy}>
               {busy ? 'Please wait…' : authMode === 'sign-up' ? 'Create account' : 'Sign in'}
             </button>
           </form>
-          <button className="text-button" disabled={busy} onClick={() => {
-            setAuthMode((mode) => mode === 'sign-in' ? 'sign-up' : 'sign-in');
-            setStatus('');
-          }}>
-            {authMode === 'sign-up' ? 'Already have an account? Sign in' : 'Create a new account'}
-          </button>
+
+          <p className="muted" style={{ marginTop: 10, textAlign: 'center' }}>
+            Never share your password or one-time codes.
+          </p>
         </section>
-        {status && <p className="status" role="status">{status}</p>}
+
+        {status && (
+          <p className="status" role="status">
+            {status}
+          </p>
+        )}
       </main>
     );
   }
 
-  return (
-    <main className="popup">
-      <header className="brand">
-        <div className="brand-mark">P</div>
-        <div>
-          <strong>Progeni AutoApply</strong>
-          <span>{localMode ? 'Career workspace · local' : 'Career workspace · account'}</span>
-        </div>
-      </header>
+  if (consent !== true) {
+    return (
+      <main className="popup">
+        <header className="brand">
+          <div className="brand-mark">P</div>
+          <div className="brand-text">
+            <strong>Progeni AutoApply</strong>
+            <span>{localMode ? 'Local career workspace' : 'Account career workspace'}</span>
+          </div>
+        </header>
 
-      {consent !== true ? (
-        <section className="card">
-          <h1>Before you begin</h1>
+        <section className="card card-hero">
+          <span className="pill">
+            <Icon name="shield" />
+            Privacy first
+          </span>
+          <h1 style={{ marginTop: 10 }}>Before you begin</h1>
           <p>
-            With your permission, Progeni reads job details only when you choose Detect.
-            Your profile, detected jobs, and tracker are stored {localMode
+            With your permission, Progeni reads job details only when you choose Detect. Your profile,
+            detected jobs, and tracker are stored{' '}
+            {localMode
               ? 'on this device by the local backend.'
-              : 'in the Progeni workspace linked to your account.'}
-            {' '}They are not sent to an AI provider or job site.
+              : 'in the Progeni workspace linked to your account.'}{' '}
+            They are not sent to an AI provider or job site.
           </p>
           <p className="muted">
-            Resume files are processed to suggest details; the original file and full text
-            are not saved. You can clear your workspace data. Submission is always manual.
+            Resume files are processed to suggest details; the original file and full text are not saved.
+            You can clear your workspace data. Submission is always manual.
           </p>
-          <button className="primary" disabled={busy || consent === null} onClick={acceptConsent}>
+          <button className="primary" disabled={busy || consent === null} onClick={() => void acceptConsent()}>
             {busy ? 'Connecting…' : 'I agree and continue'}
           </button>
           {consent === null && (
@@ -366,96 +564,177 @@ export default function Popup() {
             </button>
           )}
         </section>
-      ) : (
-        <>
-          <section className="card">
-            <div className="section-heading">
+
+        {status && (
+          <p className="status" role="status">
+            {status}
+          </p>
+        )}
+      </main>
+    );
+  }
+
+  return (
+    <main className="popup">
+      <header className="brand">
+        <div className="brand-mark">P</div>
+        <div className="brand-text">
+          <strong>Progeni AutoApply</strong>
+          <span>{localMode ? 'Career workspace · local' : 'Career workspace · account'}</span>
+        </div>
+        <span className="brand-badge">
+          <span className="pill-dot" />
+          {localMode ? 'LOCAL' : 'LIVE'}
+        </span>
+      </header>
+
+      {/* Current job */}
+      <section className="card card-hero">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Current tab</p>
+            <h1>Current job</h1>
+            <p>Detect job details only when you ask.</p>
+          </div>
+          <span className="brand-mark" style={{ width: 30, height: 30, flex: '0 0 30px', borderRadius: 9 }}>
+            <Icon name="radar" />
+          </span>
+        </div>
+
+        <button className="primary" disabled={busy} onClick={() => void detectJob()}>
+          <Icon name="search" />
+          {busy ? 'Working…' : 'Detect this job'}
+        </button>
+
+        {matchScore && (
+          <div className="match-score-card">
+            <div className="score-ring">
+              <div
+                className="score"
+                style={{ '--score': matchScore.score } as unknown as React.CSSProperties}
+              >
+                {matchScore.score}
+              </div>
               <div>
-                <h1>Current job</h1>
-                <p>Detect job details only when you ask.</p>
-              </div>
-              <span className="local-badge">{localMode ? 'LOCAL' : 'ACCOUNT'}</span>
-            </div>
-            {matchScore && (
-              <div className="match-score-card">
-                <strong>Match Score: {matchScore.score}%</strong>
+                <strong>Match score {matchScore.score}%</strong>
                 <p>{matchScore.explanation?.join('. ') || 'No details available.'}</p>
-                {matchScore.matchedSkills.length > 0 && (
-                  <p>Matched skills: {matchScore.matchedSkills.join(', ')}</p>
-                )}
-                {matchScore.missingSkills.length > 0 && (
-                  <p>Suggested skills to add: {matchScore.missingSkills.join(', ')}</p>
-                )}
               </div>
-            )}
-            {coverLetter && (
-              <div className="cover-letter-card">
-                <h3>Generated Cover Letter</h3>
-                <p>{coverLetter}</p>
-                <button className="primary full-width" style={{ marginTop: '10px' }} onClick={() => {
-                  // Copy to clipboard or open in new window
-                  const textArea = document.createElement('textarea');
-                  textArea.value = coverLetter;
-                  document.body.appendChild(textArea);
-                  textArea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textArea);
-                  alert('Cover letter copied to clipboard!');
-                }}>
-                  Copy to Clipboard
-                </button>
-              </div>
-            )}
-            {smartApplyResult && (
-              <div className="smart-apply-result">
-                <div style={{ background: '#f0f7ff', border: '1px solid #b3d8ff', borderRadius: 8, padding: 12, marginTop: 12 }}>
-                  <strong>{smartApplyResult.message}</strong>
-                  <div style={{ marginTop: 8, fontSize: '12px', color: '#64748b' }}>
-                    <strong>Auto-filled:</strong> {smartApplyResult.injectedCount} fields
-                    <strong style={{ marginLeft: '16px' }}>|</strong>
-                    <strong>Skipped/Safety:</strong> {smartApplyResult.skippedCount} fields
-                  </div>
-                  <p style={{ marginTop: 8, fontSize: '12px', color: '#2c3e50' }}>
-                    ⚡ 4-5 seconds automation | 👁️ Review form & click job's "Apply" button to submit
-                  </p>
+            </div>
+            {matchScore.matchedSkills.length > 0 && (
+              <div>
+                <p className="muted">Matched skills</p>
+                <div className="skill-chips">
+                  {matchScore.matchedSkills.map((skill) => (
+                    <span key={skill}>{skill}</span>
+                  ))}
                 </div>
               </div>
             )}
-            {job && (
-              <div className="job-actions">
-                <button className="secondary" onClick={() => void generateCoverLetter()}>
-                  Generate Cover Letter
-                </button>
-                <button className="secondary" onClick={() => void smartApplyJob()}>
-                  Smart Auto-Apply (4s)
-                </button>
-                <button className="primary" onClick={() => void openDashboard()}>
-                  Open Dashboard
-                </button>
+            {matchScore.missingSkills.length > 0 && (
+              <div>
+                <p className="muted">Suggested skills to add</p>
+                <div className="skill-chips">
+                  {matchScore.missingSkills.map((skill) => (
+                    <span key={skill}>{skill}</span>
+                  ))}
+                </div>
               </div>
             )}
-            <button className="primary" disabled={busy} onClick={() => void detectJob()}>
-              {busy ? 'Working…' : 'Detect this job'}
+          </div>
+        )}
+
+        {job && (
+          <div className="button-row">
+            <button className="secondary" disabled={busy} onClick={() => void generateCoverLetter()}>
+              <Icon name="wand" />
+              Cover letter
             </button>
-            <button className="secondary" onClick={() => void sendMessage({ type: 'OPEN_SIDE_PANEL' })}>
-              Open career side panel
+            <button className="secondary" disabled={busy} onClick={() => void smartApplyJob()}>
+              <Icon name="sparkles" />
+              Smart apply
             </button>
-            <button className="text-button" onClick={() => void openDashboard()}>
+            <button className="primary" onClick={() => void openDashboard()}>
+              <Icon name="external" />
               Open dashboard
             </button>
-            {!localMode && (
-              <button className="text-button" disabled={busy} onClick={() => void leaveAccount()}>
-                Sign out
-              </button>
-            )}
-          </section>
-          <p className="policy-note">
-            Manual review and submission only. Progeni never clicks Apply or bypasses
-            platform controls.
+            <button
+              className="ghost"
+              onClick={() => void sendMessage({ type: 'OPEN_SIDE_PANEL' })}
+            >
+              <Icon name="panel" />
+              Side panel
+            </button>
+          </div>
+        )}
+
+        {!job && (
+          <p className="muted" style={{ marginTop: 10 }}>
+            Tip: open a Naukri, LinkedIn, or Indeed job page, then click Detect.
           </p>
-        </>
+        )}
+      </section>
+
+      {coverLetter && (
+        <section className="card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Draft</p>
+              <h2>Generated cover letter</h2>
+            </div>
+            <button
+              type="button"
+              className="ghost"
+              style={{ width: 'auto', margin: 0, padding: '4px 8px', minHeight: 30 }}
+              onClick={() => void copyCoverLetter()}
+            >
+              <Icon name={copied ? 'check' : 'copy'} />
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <div className="cover-letter-card">
+            <p>{coverLetter}</p>
+          </div>
+          <p className="muted">Review and personalize before sending. Nothing is submitted automatically.</p>
+        </section>
       )}
-      {status && <p className="status" role="status">{status}</p>}
+
+      {smartApplyResult && (
+        <section className="card">
+          <div className="smart-apply-result">
+            <strong>
+              {smartApplyResult.ok ? 'Fields prepared for review' : 'Could not prepare the form'}
+            </strong>
+            <p className="meta">
+              <span>
+                Filled: <b>{smartApplyResult.injectedCount}</b>
+              </span>
+              <span>
+                Skipped: <b>{smartApplyResult.skippedCount}</b>
+              </span>
+            </p>
+            <p className="muted" style={{ marginTop: 6 }}>
+              {smartApplyResult.message}
+            </p>
+          </div>
+        </section>
+      )}
+
+      <p className="policy-note">
+        Manual review and submission only. Progeni never clicks Apply or bypasses platform controls.
+      </p>
+
+      {!localMode && (
+        <button className="ghost" disabled={busy} onClick={() => void leaveAccount()}>
+          <Icon name="logout" />
+          Sign out
+        </button>
+      )}
+
+      {status && (
+        <p className="status" role="status">
+          {status}
+        </p>
+      )}
     </main>
   );
 }

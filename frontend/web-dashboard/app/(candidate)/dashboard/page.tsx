@@ -3,6 +3,23 @@
 import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import {
+  ArrowRight,
+  BarChart3,
+  BriefcaseBusiness,
+  CalendarClock as CalendarIcon,
+  CircleDashed,
+  ClipboardList,
+  Compass as CompassIcon,
+  FileText,
+  Gauge,
+  Link2,
+  Plus,
+  ScanSearch,
+  Sparkles,
+  Target,
+  TrendingUp,
+} from 'lucide-react';
+import {
   analyzeJob,
   createApplication,
   getApplications,
@@ -34,6 +51,14 @@ const initialJob = {
   requiredSkills: '',
   experienceMin: '',
   description: '',
+};
+
+const statusTone: Record<string, string> = {
+  discovered: 'bg-surface-variant text-on-surface-variant',
+  applied: 'bg-info-container text-on-info-container',
+  interview: 'bg-warning-container text-on-warning-container',
+  offer: 'bg-success-container text-on-success-container',
+  rejected: 'bg-danger-container text-on-danger-container',
 };
 
 export default function DashboardPage() {
@@ -90,7 +115,10 @@ export default function DashboardPage() {
         url: jobForm.url,
         description: jobForm.description,
         platform: 'manual',
-        requiredSkills: jobForm.requiredSkills.split(',').map((skill) => skill.trim()).filter(Boolean),
+        requiredSkills: jobForm.requiredSkills
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter(Boolean),
         experienceMin: jobForm.experienceMin === '' ? null : Number(jobForm.experienceMin),
       });
       setLatestMatch(result);
@@ -121,95 +149,145 @@ export default function DashboardPage() {
   const missingFields = onboardingStatus?.completeness?.missingFields ?? [];
   const extensionConnected = Boolean(onboardingStatus?.extensionConnected);
   const activeResumeCount = onboardingStatus?.activeResumeCount ?? 0;
+  const firstName = profile.fullName ? profile.fullName.split(' ')[0] : '';
+
+  const stats = [
+    {
+      label: 'Tracked opportunities',
+      value: String(applications.length),
+      footnote: 'Across your workspace',
+      icon: BriefcaseBusiness,
+      tone: 'text-primary bg-primary-container',
+    },
+    {
+      label: 'Jobs analyzed',
+      value: String(matches.length),
+      footnote: 'Explanations saved',
+      icon: ScanSearch,
+      tone: 'text-secondary bg-secondary-container',
+    },
+    {
+      label: 'Profile completeness',
+      value: `${completenessScore}%`,
+      footnote: completenessScore >= 80 ? 'Well detailed' : `${missingFields.length} recommended fields`,
+      icon: Gauge,
+      tone: completenessScore >= 80 ? 'text-success bg-success-container' : 'text-info bg-info-container',
+    },
+    {
+      label: 'Extension connection',
+      value: extensionConnected ? 'Connected' : 'Pair required',
+      footnote: activeResumeCount > 0 ? `${activeResumeCount} active resume(s)` : 'No active resume',
+      icon: Link2,
+      tone: extensionConnected ? 'text-success bg-success-container' : 'text-warning bg-warning-container',
+    },
+  ];
 
   return (
-    <div>
-      <header className="page-heading">
-        <div>
-          <p className="eyebrow">YOUR JOB SEARCH, IN ONE PLACE</p>
-          <h1>Good to see you{profile.fullName ? `, ${profile.fullName.split(' ')[0]}` : ''}.</h1>
-          <p>Understand job fit, prepare carefully, and keep your search organized.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link className="button button-secondary" href="/onboarding">
-            ✦ Onboarding wizard
-          </Link>
-          <Link className="button button-secondary" href="/candidate-profile">
-            Edit career profile
-          </Link>
-        </div>
-      </header>
-
-      {/* Onboarding & Missing Fields Alert Banner */}
-      {missingFields.length > 0 && (
-        <section
-          className="card card-padding"
-          style={{
-            marginBottom: '1rem',
-            background: 'linear-gradient(135deg, rgb(var(--info-container)) 0%, rgb(var(--surface-subtle)) 100%)',
-            border: '1px solid rgb(var(--info) / 0.3)',
-          }}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <strong style={{ color: 'rgb(var(--info))', fontSize: '14px' }}>
-                Profile Completeness: {completenessScore}% · Keep your profile accurate
-              </strong>
-              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgb(var(--on-surface-variant))' }}>
-                Adding <strong>{missingFields.slice(0, 3).join(', ')}</strong> improves job fit scoring and auto-fill accuracy.
-              </p>
+    <div className="animate-rise space-y-6">
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-outline-variant bg-surface p-6 shadow-soft sm:p-8">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 right-1/3 h-52 w-52 rounded-full bg-secondary/10 blur-3xl" />
+        <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div className="max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-subtle px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-on-surface-variant">
+              <Sparkles className="h-3 w-3 text-primary" />
+              Your job search, in one place
             </div>
-            <Link className="button button-primary" href="/onboarding">
-              Complete profile in wizard →
+            <h1 className="text-[26px] font-extrabold leading-[1.12] tracking-tight sm:text-[32px]">
+              Good to see you{firstName ? `, ${firstName}` : ''}.
+              <span className="block text-on-surface-variant/90">
+                Understand fit. Prepare carefully. Stay organized.
+              </span>
+            </h1>
+            <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-on-surface-variant sm:text-sm">
+              Progeni compares only the details you confirm. Every score is explainable, every gap is
+              visible, and nothing is ever submitted without you.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link className="button button-secondary" href="/onboarding">
+              <Sparkles className="h-4 w-4" />
+              Onboarding wizard
+            </Link>
+            <Link className="button button-primary" href="/candidate-profile">
+              Edit career profile
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Completeness banner */}
+      {missingFields.length > 0 && (
+        <section className="flex flex-col gap-4 rounded-2xl border border-info/25 bg-gradient-to-r from-info-container/80 to-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-info/10 text-info">
+              <TrendingUp className="h-4 w-4" />
+            </span>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[13px] font-semibold text-on-surface">
+                  Profile completeness {completenessScore}%
+                </span>
+                <span className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-variant">
+                  <span
+                    className="block h-full rounded-full bg-info transition-all"
+                    style={{ width: `${Math.min(100, completenessScore)}%` }}
+                  />
+                </span>
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">
+                Adding <strong className="font-semibold text-on-surface">{missingFields.slice(0, 3).join(', ')}</strong>{' '}
+                improves match scoring and auto-fill accuracy.
+              </p>
+            </div>
+          </div>
+          <Link className="button button-secondary button-sm shrink-0" href="/onboarding">
+            Finish setup
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </section>
       )}
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="stats-grid">
-        <article className="card stat-card">
-          <span className="stat-label">Tracked opportunities</span>
-          <strong className="stat-value">{applications.length}</strong>
-          <span className="stat-footnote">Across your workspace</span>
-        </article>
-
-        <article className="card stat-card">
-          <span className="stat-label">Jobs analyzed</span>
-          <strong className="stat-value">{matches.length}</strong>
-          <span className="stat-footnote">Explanations saved to workspace</span>
-        </article>
-
-        <article className="card stat-card">
-          <span className="stat-label">Profile completeness</span>
-          <strong className="stat-value" style={{ color: completenessScore >= 80 ? 'rgb(var(--success))' : 'rgb(var(--info))' }}>
-            {completenessScore}%
-          </strong>
-          <span className="stat-footnote">
-            {completenessScore >= 80 ? 'Well detailed' : `${missingFields.length} recommended fields`}
-          </span>
-        </article>
-
-        <article className="card stat-card">
-          <span className="stat-label">Extension connection</span>
-          <strong className="stat-value text-base" style={{ color: extensionConnected ? 'rgb(var(--success))' : 'rgb(var(--warning))' }}>
-            {extensionConnected ? '● Connected' : '○ Pair required'}
-          </strong>
-          <span className="stat-footnote">
-            {activeResumeCount > 0 ? `${activeResumeCount} active resume(s)` : 'No active resume'}
-          </span>
-        </article>
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <article className="card stat-card" key={stat.label}>
+              <div className="relative z-10 flex items-start justify-between gap-3">
+                <div>
+                  <span className="stat-label">{stat.label}</span>
+                  <strong className="stat-value">{stat.value}</strong>
+                  <span className="stat-footnote">{stat.footnote}</span>
+                </div>
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${stat.tone}`}>
+                  <Icon className="h-4 w-4" strokeWidth={1.9} />
+                </span>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
       <div className="content-grid">
+        {/* Job analyzer */}
         <section className="card card-padding">
-          <div className="page-heading" style={{ marginBottom: 16 }}>
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="eyebrow">JOB INTELLIGENCE</p>
+              <p className="eyebrow">Job intelligence</p>
               <h2 className="card-title">Check a job match</h2>
-              <p className="card-description">Paste a job URL or enter the details yourself. Nothing is submitted.</p>
+              <p className="card-description">
+                Paste a job URL or enter the details yourself. Nothing is submitted.
+              </p>
             </div>
+            <span className="chip">
+              <CircleDashed className="h-3 w-3" />
+              Evidence based
+            </span>
           </div>
+
           <form onSubmit={(event) => void handleAnalyze(event)}>
             <div className="form-grid">
               <label className="field">
@@ -255,7 +333,7 @@ export default function DashboardPage() {
                   onChange={(event) => updateJobForm('requiredSkills', event.target.value)}
                   placeholder="Python, SQL, FastAPI"
                 />
-                <span className="card-description">
+                <span className="text-[11px] font-normal leading-relaxed text-on-surface-variant">
                   Mentioned skills are compared with your profile; they are not treated as mandatory criteria.
                 </span>
               </label>
@@ -282,21 +360,28 @@ export default function DashboardPage() {
             </div>
             <div className="form-actions">
               <button className="button button-primary" disabled={busy}>
+                <Target className="h-4 w-4" />
                 {busy ? 'Analyzing…' : 'Analyze job fit'}
               </button>
-              <span className="card-description">Simple average of available signals · no AI provider configured</span>
+              <span className="text-[11px] text-on-surface-variant">
+                Simple average of available signals · no AI provider configured
+              </span>
             </div>
           </form>
 
           {latestMatch && (
             <div className="match-result">
               <div className="match-result-header">
-                <strong>
-                  {latestMatch.job.title} · {latestMatch.job.company || 'Company not listed'}
-                </strong>
+                <div>
+                  <strong>
+                    {latestMatch.job.title} · {latestMatch.job.company || 'Company not listed'}
+                  </strong>
+                  <span className="mt-1 block text-[11px] text-on-surface-variant">
+                    Match score only — not a probability of being hired.
+                  </span>
+                </div>
                 <span className="score-large">{latestMatch.score}%</span>
               </div>
-              <span className="card-description">Match score only—not a probability of being hired.</span>
               <ul>
                 {latestMatch.explanation.map((line, index) => (
                   <li key={`${index}-${line}`}>{line}</li>
@@ -304,21 +389,21 @@ export default function DashboardPage() {
               </ul>
               {latestMatch.blockers.map((blocker) => (
                 <div className="notice" key={blocker}>
-                  Blocker: {blocker}
+                  <strong className="font-semibold">Blocker:</strong> {blocker}
                 </div>
               ))}
               {latestMatch.unknowns.map((unknown) => (
                 <div className="notice" key={unknown}>
-                  Needs review: {unknown}
+                  <strong className="font-semibold">Needs review:</strong> {unknown}
                 </div>
               ))}
               {latestMatch.evidence.map((item) => (
-                <span className="card-description" key={item}>
+                <span className="text-[11.5px] text-on-surface-variant" key={item}>
                   Evidence: {item}
                 </span>
               ))}
               {latestMatch.missingEvidence.map((item) => (
-                <span className="card-description" key={item}>
+                <span className="text-[11.5px] text-on-surface-variant" key={item}>
                   Missing information: {item}
                 </span>
               ))}
@@ -328,6 +413,7 @@ export default function DashboardPage() {
                   disabled={busy}
                   onClick={() => void trackJob(latestMatch.job)}
                 >
+                  <Plus className="h-4 w-4" />
                   Add to application tracker
                 </button>
               </div>
@@ -345,47 +431,79 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {/* Recent matches */}
         <aside className="card card-padding">
-          <p className="eyebrow">YOUR SEARCH</p>
-          <h2 className="card-title">Recent matches</h2>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="eyebrow">Your search</p>
+              <h2 className="card-title">Recent matches</h2>
+            </div>
+            <Link
+              href="/job-match-intelligence"
+              className="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-on-surface"
+              aria-label="Open match intelligence"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
           {loading ? (
-            <p className="empty-state">Loading your workspace…</p>
+            <div className="mt-4 space-y-2">
+              <div className="skeleton h-12 w-full" />
+              <div className="skeleton h-12 w-full" />
+              <div className="skeleton h-12 w-full" />
+            </div>
           ) : matches.length === 0 ? (
-            <p className="empty-state">No matches yet. Analyze a job to get a transparent, evidence-based breakdown.</p>
+            <p className="empty-state">
+              No matches yet. Analyze a job to get a transparent, evidence-based breakdown.
+            </p>
           ) : (
             matches.slice(0, 5).map((match) => (
               <div className="list-row" key={match.id}>
                 <div className="list-row-main">
                   <strong>{match.job.title}</strong>
                   <span>
-                    {match.job.company || 'Company not listed'} · {match.job.location || 'Location not listed'}
+                    {match.job.company || 'Company not listed'} ·{' '}
+                    {match.job.location || 'Location not listed'}
                   </span>
                 </div>
                 <span className="score-chip">{match.score}%</span>
               </div>
             ))
           )}
-          <div className="notice" style={{ marginTop: 16 }}>
-            Scores use only the profile and job details you provide. Missing information is shown as unknown—not assumed.
+          <div className="notice mt-4">
+            Scores use only the profile and job details you provide. Missing information is shown as
+            unknown — not assumed.
           </div>
         </aside>
       </div>
 
-      <section className="card card-padding" style={{ marginTop: 16 }}>
-        <p className="eyebrow">APPLICATION TRACKER</p>
-        <div className="page-heading" style={{ marginBottom: 12 }}>
+      {/* Tracker */}
+      <section className="card card-padding">
+        <div className="page-heading mb-2 items-start">
           <div>
+            <p className="eyebrow">Application tracker</p>
             <h2 className="card-title">Keep your next steps visible</h2>
-            <p className="card-description">Applications stay in “discovered” until you update their status yourself.</p>
+            <p className="card-description">
+              Applications stay in “discovered” until you update their status yourself.
+            </p>
           </div>
-          <Link className="button button-secondary" href="/application-tracker">
+          <Link className="button button-secondary button-sm" href="/application-tracker">
             Open tracker
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         {loading ? (
           <p className="empty-state">Loading applications…</p>
         ) : applications.length === 0 ? (
-          <p className="empty-state">Your tracker is ready. Save a job after analyzing it to get started.</p>
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-variant text-on-surface-variant">
+              <ClipboardList className="h-5 w-5" />
+            </span>
+            <p className="text-[13px] font-medium text-on-surface">Your tracker is ready</p>
+            <p className="max-w-sm text-xs text-on-surface-variant">
+              Save a job after analyzing it to start building your pipeline.
+            </p>
+          </div>
         ) : (
           applications.slice(0, 3).map((application) => (
             <div className="list-row" key={application.id}>
@@ -396,12 +514,44 @@ export default function DashboardPage() {
                   {new Date(application.updatedAt).toLocaleDateString()}
                 </span>
               </div>
-              <span className="score-chip min-w-[90px]">
+              <span
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold capitalize ${
+                  statusTone[application.status] ?? 'bg-surface-variant text-on-surface-variant'
+                }`}
+              >
                 {application.status}
               </span>
             </div>
           ))
         )}
+      </section>
+
+      {/* Quick links */}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { href: '/resume-analyzer', label: 'ATS diagnostics', copy: 'Find what blocks parsing.', icon: FileText },
+          { href: '/job-recommendations', label: 'Discover jobs', copy: 'Explore matching roles.', icon: CompassIcon },
+          { href: '/interview-center', label: 'Interview center', copy: 'Prepare with your evidence.', icon: CalendarIcon },
+          { href: '/performance-analytics', label: 'Search analytics', copy: 'See rates and momentum.', icon: BarChart3 },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="card group flex items-center gap-3 p-4 transition-all hover:-translate-y-0.5 hover:shadow-card"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-container text-primary">
+                <Icon className="h-4 w-4" strokeWidth={1.9} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[12.5px] font-semibold text-on-surface">{item.label}</span>
+                <span className="block truncate text-[11px] text-on-surface-variant">{item.copy}</span>
+              </span>
+              <ArrowRight className="ml-auto h-3.5 w-3.5 shrink-0 text-on-surface-variant/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+            </Link>
+          );
+        })}
       </section>
     </div>
   );

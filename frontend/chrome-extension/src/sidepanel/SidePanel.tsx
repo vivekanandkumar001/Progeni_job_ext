@@ -507,7 +507,20 @@ export default function SidePanel() {
   }
 
   if (authenticated === null) {
-    return <main className="sidepanel"><p className="status">Connecting to your Progeni account…</p></main>;
+    return (
+      <main className="sidepanel">
+        <header className="brand">
+          <div className="brand-mark">P</div>
+          <div className="brand-text">
+            <strong>Progeni AutoApply</strong>
+            <span>Connecting to your workspace…</span>
+          </div>
+        </header>
+        <section className="card">
+          <div className="empty-note">Connecting to your Progeni account…</div>
+        </section>
+      </main>
+    );
   }
 
   if (!authenticated) {
@@ -515,73 +528,137 @@ export default function SidePanel() {
       <main className="sidepanel">
         <header className="brand">
           <div className="brand-mark">P</div>
-          <div><strong>Progeni AutoApply</strong><span>Sign in to your career workspace</span></div>
+          <div className="brand-text">
+            <strong>Progeni AutoApply</strong>
+            <span>Sign in to your career workspace</span>
+          </div>
+          <span className="brand-badge">SECURE</span>
         </header>
+
         <section className="card">
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+          <p className="eyebrow">Access</p>
+          <h1>Connect your account</h1>
+          <p>Sign in with email, or link this extension using a pairing code from your dashboard.</p>
+
+          <div className="segmented" role="tablist" aria-label="Sign-in method">
             <button
               type="button"
-              className={authMethod === 'password' ? 'primary' : 'secondary'}
-              style={{ flex: 1, padding: '6px 8px', fontSize: '0.8rem' }}
-              onClick={() => { setAuthMethod('password'); setStatus(''); }}
+              role="tab"
+              aria-selected={authMethod === 'password'}
+              className={authMethod === 'password' ? 'active' : ''}
+              onClick={() => {
+                setAuthMethod('password');
+                setStatus('');
+              }}
             >
-              Email Sign In
+              Email sign in
             </button>
             <button
               type="button"
-              className={authMethod === 'pairing' ? 'primary' : 'secondary'}
-              style={{ flex: 1, padding: '6px 8px', fontSize: '0.8rem' }}
-              onClick={() => { setAuthMethod('pairing'); setStatus(''); }}
+              role="tab"
+              aria-selected={authMethod === 'pairing'}
+              className={authMethod === 'pairing' ? 'active' : ''}
+              onClick={() => {
+                setAuthMethod('pairing');
+                setStatus('');
+              }}
             >
-              Pair with Code
+              Pair with code
             </button>
           </div>
 
           {authMethod === 'pairing' ? (
             <div>
-              <p style={{ fontSize: '0.825rem', color: '#4b5563', marginBottom: '10px' }}>
-                Open your Progeni Web Dashboard &rarr; <b>Settings &rarr; Chrome Extension Pairing</b> and paste the 6-digit code below:
+              <p className="muted">
+                Open your Progeni dashboard → <b>Settings → Chrome extension pairing</b> and paste the
+                6-digit code below.
               </p>
               <form className="form-grid" onSubmit={(event) => void submitPairing(event)}>
-                <label className="full-width">Pairing code
+                <label className="full-width">
+                  Pairing code
                   <input
                     type="text"
                     required
                     placeholder="PAIR-123456"
                     value={pairingCodeInput}
-                    onChange={(e) => setPairingCodeInput(e.target.value)}
-                    style={{ textTransform: 'uppercase', letterSpacing: '1px', fontFamily: 'monospace', fontWeight: 600 }}
+                    onChange={(event) => setPairingCodeInput(event.target.value)}
+                    style={{
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      fontFamily: 'monospace',
+                      fontWeight: 600,
+                    }}
                   />
                 </label>
                 <button className="primary full-width" disabled={busy || !pairingCodeInput}>
-                  {busy ? 'Linking…' : 'Link Extension'}
+                  {busy ? 'Linking…' : 'Link extension'}
                 </button>
               </form>
             </div>
           ) : (
             <>
-              <h1>{authMode === 'sign-up' ? 'Create your account' : 'Welcome back'}</h1>
-              <p>Use the same account as your Progeni web dashboard.</p>
+              <div className="segmented" role="tablist" aria-label="Account mode">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={authMode === 'sign-in'}
+                  className={authMode === 'sign-in' ? 'active' : ''}
+                  onClick={() => {
+                    setAuthMode('sign-in');
+                    setStatus('');
+                  }}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={authMode === 'sign-up'}
+                  className={authMode === 'sign-up' ? 'active' : ''}
+                  onClick={() => {
+                    setAuthMode('sign-up');
+                    setStatus('');
+                  }}
+                >
+                  Create account
+                </button>
+              </div>
               <form className="form-grid" onSubmit={(event) => void submitAuth(event)}>
-                <label className="full-width">Email
-                  <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+                <label className="full-width">
+                  Email
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                  />
                 </label>
-                <label className="full-width">Password
-                  <input type="password" autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} />
+                <label className="full-width">
+                  Password
+                  <input
+                    type="password"
+                    autoComplete={authMode === 'sign-up' ? 'new-password' : 'current-password'}
+                    minLength={8}
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="At least 8 characters"
+                  />
                 </label>
                 <button className="primary full-width" disabled={busy}>
                   {busy ? 'Please wait…' : authMode === 'sign-up' ? 'Create account' : 'Sign in'}
                 </button>
               </form>
-              <button className="text-button" disabled={busy} onClick={() => {
-                setAuthMode((mode) => mode === 'sign-in' ? 'sign-up' : 'sign-in');
-                setStatus('');
-              }}>
-                {authMode === 'sign-up' ? 'Already have an account? Sign in' : 'Create a new account'}
-              </button>
             </>
           )}
-          {status && <p className="status" role="status">{status}</p>}
+
+          {status && (
+            <p className="status" role="status">
+              {status}
+            </p>
+          )}
         </section>
       </main>
     );
@@ -592,17 +669,34 @@ export default function SidePanel() {
       <main className="sidepanel">
         <header className="brand">
           <div className="brand-mark">P</div>
-          <div><strong>Progeni AutoApply</strong><span>{localMode ? 'Local career workspace' : 'Account career workspace'}</span></div>
+          <div className="brand-text">
+            <strong>Progeni AutoApply</strong>
+            <span>{localMode ? 'Local career workspace' : 'Account career workspace'}</span>
+          </div>
         </header>
-        <section className="card">
-          <h1>Privacy notice</h1>
+
+        <section className="card card-hero">
+          <span className="pill">
+            <span className="pill-dot" />
+            Privacy first
+          </span>
+          <h1 style={{ marginTop: 10 }}>Privacy notice</h1>
           <p>
             Your profile, detected job details, match results, and tracker are stored
-            {localMode ? ' on this device by the local backend.' : ' in the Progeni workspace linked to your account.'}
-            {' '}Job pages are read only after you click Detect. No data is sent to an AI provider or job site.
+            {localMode
+              ? ' on this device by the local backend.'
+              : ' in the Progeni workspace linked to your account.'}{' '}
+            Job pages are read only after you click Detect. No data is sent to an AI provider or job site.
           </p>
-          <p className="muted">Resume files are processed to suggest details; the original file and full text are not saved. Application submission remains manual.</p>
-          <button className="primary" disabled={busy || consent === null} onClick={() => void acceptConsent()}>
+          <p className="muted">
+            Resume files are processed to suggest details; the original file and full text are not saved.
+            Application submission remains manual.
+          </p>
+          <button
+            className="primary"
+            disabled={busy || consent === null}
+            onClick={() => void acceptConsent()}
+          >
             {busy ? 'Connecting…' : 'I agree and continue'}
           </button>
           {consent === null && (
@@ -610,7 +704,11 @@ export default function SidePanel() {
               Retry connection
             </button>
           )}
-          {status && <p className="status" role="status">{status}</p>}
+          {status && (
+            <p className="status" role="status">
+              {status}
+            </p>
+          )}
         </section>
       </main>
     );
@@ -620,60 +718,175 @@ export default function SidePanel() {
     <main className="sidepanel">
       <header className="brand">
         <div className="brand-mark">P</div>
-        <div><strong>Progeni AutoApply</strong><span>Candidate workspace · {localMode ? 'local' : 'account'}</span></div>
+        <div className="brand-text">
+          <strong>Progeni AutoApply</strong>
+          <span>Candidate workspace · {localMode ? 'local' : 'account'}</span>
+        </div>
+        <span className="brand-badge">
+          <span className="pill-dot" />
+          {localMode ? 'LOCAL' : 'LIVE'}
+        </span>
       </header>
 
+      {/* Profile */}
       <section className="card">
         <div className="section-heading">
-          <div><h1>Your career profile</h1><p>Only used to explain job fit.</p></div>
+          <div>
+            <p className="eyebrow">Your truth base</p>
+            <h1>Career profile</h1>
+            <p>Only used to explain job fit.</p>
+          </div>
           <span className="local-badge">{localMode ? 'LOCAL' : 'ACCOUNT'}</span>
         </div>
         <form className="form-grid" onSubmit={(event) => void saveProfile(event)}>
-          <label>Full name<input value={profile.fullName} onChange={(event) => updateProfile('fullName', event.target.value)} autoComplete="name" /></label>
-          <label>Email<input type="email" value={profile.email} onChange={(event) => updateProfile('email', event.target.value)} autoComplete="email" /></label>
-          <label>Phone<input value={profile.phone} onChange={(event) => updateProfile('phone', event.target.value)} autoComplete="tel" /></label>
-          <label>Target role<input value={profile.targetRole} onChange={(event) => updateProfile('targetRole', event.target.value)} /></label>
-          <label>Location<input value={profile.location} onChange={(event) => updateProfile('location', event.target.value)} /></label>
-          <label>Years of experience<input type="number" min="0" max="80" step="0.5" value={profile.experienceYears ?? ''} onChange={(event) => updateProfile('experienceYears', event.target.value === '' ? null : Number(event.target.value))} /></label>
-          <label className="full-width">Skills, comma separated<input value={skillsText} onChange={(event) => setSkillsText(event.target.value)} placeholder="Python, SQL, FastAPI" /></label>
-          <button className="primary full-width" disabled={busy}>Save profile</button>
+          <label>
+            Full name
+            <input
+              value={profile.fullName}
+              onChange={(event) => updateProfile('fullName', event.target.value)}
+              autoComplete="name"
+            />
+          </label>
+          <label>
+            Email
+            <input
+              type="email"
+              value={profile.email}
+              onChange={(event) => updateProfile('email', event.target.value)}
+              autoComplete="email"
+            />
+          </label>
+          <label>
+            Phone
+            <input
+              value={profile.phone}
+              onChange={(event) => updateProfile('phone', event.target.value)}
+              autoComplete="tel"
+            />
+          </label>
+          <label>
+            Target role
+            <input
+              value={profile.targetRole}
+              onChange={(event) => updateProfile('targetRole', event.target.value)}
+            />
+          </label>
+          <label>
+            Location
+            <input
+              value={profile.location}
+              onChange={(event) => updateProfile('location', event.target.value)}
+            />
+          </label>
+          <label>
+            Years of experience
+            <input
+              type="number"
+              min="0"
+              max="80"
+              step="0.5"
+              value={profile.experienceYears ?? ''}
+              onChange={(event) =>
+                updateProfile(
+                  'experienceYears',
+                  event.target.value === '' ? null : Number(event.target.value),
+                )
+              }
+            />
+          </label>
+          <label className="full-width">
+            Skills, comma separated
+            <input
+              value={skillsText}
+              onChange={(event) => setSkillsText(event.target.value)}
+              placeholder="Python, SQL, FastAPI"
+            />
+          </label>
+          <button className="primary full-width" disabled={busy}>
+            Save profile
+          </button>
         </form>
       </section>
 
+      {/* Job intelligence */}
       <section className="card">
         <div className="section-heading">
-          <div><h2>Job intelligence</h2><p>Extract only after your click.</p></div>
+          <div>
+            <p className="eyebrow">Job intelligence</p>
+            <h2>Analyze this job</h2>
+            <p>Extract only after your click.</p>
+          </div>
         </div>
         <button className="primary" disabled={busy} onClick={() => void detectJob()}>
-          Detect job on current tab
+          {busy ? 'Working…' : 'Detect job on current tab'}
         </button>
+
         {job && (
           <div className="job-preview">
             <strong>{job.title || 'Untitled job'}</strong>
             <span>{[job.company, job.location, job.platform].filter(Boolean).join(' · ')}</span>
-            <span>{job.requiredSkills.length ? `Detected skills: ${job.requiredSkills.join(', ')}` : 'No recognizable skills found; verify requirements manually.'}</span>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-              <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void analyzeJob()}>
+            <span>
+              {job.requiredSkills.length
+                ? `Detected skills: ${job.requiredSkills.join(', ')}`
+                : 'No recognizable skills found; verify requirements manually.'}
+            </span>
+            <div className="button-row">
+              <button className="secondary" disabled={busy} onClick={() => void analyzeJob()}>
                 Calculate match
               </button>
-              <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void generateCoverLetter()}>
-                Generate Cover Letter
+              <button className="secondary" disabled={busy} onClick={() => void generateCoverLetter()}>
+                Cover letter
               </button>
-              <button className="secondary" style={{ flex: 1 }} disabled={busy} onClick={() => void importDetectedJob()}>
-                Import to Discovery
+              <button
+                className="secondary full-width"
+                disabled={busy}
+                onClick={() => void importDetectedJob()}
+              >
+                Import to discovery
               </button>
             </div>
           </div>
         )}
+
         {match && (
-          <div className="match-card">
-            <div className="score">{match.score}<span>%</span></div>
-            <p className="muted">Fit score, not a hiring probability.</p>
-            <ul>{match.explanation.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul>
-            {match.blockers.map((item) => <p className="warning" key={item}>{item}</p>)}
-            {match.unknowns.map((item) => <p className="warning" key={item}>Needs review: {item}</p>)}
-            {match.evidence.map((item) => <p className="muted" key={item}>Evidence: {item}</p>)}
-            {match.missingEvidence.map((item) => <p className="muted" key={item}>Missing evidence: {item}</p>)}
+          <div className="match-score-card">
+            <div className="score-ring">
+              <div
+                className="score"
+                style={{ '--score': match.score } as unknown as React.CSSProperties}
+              >
+                {match.score}
+              </div>
+              <div>
+                <strong>Match score {match.score}%</strong>
+                <p>Fit score, not a hiring probability.</p>
+              </div>
+            </div>
+            <ul>
+              {match.explanation.map((item, index) => (
+                <li key={`${index}-${item}`}>{item}</li>
+              ))}
+            </ul>
+            {match.blockers.map((item) => (
+              <p className="warning" key={item}>
+                {item}
+              </p>
+            ))}
+            {match.unknowns.map((item) => (
+              <p className="warning" key={item}>
+                Needs review: {item}
+              </p>
+            ))}
+            {match.evidence.map((item) => (
+              <p className="muted" key={item}>
+                Evidence: {item}
+              </p>
+            ))}
+            {match.missingEvidence.map((item) => (
+              <p className="muted" key={item}>
+                Missing evidence: {item}
+              </p>
+            ))}
             {job?.id && (
               <button className="secondary" disabled={busy} onClick={() => void trackJob()}>
                 Add job to tracker
@@ -681,79 +894,112 @@ export default function SidePanel() {
             )}
           </div>
         )}
+
         {coverLetter && (
           <div className="cover-letter-card">
-            <h3>Generated Cover Letter</h3>
+            <div className="section-heading" style={{ marginBottom: 0 }}>
+              <h3>Generated cover letter</h3>
+              <button
+                type="button"
+                className="ghost"
+                style={{ width: 'auto', margin: 0, padding: '4px 8px', minHeight: 28 }}
+                onClick={() => {
+                  const textArea = document.createElement('textarea');
+                  textArea.value = coverLetter;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  setStatus('Cover letter copied to clipboard.');
+                }}
+              >
+                Copy
+              </button>
+            </div>
             <p>{coverLetter}</p>
+            {showCoverLetter && <p className="muted">Review and personalize before sending.</p>}
             <button
-              className="secondary full-width"
-              style={{ marginTop: '10px', marginBottom: '10px' }}
-              onClick={() => {
-                const textArea = document.createElement('textarea');
-                textArea.value = coverLetter;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('Cover letter copied to clipboard!');
-              }}
+              type="button"
+              className="ghost"
+              style={{ marginTop: 6 }}
+              onClick={toggleCoverLetterVisibility}
             >
-              Copy to Clipboard
+              {showCoverLetter ? 'Hide note' : 'Show review note'}
             </button>
           </div>
         )}
       </section>
 
+      {/* Autofill assistant */}
       <section className="card">
         <div className="section-heading">
-          <div><h2>Application Assistant & Smart Autofill</h2><p>Safe form population with explicit candidate approval.</p></div>
+          <div>
+            <p className="eyebrow">Application assistant</p>
+            <h2>Safe form population</h2>
+            <p>Explicit candidate approval required before injection.</p>
+          </div>
         </div>
         <button className="primary" disabled={busy} onClick={() => void detectFormFields()}>
-          Scan Application Form
+          {busy ? 'Scanning…' : 'Scan application form'}
         </button>
 
         {autofillFields.length > 0 && (
           <div style={{ marginTop: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Detected Fields ({autofillFields.length})</span>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 6,
+              }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 700 }}>
+                Detected fields ({autofillFields.length})
+              </span>
               <button
                 type="button"
-                className="secondary"
-                style={{ padding: '2px 8px', fontSize: '0.75rem' }}
+                className="ghost"
+                style={{ width: 'auto', margin: 0, padding: '3px 8px', minHeight: 26 }}
                 onClick={() => approveAllFields()}
               >
                 Approve all
               </button>
             </div>
-            <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 6, padding: 8 }}>
+
+            <div className="fields-list">
               {autofillFields.map((f) => (
-                <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: '1px solid #f1f5f9' }}>
+                <div className="field-row" key={f.id}>
                   <input
                     type="checkbox"
                     checked={f.approved}
                     onChange={() => toggleFieldApproval(f.id)}
                     id={`field_${f.id}`}
                   />
-                  <label htmlFor={`field_${f.id}`} style={{ flex: 1, fontSize: '0.8rem', cursor: 'pointer', margin: 0 }}>
-                    <strong>{f.label}</strong> {f.required ? '*' : ''}
-                    <span style={{ display: 'block', color: '#64748b', fontSize: '0.75rem' }}>
-                      {f.value ? `→ "${f.value.slice(0, 30)}${f.value.length > 30 ? '...' : ''}"` : '*(No mapped value)*'}
+                  <label htmlFor={`field_${f.id}`}>
+                    <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
+                      {f.label} {f.required ? '*' : ''}
+                    </span>
+                    <span>
+                      {f.value
+                        ? `→ "${f.value.slice(0, 34)}${f.value.length > 34 ? '…' : ''}"`
+                        : '(No mapped value)'}
                     </span>
                   </label>
                 </div>
               ))}
             </div>
 
-            <div style={{ marginTop: 12, padding: 10, background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.8rem', cursor: 'pointer' }}>
+            <div className="approval-gate">
+              <label className="checkbox-row">
                 <input
                   type="checkbox"
                   checked={humanApproved}
-                  onChange={(e) => setHumanApproved(e.target.checked)}
-                  style={{ marginTop: 2 }}
+                  onChange={(event) => setHumanApproved(event.target.checked)}
                 />
                 <span>
-                  <strong>Explicit Human Approval Gate:</strong> I have reviewed the detected fields and explicitly approve populating them. Progeni will never automatically submit or bypass security checks.
+                  <strong style={{ color: 'var(--ink)' }}>Explicit human approval gate:</strong> I have
+                  reviewed the detected fields and approve populating them. Progeni never submits forms
+                  or bypasses security checks.
                 </span>
               </label>
             </div>
@@ -764,42 +1010,69 @@ export default function SidePanel() {
               disabled={busy || !humanApproved || autofillFields.filter((f) => f.approved).length === 0}
               onClick={() => void executeAutofill()}
             >
-              Safely Fill Approved Fields
+              Safely fill approved fields
             </button>
           </div>
         )}
-        {autofillNotice && <p className="status" style={{ marginTop: 8 }} role="status">{autofillNotice}</p>}
+
+        {autofillNotice && (
+          <p className="status" style={{ marginTop: 8 }} role="status">
+            {autofillNotice}
+          </p>
+        )}
       </section>
 
+      {/* Tracker */}
       <section className="card">
-        <h2>Application tracker</h2>
-        {applications.length === 0 ? (
-          <p className="muted">No jobs tracked yet. Detect a job and add it here.</p>
-        ) : applications.map((application) => (
-          <div className="application-row" key={application.id}>
-            <div><strong>{application.job.title}</strong><span>{application.job.company || 'Company not listed'}</span></div>
-            <select
-              aria-label={`Status for ${application.job.title}`}
-              disabled={busy}
-              value={application.status}
-              onChange={(event) => void updateStatus(application, event.target.value)}
-            >
-              {['discovered', 'prepared', 'submitted', 'interview', 'rejected', 'withdrawn'].map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Pipeline</p>
+            <h2>Application tracker</h2>
           </div>
-        ))}
-        <p className="muted">“Submitted” is a status you set yourself; Progeni does not submit applications.</p>
+          <span className="local-badge">{applications.length} SAVED</span>
+        </div>
+        {applications.length === 0 ? (
+          <p className="empty-note">No jobs tracked yet. Detect a job and add it here.</p>
+        ) : (
+          applications.map((application) => (
+            <div className="application-row" key={application.id}>
+              <div>
+                <strong>{application.job.title}</strong>
+                <span>{application.job.company || 'Company not listed'}</span>
+              </div>
+              <select
+                aria-label={`Status for ${application.job.title}`}
+                disabled={busy}
+                value={application.status}
+                onChange={(event) => void updateStatus(application, event.target.value)}
+              >
+                {['discovered', 'prepared', 'submitted', 'interview', 'rejected', 'withdrawn'].map(
+                  (value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+          ))
+        )}
+        <p className="muted" style={{ marginTop: 8 }}>
+          “Submitted” is a status you set yourself; Progeni does not submit applications.
+        </p>
       </section>
 
-      <button className="text-button" disabled={busy} onClick={() => void leaveAccount()}>
+      <button className="ghost" disabled={busy} onClick={() => void leaveAccount()}>
         Sign out of Progeni
       </button>
       <footer className="policy-note">
         Manual review and submission only. Never share passwords or one-time codes.
       </footer>
-      {status && <p className="status" role="status">{status}</p>}
+      {status && (
+        <p className="status" role="status">
+          {status}
+        </p>
+      )}
     </main>
   );
 }

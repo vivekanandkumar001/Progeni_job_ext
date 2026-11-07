@@ -1,6 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import {
+  Activity,
+  AlertTriangle,
+  BadgeCheck,
+  BarChart3,
+  CheckCircle2,
+  CreditCard,
+  Gauge,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Wallet,
+} from 'lucide-react';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+const TOKEN_KEY = 'progeni.adminToken';
 
 interface RevenueKPIs {
   mrr: number;
@@ -27,6 +47,28 @@ interface AbuseAlert {
   timestamp: string;
 }
 
+type Tab = 'overview' | 'usage' | 'abuse' | 'adjust';
+
+const TIERS = [
+  { key: 'premium', label: 'Premium Elite Suite', price: '₹2,499 / mo', dot: 'violet' },
+  { key: 'pro', label: 'Pro Career Accelerator', price: '₹999 / mo', dot: 'blue' },
+  { key: 'free', label: 'Free Starter', price: '₹0 / mo', dot: 'slate' },
+];
+
+function formatINR(value: number) {
+  return `₹${value.toLocaleString('en-IN')}`;
+}
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+function severityChip(severity: AbuseAlert['severity']) {
+  if (severity === 'high') return 'chip chip-danger';
+  if (severity === 'medium') return 'chip chip-warning';
+  return 'chip';
+}
+
 export default function AdminDashboardPage() {
   const [revenue, setRevenue] = useState<RevenueKPIs | null>(null);
   const [usage, setUsage] = useState<UsageKPIs | null>(null);
@@ -34,7 +76,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'usage' | 'abuse' | 'adjust'>('overview');
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
 
   // Manual Adjust Modal
   const [adjustCandidateId, setAdjustCandidateId] = useState('');
@@ -46,19 +88,19 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError('');
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
       // Fetch overview, usage, abuse monitoring
       const [resRev, resUsage, resAbuse] = await Promise.all([
-        fetch('http://127.0.0.1:5000/api/v1/admin/billing/overview', { headers })
+        fetch(`${API_BASE}/api/v1/admin/billing/overview`, { headers })
           .then((r) => r.json())
           .catch(() => ({ ok: false })),
-        fetch('http://127.0.0.1:5000/api/v1/admin/billing/usage-analytics', { headers })
+        fetch(`${API_BASE}/api/v1/admin/billing/usage-analytics`, { headers })
           .then((r) => r.json())
           .catch(() => ({ ok: false })),
-        fetch('http://127.0.0.1:5000/api/v1/admin/billing/abuse-monitoring', { headers })
+        fetch(`${API_BASE}/api/v1/admin/billing/abuse-monitoring`, { headers })
           .then((r) => r.json())
           .catch(() => ({ ok: false })),
       ]);
@@ -66,8 +108,8 @@ export default function AdminDashboardPage() {
       if (resRev.ok) setRevenue(resRev.analytics);
       if (resUsage.ok) setUsage(resUsage.usage);
       if (resAbuse.ok) setAlerts(resAbuse.alerts || []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load administrative analytics');
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to load administrative analytics'));
     } finally {
       setLoading(false);
     }
@@ -77,13 +119,13 @@ export default function AdminDashboardPage() {
     void loadData();
   }, []);
 
-  async function handleAdjustSubmit(e: React.FormEvent) {
+  async function handleAdjustSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmittingAdjust(true);
     setError('');
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-      const res = await fetch('http://127.0.0.1:5000/api/v1/admin/billing/credits/adjust', {
+      const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+      const res = await fetch(`${API_BASE}/api/v1/admin/billing/credits/adjust`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,320 +143,449 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || 'Failed to adjust credits');
       }
 
-      setNotice(`Successfully adjusted ${adjustAmount} credits for candidate ${adjustCandidateId}! New balance: ${data.balanceRemaining}`);
+      setNotice(
+        `Successfully adjusted ${adjustAmount} credits for candidate ${adjustCandidateId}. New balance: ${data.balanceRemaining}`,
+      );
       setAdjustCandidateId('');
       setAdjustReason('');
       await loadData();
-    } catch (err: any) {
-      setError(err.message || 'Error executing manual credit adjustment');
+    } catch (err) {
+      setError(errorMessage(err, 'Error executing manual credit adjustment'));
     } finally {
       setSubmittingAdjust(false);
     }
   }
 
+  const tierCounts = TIERS.reduce((total, tier) => {
+    return total + (revenue?.tierBreakdown?.[tier.key]?.count || 0);
+  }, 0);
+
+  const totalServiceCredits = Object.values(usage?.serviceBreakdown || {}).reduce(
+    (total, item) => total + item.credits,
+    0,
+  );
+
+  const tabs: Array<{ id: Tab; label: string; icon: typeof BarChart3; count?: number }> = [
+    { id: 'overview', label: 'Revenue & plans', icon: Wallet },
+    { id: 'usage', label: 'AI usage', icon: Sparkles },
+    { id: 'abuse', label: 'Abuse & alerts', icon: AlertTriangle, count: alerts.length },
+    { id: 'adjust', label: 'Credit adjustments', icon: SlidersHorizontal },
+  ];
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 text-zinc-100">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-800 pb-5">
+    <div className="animate-rise">
+      <div className="page-heading">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">SaaS Administration & Billing Portal</h1>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-              SUPER ADMIN / RBAC
-            </span>
-          </div>
-          <p className="text-xs text-zinc-400 mt-1">
-            Real-time revenue metrics, metered AI credit velocity, payment gateway telemetry, and abuse monitoring.
+          <p className="eyebrow">Control room</p>
+          <h1>SaaS administration &amp; billing</h1>
+          <p>
+            Real-time revenue metrics, metered AI credit velocity, payment gateway telemetry and
+            abuse monitoring across the platform.
           </p>
         </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 p-1 rounded-xl">
+        <div className="page-heading-actions">
+          <span className="chip chip-primary">
+            <ShieldCheck size={12} />
+            Super admin / RBAC
+          </span>
           <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-              activeTab === 'overview' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'
-            }`}
+            type="button"
+            className="button button-secondary button-sm"
+            onClick={() => void loadData()}
+            disabled={loading}
           >
-            Revenue & Plans
-          </button>
-          <button
-            onClick={() => setActiveTab('usage')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-              activeTab === 'usage' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            AI Usage Metering
-          </button>
-          <button
-            onClick={() => setActiveTab('abuse')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-              activeTab === 'abuse' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            Abuse & Alerts ({alerts.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('adjust')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-              activeTab === 'adjust' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            Credit Adjustments
+            <RefreshCw size={14} className={loading ? 'spin' : undefined} />
+            {loading ? 'Refreshing' : 'Refresh'}
           </button>
         </div>
       </div>
 
       {notice && (
-        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex justify-between items-center">
-          <span>{notice}</span>
-          <button onClick={() => setNotice('')} className="text-xs text-emerald-400 hover:underline">
+        <div className="notice notice-success" style={{ marginBottom: 14 }} role="status">
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CheckCircle2 size={15} />
+            {notice}
+          </span>
+          <button type="button" className="button button-ghost button-sm" onClick={() => setNotice('')}>
             Dismiss
           </button>
         </div>
       )}
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex justify-between items-center">
-          <span>{error}</span>
-          <button onClick={() => setError('')} className="text-xs text-rose-400 hover:underline">
+        <div className="notice notice-danger" style={{ marginBottom: 14 }} role="alert">
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={15} />
+            {error}
+          </span>
+          <button type="button" className="button button-ghost button-sm" onClick={() => setError('')}>
             Dismiss
           </button>
         </div>
       )}
 
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-          <span className="text-xs text-zinc-400 uppercase font-medium">Monthly Recurring Revenue</span>
-          <div className="text-2xl font-black font-mono text-emerald-400">
-            ₹{(revenue?.mrr ?? 0).toLocaleString('en-IN')}
+      <div className="stats-grid">
+        <section className="card stat-card">
+          <div className="stat-top">
+            <span className="stat-label">Monthly recurring revenue</span>
+            <span className="stat-icon success">
+              <TrendingUp size={16} />
+            </span>
           </div>
-          <span className="text-[11px] text-zinc-500 block">ARR: ₹{(revenue?.arr ?? 0).toLocaleString('en-IN')}</span>
-        </div>
+          <div>
+            <span className="stat-value">{formatINR(revenue?.mrr ?? 0)}</span>
+            <span className="stat-footnote">ARR {formatINR(revenue?.arr ?? 0)}</span>
+          </div>
+        </section>
 
-        <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-          <span className="text-xs text-zinc-400 uppercase font-medium">Net Captured Revenue</span>
-          <div className="text-2xl font-black font-mono text-zinc-100">
-            ₹{(revenue?.netRevenue ?? 0).toLocaleString('en-IN')}
+        <section className="card stat-card">
+          <div className="stat-top">
+            <span className="stat-label">Net captured revenue</span>
+            <span className="stat-icon info">
+              <Wallet size={16} />
+            </span>
           </div>
-          <span className="text-[11px] text-zinc-500 block">Refunds: ₹{(revenue?.totalRefunds ?? 0).toLocaleString('en-IN')}</span>
-        </div>
+          <div>
+            <span className="stat-value">{formatINR(revenue?.netRevenue ?? 0)}</span>
+            <span className="stat-footnote">
+              Refunds {formatINR(revenue?.totalRefunds ?? 0)}
+            </span>
+          </div>
+        </section>
 
-        <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-          <span className="text-xs text-zinc-400 uppercase font-medium">Total AI Credits Consumed</span>
-          <div className="text-2xl font-black font-mono text-purple-400">
-            {(usage?.totalCreditsConsumed ?? 0).toLocaleString()}
+        <section className="card stat-card">
+          <div className="stat-top">
+            <span className="stat-label">AI credits consumed</span>
+            <span className="stat-icon">
+              <Sparkles size={16} />
+            </span>
           </div>
-          <span className="text-[11px] text-zinc-500 block">Across all metered services</span>
-        </div>
+          <div>
+            <span className="stat-value">
+              {(usage?.totalCreditsConsumed ?? 0).toLocaleString()}
+            </span>
+            <span className="stat-footnote">Across all metered services</span>
+          </div>
+        </section>
 
-        <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-          <span className="text-xs text-zinc-400 uppercase font-medium">Average Revenue Per User</span>
-          <div className="text-2xl font-black font-mono text-indigo-400">
-            ₹{(revenue?.arpu ?? 0).toLocaleString('en-IN')}
+        <section className="card stat-card">
+          <div className="stat-top">
+            <span className="stat-label">Revenue per user</span>
+            <span className="stat-icon warning">
+              <Users size={16} />
+            </span>
           </div>
-          <span className="text-[11px] text-zinc-500 block">Active paying accounts</span>
-        </div>
+          <div>
+            <span className="stat-value">{formatINR(revenue?.arpu ?? 0)}</span>
+            <span className="stat-footnote">Active paying accounts</span>
+          </div>
+        </section>
       </div>
 
-      {/* Main Tab Panels */}
+      <div className="segmented" role="tablist" aria-label="Billing views" style={{ marginBottom: 18 }}>
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={activeTab === tab.id ? 'active' : undefined}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon size={14} />
+              {tab.label}
+              {typeof tab.count === 'number' && <span className="count">{tab.count}</span>}
+            </button>
+          );
+        })}
+      </div>
+
       {loading ? (
-        <div className="p-16 text-center text-zinc-500 text-sm">Loading administrative analytics...</div>
+        <div className="grid-2">
+          {[0, 1].map((index) => (
+            <div className="card card-padding" key={index}>
+              <div className="skeleton" style={{ width: '42%', height: 14 }} />
+              <div className="skeleton" style={{ width: '100%', height: 54, marginTop: 18 }} />
+              <div className="skeleton" style={{ width: '100%', height: 54, marginTop: 10 }} />
+              <div className="skeleton" style={{ width: '100%', height: 54, marginTop: 10 }} />
+            </div>
+          ))}
+        </div>
       ) : activeTab === 'overview' ? (
-        /* Revenue & Tier Distribution */
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Subscriptions by Tier */}
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-zinc-100">Subscription Tier Distribution</h2>
-            <div className="space-y-3">
-              {[
-                { key: 'premium', label: 'Premium Elite Suite (₹2,499/mo)', color: 'bg-purple-500' },
-                { key: 'pro', label: 'Pro Career Accelerator (₹999/mo)', color: 'bg-indigo-500' },
-                { key: 'free', label: 'Free Starter (₹0/mo)', color: 'bg-zinc-600' },
-              ].map((tier) => {
+        <div className="grid-2">
+          <section className="card card-padding">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Subscription tier distribution</h2>
+                <p className="card-description">Paying accounts and monthly contribution by plan.</p>
+              </div>
+              <span className="chip chip-primary">{tierCounts} subscribers</span>
+            </div>
+
+            <div style={{ display: 'grid', gap: 10 }}>
+              {TIERS.map((tier) => {
                 const count = revenue?.tierBreakdown?.[tier.key]?.count || 0;
                 const rev = revenue?.tierBreakdown?.[tier.key]?.revenue || 0;
+                const share = tierCounts > 0 ? Math.round((count / tierCounts) * 100) : 0;
                 return (
-                  <div key={tier.key} className="p-3.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50 space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-semibold text-zinc-200">{tier.label}</span>
-                      <span className="font-mono text-zinc-400">{count} Subscribers</span>
+                  <div className="tier-row" key={tier.key}>
+                    <div className="tier-row-head">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className={`tier-dot ${tier.dot}`} aria-hidden />
+                        <strong>{tier.label}</strong>
+                      </span>
+                      <span className="chip">{tier.price}</span>
                     </div>
-                    <div className="flex justify-between text-xs text-zinc-400">
-                      <span>Monthly Contribution:</span>
-                      <span className="font-mono text-emerald-400 font-semibold">₹{rev.toLocaleString('en-IN')}</span>
+                    <div className="meter">
+                      <span style={{ width: `${share}%` }} />
+                    </div>
+                    <div className="tier-row-foot">
+                      <span>{count} subscribers · {share}% of base</span>
+                      <b>{formatINR(rev)}</b>
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
+          </section>
 
-          {/* Payment Gateway Telemetry */}
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-zinc-100">Payment Gateway Telemetry</h2>
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between p-3 rounded-lg bg-zinc-800/40">
-                <span className="text-zinc-400">Provider:</span>
-                <span className="font-bold text-zinc-200">Razorpay India (UPI, NetBanking, Cards)</span>
+          <section className="card card-padding">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Payment gateway telemetry</h2>
+                <p className="card-description">Provider posture and verification safeguards.</p>
               </div>
-              <div className="flex justify-between p-3 rounded-lg bg-zinc-800/40">
-                <span className="text-zinc-400">Environment Mode:</span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  SANDBOX / VERIFIED TEST
-                </span>
+              <span className="chip chip-success">
+                <CheckCircle2 size={12} />
+                Verified
+              </span>
+            </div>
+
+            <div>
+              <div className="detail-row">
+                <span>Provider</span>
+                <span>Razorpay India · UPI, NetBanking, Cards</span>
               </div>
-              <div className="flex justify-between p-3 rounded-lg bg-zinc-800/40">
-                <span className="text-zinc-400">Webhook Signature Verification:</span>
-                <span className="text-emerald-400 font-semibold">✓ HMAC-SHA256 Timing-Safe</span>
+              <div className="detail-row">
+                <span>Environment</span>
+                <span className="chip chip-warning">Sandbox / verified test</span>
               </div>
-              <div className="flex justify-between p-3 rounded-lg bg-zinc-800/40">
-                <span className="text-zinc-400">PCI-DSS Credentials Safety:</span>
-                <span className="text-emerald-400 font-semibold">✓ Zero Raw Card/CVV Storage</span>
+              <div className="detail-row">
+                <span>Webhook signature</span>
+                <span className="chip chip-success">HMAC-SHA256 · timing-safe</span>
+              </div>
+              <div className="detail-row">
+                <span>Card data safety</span>
+                <span className="chip chip-success">Zero raw card / CVV storage</span>
+              </div>
+              <div className="detail-row">
+                <span>Total captured</span>
+                <span>{formatINR(revenue?.totalRevenue ?? 0)}</span>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       ) : activeTab === 'usage' ? (
-        /* Usage Analytics */
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-zinc-100">Consumption by Metered Service</h2>
-            <div className="space-y-2.5">
-              {Object.entries(usage?.serviceBreakdown || {}).map(([service, data]) => (
-                <div key={service} className="p-3 rounded-xl bg-zinc-800/50 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="font-semibold text-zinc-200 capitalize">{service.replace(/_/g, ' ')}</span>
-                    <span className="text-zinc-500 text-[11px] block">{data.calls} invocations</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-purple-300 text-sm">{data.credits}</span>
-                    <span className="text-zinc-500 text-[10px] block">credits</span>
-                  </div>
-                </div>
-              ))}
+        <div className="grid-2">
+          <section className="card card-padding">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Consumption by metered service</h2>
+                <p className="card-description">Credit burn per AI capability.</p>
+              </div>
+              <span className="chip">
+                <Gauge size={12} />
+                {totalServiceCredits.toLocaleString()} credits
+              </span>
             </div>
-          </div>
 
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h2 className="text-base font-bold text-zinc-100">Top AI Consumers</h2>
-            <div className="space-y-2.5">
-              {(usage?.topConsumers || []).map((consumer, idx) => (
-                <div key={consumer.candidateId} className="p-3 rounded-xl bg-zinc-800/50 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center font-bold text-[10px] text-zinc-300">
-                      {idx + 1}
-                    </span>
-                    <span className="font-mono text-zinc-300 text-[11px]">{consumer.candidateId}</span>
+            <div style={{ display: 'grid', gap: 9 }}>
+              {Object.entries(usage?.serviceBreakdown || {}).map(([service, data]) => {
+                const share =
+                  totalServiceCredits > 0 ? Math.round((data.credits / totalServiceCredits) * 100) : 0;
+                return (
+                  <div className="tier-row" key={service}>
+                    <div className="tier-row-head">
+                      <strong style={{ textTransform: 'capitalize' }}>
+                        {service.replace(/_/g, ' ')}
+                      </strong>
+                      <span className="chip chip-primary">{data.credits} credits</span>
+                    </div>
+                    <div className="meter success">
+                      <span style={{ width: `${share}%` }} />
+                    </div>
+                    <div className="tier-row-foot">
+                      <span>{data.calls} invocations</span>
+                      <b>{share}%</b>
+                    </div>
                   </div>
-                  <span className="font-mono font-bold text-emerald-400">{consumer.creditsConsumed} cr</span>
+                );
+              })}
+              {Object.keys(usage?.serviceBreakdown || {}).length === 0 && (
+                <div className="empty-state">
+                  <BarChart3 />
+                  No metered service activity recorded yet.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="card card-padding">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Top AI consumers</h2>
+                <p className="card-description">Highest credit velocity across the platform.</p>
+              </div>
+              <span className="chip">{usage?.topConsumers?.length || 0} accounts</span>
+            </div>
+
+            <div>
+              {(usage?.topConsumers || []).map((consumer, index) => (
+                <div className="rank-row" key={consumer.candidateId}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <span className="rank-index">{index + 1}</span>
+                    <strong className="mono" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {consumer.candidateId}
+                    </strong>
+                  </span>
+                  <span className="rank-value">{consumer.creditsConsumed} cr</span>
                 </div>
               ))}
+              {(usage?.topConsumers || []).length === 0 && (
+                <div className="empty-state">
+                  <Users />
+                  No consumer activity to rank yet.
+                </div>
+              )}
             </div>
-          </div>
+          </section>
         </div>
       ) : activeTab === 'abuse' ? (
-        /* Abuse Monitoring */
-        <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-zinc-100">Abuse Detection & High Velocity Guard</h2>
-            <span className="text-xs text-zinc-400">Threshold: &gt; 250 credits/24h or &ge; 2 payment failures</span>
+        <section className="card card-padding">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">Abuse detection &amp; high-velocity guard</h2>
+              <p className="card-description">
+                Automatic flags for anomalous consumption or repeated payment failures.
+              </p>
+            </div>
+            <span className="chip chip-warning">Threshold &gt; 250 credits / 24h</span>
           </div>
 
           {alerts.length === 0 ? (
-            <div className="p-12 text-center text-zinc-500 text-xs">
-              ✓ No active abuse anomalies or high-velocity flags detected.
+            <div className="empty-state">
+              <BadgeCheck />
+              No active abuse anomalies or high-velocity flags detected.
             </div>
           ) : (
-            <div className="space-y-3">
-              {alerts.map((alert, idx) => (
+            <div style={{ display: 'grid', gap: 10 }}>
+              {alerts.map((alert, index) => (
                 <div
-                  key={idx}
-                  className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start justify-between text-xs"
+                  key={`${alert.candidateId}-${index}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    gap: 14,
+                    padding: '14px 15px',
+                    border: '1px solid rgb(var(--danger) / 0.25)',
+                    borderRadius: 12,
+                    background: 'rgb(var(--danger-container) / 0.55)',
+                  }}
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500 text-white">
-                        {alert.severity}
-                      </span>
-                      <span className="font-semibold text-rose-300">{alert.reason}</span>
+                  <div style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span className={severityChip(alert.severity)}>{alert.severity}</span>
+                      <strong style={{ color: 'rgb(var(--on-surface))', fontSize: 12.5 }}>
+                        {alert.reason}
+                      </strong>
                     </div>
-                    <p className="text-zinc-400">
-                      Candidate ID: <span className="font-mono text-zinc-200">{alert.candidateId}</span>
-                    </p>
-                    <p className="text-[11px] text-zinc-500">
-                      {alert.metric}: <strong className="text-zinc-300">{alert.value}</strong> • Flagged: {new Date(alert.timestamp).toLocaleString()}
-                    </p>
+                    <span style={{ color: 'rgb(var(--on-surface-variant))', fontSize: 11.5 }}>
+                      Candidate <span className="mono">{alert.candidateId}</span>
+                    </span>
+                    <span style={{ color: 'rgb(var(--on-surface-variant))', fontSize: 10.5 }}>
+                      {alert.metric}: <b style={{ color: 'rgb(var(--on-surface))' }}>{alert.value}</b>
+                      {' · '}Flagged {new Date(alert.timestamp).toLocaleString()}
+                    </span>
                   </div>
+                  <AlertTriangle size={17} style={{ flex: '0 0 17px', color: 'rgb(var(--danger))' }} />
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
       ) : (
-        /* Manual Credit Adjustments */
-        <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 max-w-xl mx-auto space-y-4">
-          <div>
-            <h2 className="text-base font-bold text-zinc-100">Manual Credit Adjustment</h2>
-            <p className="text-xs text-zinc-400 mt-1">
-              Add or deduct credits for a candidate with an immutable administrative audit log.
-            </p>
-          </div>
+        <div style={{ maxWidth: 620 }}>
+          <section className="card card-padding">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Manual credit adjustment</h2>
+                <p className="card-description">
+                  Add or deduct credits for a candidate. Every adjustment is audit-logged.
+                </p>
+              </div>
+              <span className="stat-icon">
+                <Activity size={16} />
+              </span>
+            </div>
 
-          <form onSubmit={handleAdjustSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">
-                Candidate User ID (UUID)
+            <form onSubmit={handleAdjustSubmit} style={{ display: 'grid', gap: 14 }}>
+              <label className="field">
+                Candidate user ID (UUID)
+                <input
+                  type="text"
+                  required
+                  value={adjustCandidateId}
+                  onChange={(e) => setAdjustCandidateId(e.target.value)}
+                  placeholder="e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                />
               </label>
-              <input
-                type="text"
-                required
-                value={adjustCandidateId}
-                onChange={(e) => setAdjustCandidateId(e.target.value)}
-                placeholder="e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 focus:outline-none focus:border-purple-500"
-              />
-            </div>
 
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">
-                Adjustment Amount (Positive to add, negative to deduct)
+              <label className="field">
+                Adjustment amount (positive to add, negative to deduct)
+                <input
+                  type="number"
+                  required
+                  value={adjustAmount}
+                  onChange={(e) => setAdjustAmount(Number(e.target.value))}
+                  placeholder="e.g. 50 or -20"
+                />
               </label>
-              <input
-                type="number"
-                required
-                value={adjustAmount}
-                onChange={(e) => setAdjustAmount(Number(e.target.value))}
-                placeholder="e.g. 50 or -20"
-                className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 focus:outline-none focus:border-purple-500"
-              />
-            </div>
 
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">
-                Audit Reason / Justification
+              <label className="field">
+                Audit reason / justification
+                <textarea
+                  rows={3}
+                  required
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  placeholder="e.g. Compensation for a temporary service outage during interview simulation"
+                />
               </label>
-              <textarea
-                rows={3}
-                required
-                value={adjustReason}
-                onChange={(e) => setAdjustReason(e.target.value)}
-                placeholder="e.g. Compensation for temporary service outage during interview simulation"
-                className="w-full px-3 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 focus:outline-none focus:border-purple-500"
-              />
-            </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={submittingAdjust}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition disabled:opacity-50"
-              >
-                {submittingAdjust ? 'Applying Adjustment...' : 'Apply Credit Adjustment'}
-              </button>
-            </div>
-          </form>
+              <div className="form-actions" style={{ justifyContent: 'space-between' }}>
+                <span className="chip">
+                  <CreditCard size={12} />
+                  Immutable audit trail
+                </span>
+                <button type="submit" className="button button-primary" disabled={submittingAdjust}>
+                  {submittingAdjust ? (
+                    <>
+                      <Loader2 size={15} className="spin" />
+                      Applying...
+                    </>
+                  ) : (
+                    <>
+                      <SlidersHorizontal size={15} />
+                      Apply adjustment
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
       )}
     </div>
