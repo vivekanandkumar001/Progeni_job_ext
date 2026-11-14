@@ -49,6 +49,18 @@ app.use(cors({
 app.use(express.json({ limit: isLocalDevelopment ? '10mb' : '4mb' }));
 app.use(requestCorrelationMiddleware);
 
+// API-only domain root: point clients at the health endpoints instead of a 404.
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'Progeni AutoApply API',
+    status: 'ok',
+    message: 'This is an API-only domain. Candidate data is available to the authenticated extension and web app.',
+    health: '/health',
+    deepHealth: '/api/v1/health/deep',
+    docs: 'https://job.progeni.live',
+  });
+});
+
 app.get('/health', async (_req, res, next) => {
   try {
     if (!isLocalDevelopment) {
