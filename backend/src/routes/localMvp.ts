@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { authMiddleware, requireRole, type AuthRequest } from '../middlewares/auth.js';
 import { env } from '../config/env.js';
 import { checkHardEligibility, calculateMatchScore } from '../services/matchingEngine.js';
-import { localDataStore, type CandidateWorkspaceStore } from '../services/localDataStore.js';
+import { localDataStore, type CandidateWorkspaceStore, type CandidateProfile } from '../services/localDataStore.js';
 import { mongoWorkspaceStore } from '../services/mongoWorkspaceStore.js';
 import { analyzeResume, ResumeParseError, type ResumeFileType } from '../services/resumeParser.js';
 
@@ -201,6 +201,25 @@ function createWorkspaceRoutes(store: CandidateWorkspaceStore) {
         }
         const userId = requireUserId(req);
         const profile = await store.getProfile(userId);
+        const candidateProfileInput: Omit<CandidateProfile, 'updatedAt'> = profile
+          ? {
+              fullName: profile.fullName,
+              email: profile.email,
+              phone: profile.phone,
+              targetRole: profile.targetRole,
+              location: profile.location,
+              skills: profile.skills,
+              experienceYears: profile.experienceYears,
+            }
+          : {
+              fullName: '',
+              email: '',
+              phone: '',
+              targetRole: '',
+              location: '',
+              skills: [],
+              experienceYears: null,
+            };
         const analysis = await analyzeResume(fileName, fileType as any, buffer);
         const skills = analysis.skills.map((s: any) => s.skill);
         const resume = await store.saveResume(
@@ -212,7 +231,7 @@ function createWorkspaceRoutes(store: CandidateWorkspaceStore) {
             experienceYears: analysis.detected.experienceYears,
             experienceEvidence: analysis.detected.experienceEvidence,
           },
-          profile,
+          candidateProfileInput,
         );
         res.json({ ok: true, analysis, resume });
       } catch (error) {

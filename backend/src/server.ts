@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -11,7 +11,6 @@ import resumeRoutes from './routes/resume.js';
 import resumeStudioRoutes from './routes/resumeStudio.js';
 import jobRoutes from './routes/jobs.js';
 import matchRoutes from './routes/matches.js';
-import adminRoutes from './routes/admin.js';
 import applicationRoutes from './routes/applications.js';
 import coverLetterRoutes from './routes/coverLetter.js';
 import authRoutes from './routes/auth.js';
