@@ -35,6 +35,16 @@ const applicationSchema = z.object({
   jobId: z.string().uuid(),
 });
 
+const localJobImportSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  companyName: z.string().trim().max(200).optional(),
+  location: z.string().trim().max(200).optional(),
+  url: z.string().url().max(2048),
+  provider: z.string().trim().max(100).optional(),
+  descriptionText: z.string().max(50000).optional(),
+  skills: z.array(z.string().trim().min(1).max(80)).max(100).optional(),
+});
+
 const applicationUpdateSchema = z.object({
   status: z.enum(['discovered', 'prepared', 'submitted', 'interview', 'rejected', 'withdrawn']),
   notes: z.string().trim().max(4000).optional(),
@@ -168,6 +178,52 @@ function createWorkspaceRoutes(store: CandidateWorkspaceStore) {
       }
     });
 
+    router.post('/candidate/resume', async (req: AuthRequest, res, next) => {
+      try {
+        const { fileName, fileType, contentBase64, title } = req.body;
+        if (!fileName || !fileType || !contentBase64) {
+          res.status(400).json({ ok: false, error: 'Missing required fields: fileName, fileType, contentBase64.' });
+          return;
+        }
+        const expectedExtension = `.${fileType}`;
+        if (!fileName.toLocaleLowerCase().endsWith(expectedExtension)) {
+          res.status(400).json({ ok: false, error: `Choose a file with the ${expectedExtension} extension.` });
+          return;
+        }
+        const buffer = Buffer.from(contentBase64, 'base64');
+        if (buffer.length > 5 * 1024 * 1024) {
+          res.status(413).json({ ok: false, error: 'Resume files must be 5 MB or smaller.' });
+          return;
+        }
+        if (buffer.toString('base64') !== contentBase64) {
+          res.status(400).json({ ok: false, error: 'Resume file data is not valid base64.' });
+          return;
+        }
+        const userId = requireUserId(req);
+        const profile = await store.getProfile(userId);
+        const analysis = await analyzeResume(fileName, fileType as any, buffer);
+        const skills = analysis.skills.map((s: any) => s.skill);
+        const resume = await store.saveResume(
+          userId,
+          {
+            fileName: analysis.fileName,
+            fileType: analysis.fileType,
+            skills,
+            experienceYears: analysis.detected.experienceYears,
+            experienceEvidence: analysis.detected.experienceEvidence,
+          },
+          profile,
+        );
+        res.json({ ok: true, analysis, resume });
+      } catch (error) {
+        if (error instanceof ResumeParseError) {
+          res.status(422).json({ ok: false, error: error.message });
+          return;
+        }
+        next(error);
+      }
+    });
+
     router.post('/resumes', async (req: AuthRequest, res, next) => {
       const parsed = resumeSaveSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -231,6 +287,29 @@ function createWorkspaceRoutes(store: CandidateWorkspaceStore) {
     router.get('/jobs', async (req: AuthRequest, res, next) => {
       try {
         res.json({ ok: true, jobs: await store.listJobs(requireUserId(req)) });
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    router.post('/jobs/import', async (req: AuthRequest, res, next) => {
+      const parsed = localJobImportSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ ok: false, error: 'Invalid job import data', details: parsed.error.flatten() });
+        return;
+      }
+      try {
+        const job = await store.importJob(requireUserId(req), {
+          title: parsed.data.title,
+          company: parsed.data.companyName || 'Unknown',
+          location: parsed.data.location || '',
+          description: parsed.data.descriptionText || '',
+          url: parsed.data.url,
+          platform: parsed.data.provider || 'extension',
+          requiredSkills: parsed.data.skills || [],
+          experienceMin: null,
+        });
+        res.json({ ok: true, job });
       } catch (error) {
         next(error);
       }

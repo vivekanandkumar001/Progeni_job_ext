@@ -267,11 +267,13 @@ export default function SidePanel() {
           companyName: job.company,
           location: job.location,
           url: job.url,
-          provider: 'extension',
+          provider: job.platform || 'extension',
+          descriptionText: job.description,
           skills: job.requiredSkills,
         },
       });
       if (!result.ok) throw new Error(result.error || 'Failed to import job');
+      if (result.job) setJob(result.job);
       setStatus('Job imported and synced with your candidate dashboard.');
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Could not import job');

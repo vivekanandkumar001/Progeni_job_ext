@@ -66,7 +66,7 @@ router.patch('/config/features', requireAdmin, async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  });
+  }
 });
 
 /**
@@ -301,7 +301,7 @@ router.get('/jobs/:id', requireAdmin, async (req, res) => {
     res.json({ success: true, data: job });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  });
+  }
 });
 
 router.patch('/jobs/:id/status', requireAdmin, async (req, res) => {

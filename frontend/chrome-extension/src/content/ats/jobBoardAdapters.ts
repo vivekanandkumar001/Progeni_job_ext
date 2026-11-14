@@ -93,13 +93,33 @@ export const indeedAdapter: ATSAdapter = {
     };
   },
 
-  detectApplicationForm(): FormField[] {
-    // Indeed Apply is external redirect or multi-step iframe
-    return [];
+  detectApplicationForm(document: Document): FormField[] {
+    const fields: FormField[] = [];
+    // Indeed job applications often redirect to the employer's ATS or use an external form.
+    // Detect any visible form inputs that could be pre-filled with candidate data.
+    const inputs = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="password"]), textarea, select',
+    );
+    for (const input of inputs) {
+      const label = input.getAttribute('aria-label') || input.name || input.id;
+      if (!label) continue;
+      // Skip likely non-application fields
+      const lowerLabel = label.toLowerCase();
+      if (/captcha|recaptcha|hcaptcha|password|otp|verify|code/i.test(lowerLabel)) continue;
+      fields.push({
+        name: input.name || input.id || 'indeed_field',
+        label,
+        type: input.type === 'file' ? 'file' : input.type === 'email' ? 'email' : 'text',
+        required: input.required || input.getAttribute('aria-required') === 'true',
+        selector: input.id ? `#${input.id}` : `input[name="${input.name}"]`,
+      });
+    }
+    return fields;
   },
 
   canAutoFill(): boolean {
-    return false;
+    // Indeed applications may redirect externally; auto-fill available with explicit candidate review per field.
+    return true;
   },
 
   requiresManualReview(): boolean {
@@ -140,12 +160,33 @@ export const naukriAdapter: ATSAdapter = {
     };
   },
 
-  detectApplicationForm(): FormField[] {
-    return [];
+  detectApplicationForm(document: Document): FormField[] {
+    const fields: FormField[] = [];
+    // Naukri job applications may have various form layouts.
+    // Detect visible form inputs that could be pre-filled with candidate data.
+    const inputs = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="password"]), textarea, select',
+    );
+    for (const input of inputs) {
+      const label = input.getAttribute('aria-label') || input.name || input.id;
+      if (!label) continue;
+      // Skip likely non-application fields
+      const lowerLabel = label.toLowerCase();
+      if (/captcha|recaptcha|hcaptcha|password|otp|verify|code/i.test(lowerLabel)) continue;
+      fields.push({
+        name: input.name || input.id || 'naukri_field',
+        label,
+        type: input.type === 'file' ? 'file' : input.type === 'email' ? 'email' : 'text',
+        required: input.required || input.getAttribute('aria-required') === 'true',
+        selector: input.id ? `#${input.id}` : `input[name="${input.name}"]`,
+      });
+    }
+    return fields;
   },
 
   canAutoFill(): boolean {
-    return false;
+    // Naukri applications may redirect externally; auto-fill available with explicit candidate review per field.
+    return true;
   },
 
   requiresManualReview(): boolean {

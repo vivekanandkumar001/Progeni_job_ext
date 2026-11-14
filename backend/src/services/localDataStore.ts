@@ -80,6 +80,7 @@ export interface CandidateWorkspaceStore {
   ): Promise<LocalResume>;
   deleteResume(userId: string, id: string): Promise<boolean>;
   listJobs(userId: string): Promise<JobListing[]>;
+  importJob(userId: string, job: Omit<JobListing, 'id' | 'createdAt'>): Promise<JobListing>;
   saveMatch(
     userId: string,
     job: Omit<JobListing, 'id' | 'createdAt'>,
@@ -236,6 +237,20 @@ export const localDataStore = {
 
   async listJobs(_userId: string): Promise<JobListing[]> {
     return (await readData()).jobs;
+  },
+
+  importJob(
+    _userId: string,
+    job: Omit<JobListing, 'id' | 'createdAt'>,
+  ): Promise<JobListing> {
+    return updateData((data) => {
+      const existing = data.jobs.find((item) => item.url === job.url);
+      const saved: JobListing = existing
+        ? { ...existing, ...job }
+        : { ...job, id: randomUUID(), createdAt: new Date().toISOString() };
+      data.jobs = [saved, ...data.jobs.filter((item) => item.id !== saved.id)].slice(0, 500);
+      return saved;
+    });
   },
 
   saveMatch(

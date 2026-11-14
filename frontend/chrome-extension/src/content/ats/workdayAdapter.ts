@@ -53,8 +53,10 @@ export const workdayAdapter: ATSAdapter = {
   },
 
   canAutoFill(): boolean {
-    // Workday forms use complex shadow DOM / multi-step authentication. Auto-fill is limited to assistive overlay.
-    return false;
+    // Workday forms use complex shadow DOM / multi-step workflows.
+    // Assistive auto-fill is possible with explicit user review per field.
+    // Return true so the preview flow opens, but each field requires individual approval.
+    return true;
   },
 
   requiresManualReview(): boolean {

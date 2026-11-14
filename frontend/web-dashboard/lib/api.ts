@@ -150,7 +150,24 @@ async function request<T>(
   headers.set('Authorization', `Bearer ${token}`);
 
   const rootApiUrl = API_BASE_URL.replace(/\/(local|workspace)$/, '');
-  const url = path.startsWith('/auth') || path.startsWith('/candidate') || path.startsWith('/resumes') || path.startsWith('/resume-studio') || path.startsWith('/jobs') || path.startsWith('/matches') || path.startsWith('/applications') || path.startsWith('/tracker') || path.startsWith('/interviews') || path.startsWith('/follow-ups') || path.startsWith('/analytics') || path.startsWith('/notifications') || path.startsWith('/integration') || path.startsWith('/billing')
+  const rootScopedPath =
+    path.startsWith('/auth') ||
+    path.startsWith('/candidate') ||
+    path.startsWith('/resumes') ||
+    path.startsWith('/resume-studio') ||
+    path.startsWith('/jobs') ||
+    path.startsWith('/matches') ||
+    path.startsWith('/applications') ||
+    path.startsWith('/tracker') ||
+    path.startsWith('/interviews') ||
+    path.startsWith('/follow-ups') ||
+    path.startsWith('/analytics') ||
+    path.startsWith('/notifications') ||
+    path.startsWith('/integration') ||
+    path.startsWith('/billing');
+  // In local mode the workspace routes (jobs, matches, applications, resumes) live
+  // under /api/v1/local; only auth endpoints stay on the root API.
+  const url = rootScopedPath && (usesCloudAuthentication || path.startsWith('/auth'))
     ? `${rootApiUrl}${path}`
     : `${API_BASE_URL}${path}`;
 
@@ -1090,6 +1107,61 @@ export interface CandidateSavedJobItem {
   job: DiscoveredJob | null;
 }
 
+interface LocalJobListing {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  url: string;
+  platform: string;
+  requiredSkills: string[];
+  experienceMin: number | null;
+  createdAt: string;
+}
+
+function mapLocalJob(job: LocalJobListing): DiscoveredJob {
+  const provider = (
+    ['greenhouse', 'lever', 'ashby', 'smartrecruiters', 'workday', 'extension', 'manual'] as const
+  ).includes(job.platform as any)
+    ? (job.platform as DiscoveredJob['provider'])
+    : 'other';
+  const location = job.location || '';
+  const workplace_mode: DiscoveredJob['workplace_mode'] = /remote/i.test(location)
+    ? 'remote'
+    : /hybrid/i.test(location)
+      ? 'hybrid'
+      : 'office';
+  return {
+    id: job.id,
+    job_id: job.id,
+    external_job_id: null,
+    provider,
+    company_name: job.company,
+    job_title: job.title,
+    job_description: job.description,
+    responsibilities: [],
+    required_skills: job.requiredSkills,
+    preferred_skills: [],
+    experience_min: job.experienceMin,
+    experience_max: null,
+    salary_min: null,
+    salary_max: null,
+    salary_currency: null,
+    employment_type: 'other',
+    workplace_mode,
+    location: job.location || null,
+    country: null,
+    application_url: job.url,
+    original_source_url: job.url,
+    canonical_url: job.url,
+    posted_at: job.createdAt,
+    status: 'active',
+    is_saved: false,
+    match_reasons: [],
+  };
+}
+
 export async function listDiscoveredJobs(params?: {
   q?: string;
   role?: string;
@@ -1102,6 +1174,38 @@ export async function listDiscoveredJobs(params?: {
   page?: number;
   limit?: number;
 }): Promise<DiscoveredJobsResponse> {
+  if (!usesCloudAuthentication) {
+    const res = await request<never>('/jobs');
+    let jobs = ((((res as any).jobs) || []) as LocalJobListing[]).map(mapLocalJob);
+    if (params?.q) {
+      const q = params.q.toLowerCase();
+      jobs = jobs.filter((job) =>
+        `${job.job_title} ${job.company_name} ${job.job_description}`.toLowerCase().includes(q),
+      );
+    }
+    if (params?.location) {
+      const location = params.location.toLowerCase();
+      jobs = jobs.filter((job) => (job.location || '').toLowerCase().includes(location));
+    }
+    if (params?.provider && params.provider !== 'all') {
+      jobs = jobs.filter((job) => job.provider === params.provider);
+    }
+    if (params?.workplace_mode && params.workplace_mode !== 'all') {
+      jobs = jobs.filter((job) => job.workplace_mode === params.workplace_mode);
+    }
+    const page = params?.page ?? 1;
+    const limit = params?.limit ?? 20;
+    const start = (page - 1) * limit;
+    return {
+      jobs: jobs.slice(start, start + limit),
+      total: jobs.length,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(jobs.length / limit)),
+      isPersonalized: false,
+    };
+  }
+
   const query = new URLSearchParams();
   if (params?.q) query.set('q', params.q);
   if (params?.role) query.set('role', params.role);
@@ -1121,6 +1225,13 @@ export async function listDiscoveredJobs(params?: {
 }
 
 export async function getDiscoveredJobDetails(id: string): Promise<DiscoveredJob> {
+  if (!usesCloudAuthentication) {
+    const res = await request<never>('/jobs');
+    const raw = (((res as any).jobs) || []) as LocalJobListing[];
+    const found = raw.find((job) => job.id === id);
+    if (!found) throw new Error('Job not found in your local workspace.');
+    return mapLocalJob(found);
+  }
   const res = await request<never>(`/jobs/${encodeURIComponent(id)}`);
   return (res as any).job;
 }
@@ -1288,6 +1399,113 @@ export interface SkillGapAnalysisData {
   disclaimer: string;
 }
 
+interface LocalJobMatch {
+  id: string;
+  job: LocalJobListing;
+  score: number;
+  factors: Record<string, number>;
+  explanation: string[];
+  missingEvidence: string[];
+  eligible: boolean;
+  blockers: string[];
+  unknowns: string[];
+  evidence: string[];
+  createdAt: string;
+}
+
+function mapLocalMatch(match: LocalJobMatch): DetailedMatchRecord {
+  const job = mapLocalJob(match.job);
+  const skills = Number(match.factors?.skills) || 0;
+  const experience = Number(match.factors?.experience) || 0;
+  const role = Number(match.factors?.role) || 0;
+  const missingText = (match.missingEvidence || []).join(' ').toLowerCase();
+  const matchedSkills = (match.job.requiredSkills || []).filter(
+    (skill) => !missingText.includes(skill.toLowerCase()),
+  );
+  return {
+    id: match.id,
+    user_id: 'local-candidate',
+    candidate_id: 'local-candidate',
+    job_id: match.job.id,
+    overall_score: match.score,
+    dimension_scores: {
+      skills_alignment: skills,
+      experience_eligibility: experience,
+      role_relevance: role,
+      education_eligibility: 0,
+      location_compatibility: 0,
+      salary_compatibility: 0,
+    },
+    eligibility_status: match.eligible
+      ? 'eligible'
+      : match.blockers?.length
+        ? 'ineligible'
+        : 'potentially_eligible',
+    matched_skills: matchedSkills,
+    missing_required_skills: match.missingEvidence || [],
+    missing_preferred_skills: [],
+    skill_details: (match.job.requiredSkills || []).map((skill) => ({
+      skill,
+      canonical: skill,
+      status: matchedSkills.includes(skill) ? 'matched' : 'missing',
+      importance: 'required',
+    })),
+    experience_details: {
+      candidate_years: null,
+      job_min_years: match.job.experienceMin,
+      job_max_years: null,
+      status: match.eligible ? 'eligible' : 'review',
+      note: (match.explanation || []).find((line) => /experience/i.test(line)) || '',
+    },
+    education_details: {
+      candidate_degrees: [],
+      required_degree: null,
+      status: 'not_evaluated',
+      note: '',
+    },
+    location_details: {
+      candidate_locations: [],
+      candidate_mode: '',
+      job_location: match.job.location || null,
+      job_mode: job.workplace_mode,
+      status: 'not_evaluated',
+      note: '',
+    },
+    salary_details: {
+      candidate_min: null,
+      candidate_currency: null,
+      job_min: null,
+      job_max: null,
+      job_currency: null,
+      status: 'not_disclosed',
+      note: '',
+    },
+    blockers: match.blockers || [],
+    unknowns: match.unknowns || [],
+    warnings: [],
+    explanation: match.explanation || [],
+    confidence: match.score,
+    algorithm_version: 'local-mvp',
+    created_at: match.createdAt,
+    updated_at: match.createdAt,
+    job: {
+      id: job.id,
+      job_title: job.job_title,
+      company_name: job.company_name,
+      location: job.location,
+      workplace_mode: job.workplace_mode,
+      salary_min: null,
+      salary_max: null,
+      salary_currency: null,
+      required_skills: job.required_skills,
+      preferred_skills: [],
+      responsibilities: [],
+      application_url: job.application_url,
+      canonical_url: job.canonical_url,
+    },
+  };
+}
+
 export async function listCandidateMatches(options?: {
   sort?: string;
   eligibility_status?: string;
@@ -1295,6 +1513,24 @@ export async function listCandidateMatches(options?: {
   page?: number;
   limit?: number;
 }): Promise<{ matches: DetailedMatchRecord[]; total: number }> {
+  if (!usesCloudAuthentication) {
+    const res = await request<never>('/matches');
+    let matches = ((((res as any).matches) || []) as LocalJobMatch[]).map(mapLocalMatch);
+    if (options?.min_score) {
+      matches = matches.filter((match) => match.overall_score >= options.min_score!);
+    }
+    if (options?.eligibility_status) {
+      matches = matches.filter((match) => match.eligibility_status === options.eligibility_status);
+    }
+    if (options?.sort === 'relevance' || options?.sort === 'score') {
+      matches.sort((a, b) => b.overall_score - a.overall_score);
+    }
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 20;
+    const start = (page - 1) * limit;
+    return { matches: matches.slice(start, start + limit), total: matches.length };
+  }
+
   const query = new URLSearchParams();
   if (options?.sort) query.set('sort', options.sort);
   if (options?.eligibility_status) query.set('eligibility_status', options.eligibility_status);
@@ -1309,11 +1545,21 @@ export async function listCandidateMatches(options?: {
 }
 
 export async function getCandidateMatchDetails(id: string): Promise<DetailedMatchRecord> {
+  if (!usesCloudAuthentication) {
+    const res = await listCandidateMatches({ limit: 200 });
+    const found = res.matches.find((match) => match.id === id);
+    if (!found) throw new Error('Match not found in your local workspace.');
+    return found;
+  }
   const res = await request<never>(`/matches/${encodeURIComponent(id)}`);
   return (res as any).match;
 }
 
 export async function recalculateCandidateMatches(jobIds?: string[]): Promise<DetailedMatchRecord[]> {
+  if (!usesCloudAuthentication) {
+    const res = await listCandidateMatches({ limit: 200 });
+    return res.matches;
+  }
   const res = await request<never>('/matches/recalculate', {
     method: 'POST',
     body: JSON.stringify({ jobIds }),
@@ -1322,11 +1568,55 @@ export async function recalculateCandidateMatches(jobIds?: string[]): Promise<De
 }
 
 export async function getCandidateMatchSummary(): Promise<MatchSummaryData> {
+  if (!usesCloudAuthentication) {
+    const res = await listCandidateMatches({ limit: 200 });
+    const matches = res.matches;
+    return {
+      total_matches: matches.length,
+      eligible_count: matches.filter((match) => match.eligibility_status === 'eligible').length,
+      potentially_eligible_count: matches.filter(
+        (match) => match.eligibility_status === 'potentially_eligible',
+      ).length,
+      ineligible_count: matches.filter((match) => match.eligibility_status === 'ineligible').length,
+      average_score: matches.length
+        ? Math.round(matches.reduce((sum, match) => sum + match.overall_score, 0) / matches.length)
+        : 0,
+      top_matches: [...matches].sort((a, b) => b.overall_score - a.overall_score).slice(0, 5),
+    };
+  }
   const res = await request<never>('/matches/summary');
   return (res as any).summary;
 }
 
 export async function getCandidateSkillGaps(): Promise<SkillGapAnalysisData> {
+  if (!usesCloudAuthentication) {
+    const res = await listCandidateMatches({ limit: 200 });
+    const demand = new Map<string, number>();
+    for (const match of res.matches) {
+      for (const skill of match.missing_required_skills) {
+        demand.set(skill, (demand.get(skill) || 0) + 1);
+      }
+    }
+    return {
+      candidate_id: 'local-candidate',
+      target_roles: [],
+      total_jobs_analyzed: res.matches.length,
+      top_missing_skills: Array.from(demand.entries())
+        .map(([skill, count]) => ({
+          skill,
+          canonical: skill,
+          demand_count: count,
+          importance: 'required' as const,
+          candidate_has_skill: false,
+          suggested_action: 'Add evidence for this skill if you have it, or consider learning it.',
+        }))
+        .sort((a, b) => b.demand_count - a.demand_count),
+      verified_candidate_skills: [],
+      suggested_learning_priorities: [],
+      disclaimer:
+        'Local estimate based only on the jobs currently in your workspace. It does not guarantee interviews or offers.',
+    };
+  }
   const res = await request<never>('/matches/skill-gaps');
   return res as any;
 }
@@ -1793,6 +2083,104 @@ export interface NotificationItem {
 }
 
 // Tracker APIs
+type LocalApplicationStatus = 'discovered' | 'prepared' | 'submitted' | 'interview' | 'rejected' | 'withdrawn';
+
+interface LocalTrackedApplication {
+  id: string;
+  job: {
+    id: string;
+    title: string;
+    company: string;
+    location: string;
+    url: string;
+    platform: string;
+  };
+  status: LocalApplicationStatus;
+  notes: string;
+  updatedAt: string;
+}
+
+const localToTrackerStatus: Record<LocalApplicationStatus, TrackerLifecycleStatus> = {
+  discovered: 'discovered',
+  prepared: 'preparing',
+  submitted: 'submitted',
+  interview: 'interview_scheduled',
+  rejected: 'rejected',
+  withdrawn: 'withdrawn',
+};
+
+const trackerToLocalStatus: Record<TrackerLifecycleStatus, LocalApplicationStatus> = {
+  discovered: 'discovered',
+  preparing: 'prepared',
+  ready_for_review: 'prepared',
+  approved: 'prepared',
+  submitted: 'submitted',
+  under_review: 'interview',
+  shortlisted: 'interview',
+  interview_scheduled: 'interview',
+  rejected: 'rejected',
+  offer_received: 'interview',
+  offer_accepted: 'interview',
+  offer_declined: 'interview',
+  withdrawn: 'withdrawn',
+  closed: 'withdrawn',
+};
+
+function trackerTransitions(status: TrackerLifecycleStatus): string[] {
+  switch (status) {
+    case 'discovered':
+      return ['preparing', 'withdrawn'];
+    case 'preparing':
+      return ['ready_for_review', 'withdrawn'];
+    case 'ready_for_review':
+      return ['approved', 'withdrawn'];
+    case 'approved':
+      return ['submitted', 'withdrawn'];
+    case 'submitted':
+      return ['under_review', 'interview_scheduled', 'rejected', 'withdrawn'];
+    case 'under_review':
+      return ['shortlisted', 'interview_scheduled', 'rejected', 'withdrawn'];
+    case 'shortlisted':
+      return ['interview_scheduled', 'rejected', 'withdrawn'];
+    case 'interview_scheduled':
+      return ['offer_received', 'rejected', 'withdrawn'];
+    case 'offer_received':
+      return ['offer_accepted', 'offer_declined'];
+    default:
+      return [];
+  }
+}
+
+function mapLocalApplication(app: LocalTrackedApplication): TrackedAppSummary {
+  const status = localToTrackerStatus[app.status] ?? 'discovered';
+  return {
+    id: app.id,
+    candidateId: 'local-candidate',
+    jobId: app.job.id,
+    company: app.job.company,
+    jobTitle: app.job.title,
+    location: app.job.location,
+    jobUrl: app.job.url,
+    source: app.job.platform,
+    status,
+    allowedTransitions: trackerTransitions(status),
+    submissionEvidence:
+      app.status === 'submitted' || app.status === 'interview'
+        ? {
+            submissionMethod: 'manual',
+            verificationStatus: 'candidate_reported',
+            submittedAt: app.updatedAt,
+            destination: app.job.url,
+          }
+        : undefined,
+    interviewsCount: app.status === 'interview' ? 1 : 0,
+    pendingFollowUpsCount: 0,
+    hasOverdueFollowUp: false,
+    createdAt: app.updatedAt,
+    updatedAt: app.updatedAt,
+  };
+}
+
 export async function listTrackedApplications(params: {
   q?: string;
   company?: string;
@@ -1804,6 +2192,29 @@ export async function listTrackedApplications(params: {
   page?: number;
   limit?: number;
 } = {}): Promise<{ applications: TrackedAppSummary[]; total: number; page: number; limit: number }> {
+  if (!usesCloudAuthentication) {
+    const res = await request<never>('/applications');
+    let apps = (((res as any).applications) || []).map(mapLocalApplication) as TrackedAppSummary[];
+    if (params.q) {
+      const q = params.q.toLowerCase();
+      apps = apps.filter((app) =>
+        `${app.company} ${app.jobTitle} ${app.location ?? ''} ${app.jobUrl ?? ''}`
+          .toLowerCase()
+          .includes(q),
+      );
+    }
+    if (params.status) {
+      const wanted = new Set(
+        params.status.split(',').map((value) => value.trim()).filter(Boolean),
+      );
+      apps = apps.filter((app) => wanted.has(app.status));
+    }
+    const page = params.page ?? 1;
+    const limit = params.limit ?? 20;
+    const start = (page - 1) * limit;
+    return { applications: apps.slice(start, start + limit), total: apps.length, page, limit };
+  }
+
   const query = new URLSearchParams();
   if (params.q) query.set('q', params.q);
   if (params.company) query.set('company', params.company);
@@ -1830,6 +2241,18 @@ export async function updateApplicationTrackerStatus(
   status: TrackerLifecycleStatus,
   reason?: string,
 ): Promise<{ status: string; updatedAt: string }> {
+  if (!usesCloudAuthentication) {
+    const localStatus = trackerToLocalStatus[status] ?? 'discovered';
+    const res = await request<never>(`/applications/${encodeURIComponent(applicationId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: localStatus }),
+    });
+    return {
+      status,
+      updatedAt: (res as any).application?.updatedAt || new Date().toISOString(),
+    };
+  }
+
   const res = await request<never>(`/tracker/${encodeURIComponent(applicationId)}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status, reason }),
@@ -1852,6 +2275,21 @@ export async function recordApplicationSubmissionEvidence(
     notes?: string;
   },
 ): Promise<any> {
+  if (!usesCloudAuthentication) {
+    const res = await request<never>(`/applications/${encodeURIComponent(applicationId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'submitted', notes: payload.notes }),
+    });
+    const updatedAt = (res as any).application?.updatedAt || new Date().toISOString();
+    return {
+      submissionMethod: payload.submissionMethod,
+      verificationStatus: payload.verificationStatus || 'candidate_reported',
+      submittedAt: payload.confirmationEvidence?.submittedAt || updatedAt,
+      destination: payload.destination,
+      confirmationReference: payload.confirmationReference,
+    };
+  }
+
   const res = await request<never>(`/tracker/${encodeURIComponent(applicationId)}/submission-evidence`, {
     method: 'POST',
     body: JSON.stringify(payload),

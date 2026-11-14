@@ -165,9 +165,9 @@ export default function LandingPage() {
         {/* ============================== HERO ============================== */}
         <section className="relative overflow-hidden border-b border-outline-variant">
           <div className="pointer-events-none absolute left-1/2 top-[-16rem] h-[34rem] w-[60rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[130px]" />
-          <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8">
+          <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pb-14 pt-8 sm:px-6 sm:pt-11 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8">
             <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface px-3 py-1.5 text-[10.5px] font-semibold text-on-surface-variant shadow-sm">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface px-3 py-1.5 text-[10.5px] font-semibold text-on-surface-variant shadow-sm">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-success" />
                 Human-in-the-loop · Never auto-submits
               </div>
@@ -175,11 +175,11 @@ export default function LandingPage() {
                 Apply smarter,
                 <span className="block text-gradient">not blindly.</span>
               </h1>
-              <p className="mt-5 max-w-xl text-[14px] leading-relaxed text-on-surface-variant sm:text-[15px]">
+              <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-on-surface-variant sm:text-[15px]">
                 Progeni turns your real experience into explainable job matches, parser-safe resumes,
                 and interview-ready answers — with every claim grounded in what you can defend.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"
                   onClick={primaryAction}
@@ -192,7 +192,7 @@ export default function LandingPage() {
                   See how it works
                 </a>
               </div>
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-on-surface-variant">
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-on-surface-variant">
                 {['Evidence-based match scores', 'No fabricated skills', 'Wipe data anytime'].map((item) => (
                   <span className="inline-flex items-center gap-1.5" key={item}>
                     <Check className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />

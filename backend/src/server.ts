@@ -40,7 +40,7 @@ app.use(cors({
     const localOrigin =
       isLocalDevelopment &&
       origin !== undefined &&
-      (/^https?:\/\/(localhost|127\.0\.0\.1):(3000|3001|3002|5173)$/.test(origin) ||
+      (/^https?:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}):(3000|3001|3002|5173)$/.test(origin) ||
         /^chrome-extension:\/\/[a-p]{32}$/.test(origin));
     const allowed = origin === undefined || localOrigin || env.CORS_ALLOWED_ORIGINS.includes(origin);
     callback(null, allowed ? origin : false);

@@ -127,9 +127,30 @@ export function mapFieldToCandidateValue(
     portfolioUrl?: string;
     coverLetter?: string;
     screeningAnswers?: Record<string, string>;
+    experience_years?: number | null;
   },
 ): { value: string; confidence: number } {
   const text = `${label} ${name}`.toLowerCase();
+
+  // === DEMOGRAPHIC / SENSITIVE QUESTIONS ===
+  // These must NOT be auto-inferred. Return empty with confidence 0
+  // so the candidate must manually review/answer.
+  const sensitivePatterns = [
+    /(citizenship|nationality|country.?of.?birth|place.?of.?birth)/i,
+    /(visa|work.?authorization|employment.?authorization|sponsorship)/i,
+    /(disability|medical|health.?condition|reasonable.?accommodation)/i,
+    /(gender|sex|sexual.?orientation|gender.?identity)/i,
+    /(age|date.?of.?birth|birth.?date)/i,
+    /(marital.?status|married|dependents)/i,
+    /(criminal|conviction|record|legal.?history)/i,
+  ];
+
+  for (const pattern of sensitivePatterns) {
+    if (pattern.test(text)) {
+      // Never infer answers to sensitive/demographic questions
+      return { value: '', confidence: 0 };
+    }
+  }
 
   if (/first\s*name/i.test(text)) {
     const parts = (candidateData.fullName || '').split(/\s+/);
@@ -157,17 +178,34 @@ export function mapFieldToCandidateValue(
   if (/portfolio|github|website|url|web/i.test(text)) {
     return { value: candidateData.portfolioUrl || '', confidence: 0.9 };
   }
-  if (/cover\s*letter|letter\s*of\s*interest|message|why\s*join/i.test(text)) {
+  if (/cover\s*letter|letter\s*of.?interest|message|why.?join/i.test(text)) {
     return { value: candidateData.coverLetter || '', confidence: 0.85 };
   }
 
-  // Check custom screening answers
+  // === CUSTOM SCREENING QUESTIONS ===
+  // Search approved candidate data for relevant evidence.
   if (candidateData.screeningAnswers) {
     for (const [q, a] of Object.entries(candidateData.screeningAnswers)) {
-      if (text.includes(q.toLowerCase()) || q.toLowerCase().includes(text)) {
+      const normalizedQ = q.toLowerCase().trim();
+      // Exact match or significant overlap
+      if (
+        text.includes(normalizedQ) ||
+        normalizedQ.includes(text) ||
+        // Fuzzy: check if key terms overlap
+        normalizedQ.split(/\s+/).some((term) => term.length > 3 && text.includes(term))
+      ) {
         return { value: a, confidence: 0.9 };
       }
     }
+  }
+
+  // === GENERIC FIELD MAPS (low confidence - candidate must review) ===
+  if (/year(s)?\s*of\s*experience|experience.?year/i.test(text)) {
+    return { value: String(candidateData.experience_years || ''), confidence: 0.6 };
+  }
+  if (/salary|compensation|pay|range|expected/i.test(text)) {
+    return { value: '', confidence: 0 };
+    // Salary expectations must be candidate-controlled
   }
 
   return { value: '', confidence: 0 };

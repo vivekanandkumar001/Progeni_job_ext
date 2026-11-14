@@ -249,25 +249,30 @@ export default function Popup() {
 
       if (result.job && authenticated) {
         try {
-          const profileResult = await sendMessage<ResponseData>({ type: 'GET_PROFILE_SKILLS' });
-          if (profileResult.ok && profileResult.skills) {
-            const expResult = await sendMessage<ResponseData>({ type: 'GET_PROFILE_EXPERIENCE' });
-            const candExp =
-              Number(profileResult.experience_years) || Number(expResult.experience_years) || null;
-            const matchResult = await sendMessage<any>({
-              type: 'COMPUTE_MATCH_SCORE',
-              payload: {
-                job: result.job,
-                candidateSkills: profileResult.skills,
-                candidateExperience: candExp,
-              },
+          const profileResult = await sendMessage<any>({ type: 'GET_CANDIDATE_PROFILE' });
+          const profileSkills: string[] = Array.isArray(profileResult?.profile?.skills)
+            ? profileResult.profile.skills
+            : [];
+          const detectedJob = result.job as any;
+          const requiredSkills: string[] = Array.isArray(detectedJob.requiredSkills)
+            ? detectedJob.requiredSkills
+            : [];
+          const skillSet = new Set(profileSkills.map((skill) => skill.toLowerCase()));
+          const matchedSkills = requiredSkills.filter((skill) => skillSet.has(skill.toLowerCase()));
+          const missingSkills = requiredSkills.filter((skill) => !skillSet.has(skill.toLowerCase()));
+
+          const matchResult = await sendMessage<any>({ type: 'ANALYZE_JOB', payload: detectedJob });
+          if (matchResult?.ok && matchResult.match) {
+            const match = matchResult.match;
+            setMatchScore({
+              score: Number(match.score) || 0,
+              matchedSkills,
+              missingSkills,
+              explanation: Array.isArray(match.explanation) ? match.explanation : [],
             });
-            if (matchResult && matchResult.score !== undefined) {
-              setMatchScore(matchResult);
-              setStatus(`Job detected. Match score: ${matchResult.score}%.`);
-            }
+            setStatus(`Job detected. Match score: ${match.score}%.`);
           } else {
-            setStatus('Job detected. Profile skills not available for match scoring.');
+            setStatus(matchResult?.error || 'Job detected. Match scoring unavailable.');
           }
         } catch (matchError) {
           setStatus('Job detected. Match scoring unavailable.');
@@ -340,16 +345,24 @@ export default function Popup() {
         throw new Error('Please open a job application page in the active tab.');
       }
 
+      const profileResult = await sendMessage<any>({ type: 'GET_CANDIDATE_PROFILE' });
+      const profile = profileResult?.profile ?? {};
+      if (!profile.fullName && !profile.email && !profile.phone) {
+        throw new Error('Add your name, email, and phone in the side panel profile before using Smart apply.');
+      }
+
+      // CRITICAL: Use the side panel's approval flow - do NOT auto-approve.
+      // Instead, preview the form fields and let the candidate review/approve individually.
       const formResult = await sendTabMessage<any>(activeTab.tabId, {
         type: 'PREVIEW_AUTOFILL',
         payload: {
           candidateData: {
-            fullName: job.title ? job.title.replace(/[0-9]/g, '') : '',
-            email: '',
-            phone: '',
-            location: '',
+            fullName: profile.fullName || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+            location: profile.location || '',
           },
-          isApplicationApproved: true,
+          isApplicationApproved: false, // EXPLICIT: Require candidate approval per invariant #1
         },
       });
 
@@ -357,30 +370,16 @@ export default function Popup() {
         throw new Error(formResult.error || 'Could not detect form fields.');
       }
 
-      const autoApprovePlan = {
-        ...formResult.plan,
-        fields: formResult.plan.fields.map((f: any) => ({ ...f, approved: true })),
-        isApplicationApproved: true,
-      };
-
-      const autoResult = await sendTabMessage<any>(activeTab.tabId, {
-        type: 'APPLY_AUTOFILL',
-        payload: { plan: autoApprovePlan },
-      });
-
-      const injectedCount = autoResult?.injectedCount || 0;
-      const skippedCount = autoResult?.skippedCount || 0;
-
+      // Store the plan and show the side panel for candidate review
+      // The side panel has the approval gate; we'll open it for candidate interaction
       setSmartApplyResult({
-        ok: injectedCount > 0,
-        injectedCount,
-        skippedCount,
-        message: `Safely filled ${injectedCount} fields.${
-          skippedCount > 0 ? ` ${skippedCount} skipped for safety.` : ''
-        } Review the form and submit manually.`,
+        ok: false,
+        injectedCount: 0,
+        skippedCount: formResult.plan.fields.length,
+        message: 'Form detected. Please open the side panel to review and approve field mappings before auto-filling. The extension requires explicit candidate authorization before any injection.',
       });
 
-      setStatus(`${injectedCount} fields auto-filled. Please review and submit manually.`);
+      setStatus('Form detected. Open side panel to review field mappings and provide explicit authorization.');
     } catch (error) {
       setSmartApplyResult({
         ok: false,

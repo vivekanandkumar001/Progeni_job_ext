@@ -9,7 +9,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), crx({ manifest })],
     define: {
-      'import.meta.env.PROGENI_LOCAL': JSON.stringify(mode === 'local'),
+      'import.meta.env.PROGENI_LOCAL': JSON.stringify(
+        mode === 'local' || mode === 'localbuild',
+      ),
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
         env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '',
       ),

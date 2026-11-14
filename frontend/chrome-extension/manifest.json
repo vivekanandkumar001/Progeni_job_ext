@@ -13,6 +13,7 @@
   "host_permissions": [
     "http://127.0.0.1:5000/*",
     "https://job.progeni.live/*",
+    "https://api.job.progeni.live/*",
     "https://progeni-job-ext.vercel.app/*",
     "https://*.naukri.com/*",
     "https://*.linkedin.com/*",

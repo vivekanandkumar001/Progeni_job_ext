@@ -1,7 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { DETECTED_JOB_STORAGE_KEY } from '../shared/messages';
 
-const SUPPORTED_HOSTS = ['naukri.com', 'linkedin.com', 'indeed.com'];
+const SUPPORTED_HOSTS = [
+  'naukri.com',
+  'linkedin.com',
+  'indeed.com',
+  'greenhouse.io',
+  'lever.co',
+  'ashbyhq.com',
+  'myworkdayjobs.com',
+  'smartrecruiters.com',
+];
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const hasSupabaseConfiguration = Boolean(supabaseUrl || supabaseAnonKey);
@@ -9,7 +18,7 @@ const isLocalBuild = import.meta.env.DEV || import.meta.env.PROGENI_LOCAL;
 const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/+$/, '') || '';
 const defaultApiUrl = isLocalBuild
   ? 'http://127.0.0.1:5000/api/v1/local'
-  : 'https://job.progeni.live/api/v1/workspace';
+  : 'https://api.job.progeni.live/api/v1/workspace';
 const API_BASE_URL = configuredApiUrl
   ? /\/api\/v1\/(local|workspace)$/.test(configuredApiUrl)
     ? configuredApiUrl
@@ -115,9 +124,7 @@ async function localApi(path: string, init?: RequestInit): Promise<ApiResponse> 
   const headers = new Headers(init?.headers);
   headers.set('Content-Type', 'application/json');
   headers.set('Authorization', `Bearer ${token}`);
-  const base = path.startsWith('/jobs') || path.startsWith('/applications') || path.startsWith('/matches')
-    ? API_BASE_URL.replace(/\/api\/v1\/(local|workspace)$/, '/api/v1')
-    : API_BASE_URL;
+  const base = API_BASE_URL;
   const response = await fetch(`${base}${path}`, {
     ...init,
     headers,
@@ -253,6 +260,39 @@ async function handleApiMessage(message: {
         method: 'POST',
         body: JSON.stringify(message.payload),
       });
+    case 'GENERATE_COVER_LETTER': {
+      const payload = (message.payload ?? {}) as { job?: Record<string, unknown> };
+      const job = (payload.job ?? {}) as Record<string, unknown>;
+      const profileResponse = await localApi('/profile');
+      const profile = (profileResponse.profile ?? {}) as {
+        skills?: string[];
+        experienceYears?: number | null;
+        targetRole?: string;
+      };
+      const origin = API_BASE_URL.replace(/\/api\/v1\/(local|workspace)$/, '');
+      const response = await fetch(`${origin}/api/v1/cover-letter`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobTitle: typeof job.title === 'string' && job.title ? job.title : 'Job Position',
+          company: typeof job.company === 'string' && job.company ? job.company : 'Company',
+          jobDescription: typeof job.description === 'string' ? job.description : '',
+          candidateSkills: profile.skills ?? [],
+          candidateExperience: profile.experienceYears ?? null,
+          candidateTargetRole: profile.targetRole ?? null,
+        }),
+      });
+      let body: { success?: boolean; coverLetter?: string; error?: string };
+      try {
+        body = await response.json() as typeof body;
+      } catch {
+        throw new Error(`The cover letter service returned an invalid response (HTTP ${response.status}).`);
+      }
+      if (!response.ok || !body.success || !body.coverLetter) {
+        throw new Error(body.error || 'Cover letter generation failed.');
+      }
+      return { ok: true, coverLetter: body.coverLetter };
+    }
     case 'GET_APPLICATIONS':
       return localApi('/applications');
     case 'CREATE_APPLICATION':
@@ -425,6 +465,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     'GET_CONSENT', 'SAVE_CONSENT', 'GET_CANDIDATE_PROFILE', 'SAVE_PROFILE',
     'GET_APPLICATIONS', 'CREATE_APPLICATION', 'UPDATE_APPLICATION',
     'GET_MATCHES', 'ANALYZE_JOB', 'GET_DETECTED_JOB',
+    'GENERATE_COVER_LETTER',
     'IMPORT_JOB', 'SAVE_JOB', 'UNSAVE_JOB', 'LIST_SAVED_JOBS',
   ];
   if (apiMessages.includes(message.type)) {

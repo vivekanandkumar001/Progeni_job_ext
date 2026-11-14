@@ -152,6 +152,19 @@ export const mongoWorkspaceStore: CandidateWorkspaceStore = {
     return document?.data.jobs ?? [];
   },
 
+  importJob(userId, job) {
+    return updateWorkspace(userId, (data) => {
+      const boundedJob = { ...job, description: job.description.slice(0, 15_000) };
+      const existing = data.jobs.find((item) => item.url === boundedJob.url);
+      const saved: JobListing = existing
+        ? { ...existing, ...boundedJob }
+        : { ...boundedJob, id: randomUUID(), createdAt: new Date().toISOString() };
+      data.jobs = [saved, ...data.jobs.filter((item) => item.id !== saved.id)]
+        .slice(0, MAX_WORKSPACE_RECORDS);
+      return saved;
+    });
+  },
+
   saveMatch(userId, job, match) {
     return updateWorkspace(userId, (data) => {
       const boundedJob = { ...job, description: job.description.slice(0, 15_000) };
